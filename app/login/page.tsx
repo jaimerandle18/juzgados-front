@@ -43,14 +43,7 @@ export default function LoginPage() {
     <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4">
         {loading && <LoadingScreen/>}
       {/* 🧑‍⚖️ Logo */}
-      <Image
-        src={image}
-        alt="Abogados en Acción"
-        width={150}
-        height={150}
-        priority
-        className="mb-8"
-      />
+     
 
       {/* Formulario */}
       <form
