@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import image from "../../../public/abogadosea.png"
+import image from "../../public/abogadosea.png"
 
 export default function LoadingScreen() {
   return (

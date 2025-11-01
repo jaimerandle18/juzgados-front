@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { setCookie } from "cookies-next";
-import { api } from "@/src/lib/api";
-import image from "../../../public/abogadosea.png";
+import { api } from "src/lib/api";
+import image from "../../public/abogadosea.png";
 import LoadingScreen from "../components/LoadingScreen";
 
 export default function LoginPage() {

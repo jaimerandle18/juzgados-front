@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { api } from "@/src/lib/api";
+import { api } from "src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
 import VotarJuzgado from "../../components/VotarJuzgado";

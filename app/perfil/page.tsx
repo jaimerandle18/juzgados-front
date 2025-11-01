@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/src/lib/api";
+import { api } from "src/lib/api";
 import { UserCircle2, LogOut } from "lucide-react";
 
 export default function PerfilPage() {

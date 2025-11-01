@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { api } from "@/src/lib/api";
-import image from "../../../public/abogadosea.png";
+import { api } from "src/lib/api";
+import image from "../../public/abogadosea.png";
 
 export default function VerifyTokenPage() {
   const [email, setEmail] = useState<string | null>(null);

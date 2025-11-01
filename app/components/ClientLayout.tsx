@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import image from "../../../public/abogadosea.png"
+import image from "../../public/abogadosea.png"
 import Link from "next/link";
 import { Menu, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { api } from "@/src/lib/api";
+import { api } from "src/lib/api";
 /* 🔹 Pantalla de carga con logo girando y brillo metálico */
 function LoadingScreen() {
     return (
