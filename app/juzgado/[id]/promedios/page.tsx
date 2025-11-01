@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/src/lib/api";
 import { BarChart3 } from "lucide-react";
-import LoadingScreen from "@/src/app/components/LoadingScreen";
+import LoadingScreen from "@/app/components/LoadingScreen";
 
 export default function PromediosJuzgado() {
   const { id } = useParams();
