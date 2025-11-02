@@ -8,9 +8,11 @@ type Props = {
     nombre: string;
     ciudad?: string; // <- opcional
     promedio?: number;
+    telefono: string;
+    email: string
   };
   
-export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0 }: Props) {
+export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0 , telefono, email}: Props) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -49,6 +51,8 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0 }: Props)
       <div className="pl-3">
         <h2 className="text-lg font-semibold tracking-tight">{nombre}</h2>
         <p className="text-sm text-[var(--color-muted)]">{ciudad || "Sin ciudad"}</p>
+        <p className="text-sm text-[var(--color-muted)]">Telefono: {telefono || "Sin ciudad"}</p>
+        <p className="text-sm text-[var(--color-muted)]">Email: {email || "Sin ciudad"}</p>
       </div>
 
       <div className="flex items-center gap-2 pl-3">

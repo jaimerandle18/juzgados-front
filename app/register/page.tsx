@@ -17,35 +17,36 @@ export default function RegisterPage() {
   const [loading, setLoading]= useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setLoading(true)
-    e.preventDefault();
+    e.preventDefault(); // primero prevenís el reload
     setError("");
-
+    setLoading(true); // recién acá mostrás el loader
+  
     if (!nombre || !apellido || !email || !contrasenia) {
       setError("Completá todos los campos");
+      setLoading(false);
       return;
     }
-
+  
     try {
-      // Registro real
       const res = await api.post("/auth/register", {
         nombre,
         apellido,
         email,
         contrasenia,
       });
-
-      if (res.status === 200) {
+  
+      if (res.status === 200 || res.status === 201) {
         console.log(`📧 Token enviado a ${email}`);
         localStorage.setItem("email_verificacion", email);
-        router.push("/verify-token");
+        await router.push("/verify-token");
+        setLoading(false);
       }
     } catch (err: any) {
       console.error(err);
       setError("Error al registrarse. Intente nuevamente.");
     }
-    finally{setLoading(false)}
   };
+  
 
   return (
     <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-16 px-4">

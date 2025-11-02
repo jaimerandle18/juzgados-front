@@ -129,6 +129,8 @@ export default function JuzgadoDetalle() {
       <div className="max-w-3xl mx-auto bg-grisOscuro p-6 rounded-3xl shadow-lg">
         <h1 className="text-2xl font-bold mb-2">{juzgado.juzgado.nombre}</h1>
         <p className="text-gray-400 mb-4">{juzgado.juzgado.ciudad || "Sin ciudad"}</p>
+        <p className="text-gray-400 mb-4">Telefono: {juzgado.juzgado.telefono || "Sin ciudad"}</p>
+        <p className="text-gray-400 mb-4">Email: {juzgado.juzgado.email || "Sin ciudad"}</p>
 
         <div className="flex items-center gap-2 mb-6">
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />

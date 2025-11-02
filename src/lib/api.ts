@@ -12,3 +12,15 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn("🔒 Token expirado, cerrando sesión...");
+      localStorage.removeItem("authToken");
+      window.location.href = "/login"; // redirige automáticamente
+    }
+    return Promise.reject(error);
+  }
+);

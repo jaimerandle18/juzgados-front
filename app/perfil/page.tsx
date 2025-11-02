@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "src/lib/api";
 import { UserCircle2, LogOut } from "lucide-react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function PerfilPage() {
   const [usuario, setUsuario] = useState<any>(null);
@@ -23,15 +24,12 @@ export default function PerfilPage() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
   if (loading)
     return (
-      <main className="min-h-screen bg-fondo flex items-center justify-center text-gray-400">
-        <div className="animate-pulse text-lg">Cargando perfil...</div>
-      </main>
+    <LoadingScreen/>
     );
 
   if (!usuario)

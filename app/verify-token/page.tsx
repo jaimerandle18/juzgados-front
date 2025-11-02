@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "src/lib/api";
 import image from "../../public/abogadosea.png";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function VerifyTokenPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [codigo, setToken] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const [loading, setIsLoading] = useState(false)
 
   // ✅ obtener el email almacenado al registrarse
   useEffect(() => {
@@ -24,6 +26,7 @@ export default function VerifyTokenPage() {
   }, [router]);
 
   const handleVerify = async (e: React.FormEvent) => {
+setIsLoading(true)
     e.preventDefault();
     setError("");
 
@@ -47,10 +50,14 @@ export default function VerifyTokenPage() {
       console.error(err);
       setError("Token inválido o expirado ❌");
     }
+    finally{
+      setIsLoading(false)
+    }
   };
 
   return (
     <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-16 px-4">
+      {loading && <LoadingScreen/>}
       <Image
         src={image}
         alt="Abogados en Acción"
