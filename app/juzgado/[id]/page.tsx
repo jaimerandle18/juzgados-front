@@ -145,7 +145,7 @@ export default function JuzgadoDetalle() {
         {/* 🔹 Si ya votó */}
         {miVoto && !modoEdicion ? (
           <div className="bg-[#222] p-5 rounded-2xl text-center mb-6">
-            <p className="text-green-500 font-semibold mb-3">✅ Ya votaste este juzgado</p>
+            <p className="text-green-500 font-semibold mb-3">✅ Ya evaluaste este juzgado</p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => setModoEdicion(true)}
