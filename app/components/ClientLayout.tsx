@@ -82,7 +82,7 @@ function LoadingScreen() {
           }
         };
         if (!rutasOcultas.includes(pathname)){
-        fetchUser()}
+        fetchUser();}
       }, []);
   
     useEffect(() => {
