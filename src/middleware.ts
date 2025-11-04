@@ -6,14 +6,13 @@ export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
 
   // rutas públicas
-  const publicPaths = ["/login", "/register", "/verify-token"];
+  const publicPaths = ["/login", "/register", "/verify-token","/","/home"];
 
   // si no hay token y la ruta no es pública, redirige a /login
   if (!token && !publicPaths.some((path) => url.pathname.startsWith(path))) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-
 
   // si hay token y entra al login o register, redirige al home
   if (token && ["/login", "/register"].includes(url.pathname)) {
