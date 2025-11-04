@@ -68,7 +68,7 @@ function LoadingScreen() {
     const pathname = usePathname();
     const [menuAbierto, setMenuAbierto] = useState(false);
 
-    const rutasOcultas = ["/login", "/register", "/verify-token","/home"];
+    const rutasOcultas = ["/login", "/register", "/verify-token"];
 
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
