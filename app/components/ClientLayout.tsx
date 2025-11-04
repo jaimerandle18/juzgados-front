@@ -81,7 +81,7 @@ function LoadingScreen() {
             console.warn("No se pudo obtener el usuario logueado");
           }
         };
-        if (!rutasOcultas.includes(pathname)){
+        if (rutasOcultas.includes(pathname)){
         fetchUser();}
       }, []);
   

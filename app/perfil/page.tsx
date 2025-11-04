@@ -24,6 +24,7 @@ export default function PerfilPage() {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("")
     window.location.href = "/login";
   };
 
