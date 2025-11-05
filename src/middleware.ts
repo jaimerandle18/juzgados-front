@@ -4,9 +4,7 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("auth_token")?.value;
   const url = req.nextUrl.clone();
-
-  // rutas públicas
-  const publicPaths = ["/login", "/register", "/verify-token"];
+  const publicPaths = ["/verify-token"];
 
   // si no hay token y la ruta no es pública, redirige a /login
   if (!token && !publicPaths.some((path) => url.pathname.startsWith(path))) {
