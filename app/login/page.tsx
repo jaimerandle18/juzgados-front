@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4">
+    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4" style={{marginTop:"60px"}}>
         {loading && <LoadingScreen/>}
       {/* 🧑‍⚖️ Logo */}
       <Image
