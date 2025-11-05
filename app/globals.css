@@ -30,20 +30,28 @@
   transform: rotate(15deg);
 }
 
+/* ❌ ELIMINAMOS la imagen y el fixed del body */
 body {
-  background: url("../public/juez.jpg") no-repeat center center fixed;
-  background-size: cover;
-  position: relative;
+  /* background: url("../public/juez.jpg") no-repeat center center fixed; <-- ¡Eliminar! */
+  /* background-size: cover; <-- ¡Eliminar! */
+  position: relative; /* Puedes dejar esto */
 }
 
-/* Capa de blur global */
+/* ✅ TODO AQUI: Imagen, Fixed, Viewport y Filtros */
 body::before {
   content: "";
-  position: fixed;
+  /* Mantiene el pseudo-elemento fijo en el viewport */
+  position: fixed; 
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100vh; 
+  
+  /* 🖼️ MOVER LA IMAGEN AQUÍ */
+  background: url("../public/juez.jpg") no-repeat center center fixed; 
+  background-size: cover; /* Ahora se calcula en base a 100vh, NO al scroll */
+  
+  /* Aplicamos el blur y la luminosidad (brightness) */
   backdrop-filter: blur(25px) brightness(0.6);
   -webkit-backdrop-filter: blur(25px) brightness(0.6);
   z-index: -1;
