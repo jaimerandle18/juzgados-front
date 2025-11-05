@@ -10,86 +10,86 @@ import { usePathname } from "next/navigation";
 import { api } from "src/lib/api";
 /* 🔹 Pantalla de carga con logo girando y brillo metálico */
 function LoadingScreen() {
-    return (
+  return (
+    <motion.div
+      key="loader"
+      className="fixed inset-0 flex items-center justify-center bg-black z-50"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
+    >
+      {/* Glow dinámico rojo */}
       <motion.div
-        key="loader"
-        className="fixed inset-0 flex items-center justify-center bg-black z-50"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
+        className="absolute w-48 h-48 rounded-full bg-red-600/40 blur-3xl"
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      <motion.div
+        initial={{ rotateY: 0 }}
+        animate={{ rotateY: 360 }}
+        transition={{
+          repeat: Infinity,
+          duration: 1.5,
+          ease: "linear",
+        }}
+        className="relative w-32 h-32 preserve-3d flex items-center justify-center"
       >
-        {/* Glow dinámico rojo */}
-        <motion.div
-          className="absolute w-48 h-48 rounded-full bg-red-600/40 blur-3xl"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-  
-        <motion.div
-          initial={{ rotateY: 0 }}
-          animate={{ rotateY: 360 }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "linear",
-          }}
-          className="relative w-32 h-32 preserve-3d flex items-center justify-center"
-        >
-          {/* Logo circular */}
-          <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-[0_0_20px_#ff000033]">
-            <Image
-              src={image}
-              alt="Abogados en Acción"
-              fill
-              className="object-contain"
-            />
-  
-            {/* Brillo metálico centrado */}
-            <motion.div
-              className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent mix-overlay pointer-events-none"
-              initial={{ x: "-120%" }}
-              animate={{ x: "120%" }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.2,
-                ease: "easeInOut",
-              }}
-            />
-          </div>
-        </motion.div>
+        {/* Logo circular */}
+        <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-[0_0_20px_#ff000033]">
+          <Image
+            src={image}
+            alt="Abogados en Acción"
+            fill
+            className="object-contain"
+          />
+
+          {/* Brillo metálico centrado */}
+          <motion.div
+            className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent mix-overlay pointer-events-none"
+            initial={{ x: "-120%" }}
+            animate={{ x: "120%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.2,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
       </motion.div>
-    );
-  }
-  
-  /* 🔹 Layout principal con transición de fade */
-  export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const [usuario, setUsuario] = useState<{ nombre: string; apellido: string } | null>(null);
-    const pathname = usePathname();
-    const [menuAbierto, setMenuAbierto] = useState(false);
+    </motion.div>
+  );
+}
 
-    const rutasOcultas = ["/login", "/register", "/verify-token"];
+/* 🔹 Layout principal con transición de fade */
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
+  const [usuario, setUsuario] = useState<{ nombre: string; apellido: string } | null>(null);
+  const pathname = usePathname();
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
-    const [isLoading, setIsLoading] = useState(true);
-    useEffect(() => {
-        // Simulamos el fetch de usuario logueado
-        const fetchUser = async () => {
-          try {
-            const res = await api.get("/usuarios/me");
-            setUsuario(res.data);
-          } catch {
-            console.warn("No se pudo obtener el usuario logueado");
-          }
-        };
-        if (!rutasOcultas.includes(pathname)){
-        fetchUser();}
-      }, []);
-  
-    useEffect(() => {
-      const timer = setTimeout(() => setIsLoading(false), 2000);
-      return () => clearTimeout(timer);
+  const rutasOcultas = ["/login", "/register", "/verify-token"];
+
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+      // Simulamos el fetch de usuario logueado
+      const fetchUser = async () => {
+        try {
+          const res = await api.get("/usuarios/me");
+          setUsuario(res.data);
+        } catch {
+          console.warn("No se pudo obtener el usuario logueado");
+        }
+      };
+      if (!rutasOcultas.includes(pathname)){
+      fetchUser()}
     }, []);
-  
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
     return (
       <>
         <AnimatePresence mode="wait">
