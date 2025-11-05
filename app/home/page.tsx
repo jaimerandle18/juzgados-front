@@ -54,10 +54,10 @@ export default function HomePage() {
   if (loading) return <LoadingScreen key="loading" />;
 
   return (
-    <main className="min-h-screen bg-fondo text-white p-6">
+    <main className="min-h-screen bg-pink text-white p-6">
       <div className="max-w-6xl mx-auto">
         {/* 🔎 Barra de búsqueda */}
-        <div className="relative mb-6">
+        <div className="relative mb-6" style={{marginTop:70}}>
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"

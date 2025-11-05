@@ -29,3 +29,22 @@
   mix-blend-mode: overlay;
   transform: rotate(15deg);
 }
+
+body {
+  background: url("../public/juez.jpg") no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Capa de blur global */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(25px) brightness(0.6);
+  -webkit-backdrop-filter: blur(25px) brightness(0.6);
+  z-index: -1;
+}

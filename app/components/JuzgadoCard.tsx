@@ -40,7 +40,7 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
         hover:border-rojo
         hover:shadow-[0_0_25px_rgba(255,0,0,0.25)]
         transition-all
-        duration-300
+        duration-100
       "
     >
       {/* Barra lateral decorativa */}
@@ -60,9 +60,9 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
         <h2 className="text-xl font-semibold tracking-tight group-hover:text-rojo transition-colors">
           {nombre}
         </h2>
-        <p className="text-sm text-gray-400">{ciudad || "Sin ciudad"}</p>
-        <p className="text-sm text-gray-400">📞 {telefono || "Sin teléfono"}</p>
-        <p className="text-sm text-gray-400 truncate">📧 {email || "Sin email"}</p>
+        <p style={{marginTop:"5px"}} className="text-sm text-gray-400">{ciudad || "Sin ciudad"}</p>
+        <p style={{marginTop:"5px"}}className="text-sm text-gray-400">📞 {telefono || "Sin teléfono"}</p>
+        <p style={{marginTop:"5px"}}className="text-sm text-gray-400 truncate">📧 {email || "Sin email"}</p>
       </div>
 
       {/* Rating */}

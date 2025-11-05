@@ -125,8 +125,23 @@ export default function JuzgadoDetalle() {
   ];
 
   return (
-    <main className="min-h-screen bg-fondo text-white p-6">
-      <div className="max-w-3xl mx-auto bg-grisOscuro p-6 rounded-3xl shadow-lg">
+    <main className="min-h-screen flex flex-col items-center justify-center text-white px-4 py-10"
+    style={{ marginTop: "70px" }}>
+      <div
+        style={{
+          background: "rgba(30, 30, 30, 0.6)",
+          backdropFilter: "blur(20px) saturate(150%)",
+          WebkitBackdropFilter: "blur(20px) saturate(150%)",
+          boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "1.5rem",
+          padding: "2rem",
+          maxWidth: "600px",
+          width: "100%",
+          textAlign: "center",
+          
+        }}
+      >
         <h1 className="text-2xl font-bold mb-2">{juzgado.juzgado.nombre}</h1>
         <p className="text-gray-400 mb-4">{juzgado.juzgado.ciudad || "Sin ciudad"}</p>
         <p className="text-gray-400 mb-4">Telefono: {juzgado.juzgado.telefono || "Sin ciudad"}</p>

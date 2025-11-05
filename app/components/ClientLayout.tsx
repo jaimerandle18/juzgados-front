@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Menu, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { api } from "src/lib/api";
+
 /* 🔹 Pantalla de carga con logo girando y brillo metálico */
 function LoadingScreen() {
     return (
@@ -104,8 +105,21 @@ function LoadingScreen() {
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="bg-grisFondo text-white font-sans min-h-screen flex flex-col"
                 >
-             <header className="bg-grisOscuro p-4 shadow-lg relative z-50">
-      {/* 🔹 Contenedor principal */}
+<header
+  style={{
+    position: "fixed",          // se mantiene fija arriba
+    top: 0,
+    left: 0,
+    width: "100%",
+    background: "rgba(20, 20, 20, 0.6)", // gris oscuro semitransparente
+    backdropFilter: "blur(20px) saturate(140%)",
+    WebkitBackdropFilter: "blur(20px) saturate(140%)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    padding: "1rem 2rem",
+    zIndex: 1000,
+  }}
+>      {/* 🔹 Contenedor principal */}
       <div className="flex justify-between items-center">
         {/* Logo */}
         <Link
