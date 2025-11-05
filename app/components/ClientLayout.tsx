@@ -8,8 +8,6 @@ import Link from "next/link";
 import { Menu, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { api } from "src/lib/api";
-import { getCookie } from "cookies-next";
-
 /* 🔹 Pantalla de carga con logo girando y brillo metálico */
 function LoadingScreen() {
     return (
@@ -69,7 +67,7 @@ function LoadingScreen() {
     const [usuario, setUsuario] = useState<{ nombre: string; apellido: string } | null>(null);
     const pathname = usePathname();
     const [menuAbierto, setMenuAbierto] = useState(false);
-    const token = getCookie("auth_token")
+
     const rutasOcultas = ["/login", "/register", "/verify-token"];
 
     const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +81,7 @@ function LoadingScreen() {
             console.warn("No se pudo obtener el usuario logueado");
           }
         };
-        if (token && rutasOcultas.includes(pathname)){
+        if (!rutasOcultas.includes(pathname)){
         fetchUser();}
       }, []);
   
@@ -120,7 +118,9 @@ function LoadingScreen() {
     padding: "1rem 2rem",
     zIndex: 1000,
   }}
->      {/* 🔹 Contenedor principal */}
+>
+  {/* tu contenido aquí */}
+      {/* 🔹 Contenedor principal */}
       <div className="flex justify-between items-center">
         {/* Logo */}
         <Link
