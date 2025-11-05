@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCookie } from "cookies-next";
+import { getCookie, deleteCookie } from "cookies-next";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -18,8 +18,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.warn("🔒 Token expirado, cerrando sesión...");
-      localStorage.removeItem("authToken");
-      window.location.href = "/login"; // redirige automáticamente
+      deleteCookie("auth_token"); // ✅ elimina la cookie
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
