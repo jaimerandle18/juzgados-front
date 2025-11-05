@@ -92,6 +92,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
       <>
+      <div className="background-fix" />
         <AnimatePresence mode="wait">
           {isLoading ? (
               <LoadingScreen key="loading" />

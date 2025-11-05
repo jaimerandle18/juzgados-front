@@ -30,13 +30,31 @@
   transform: rotate(15deg);
 }
 
+/* NUEVA CLASE PARA FIJAR EL FONDO AL VIEWPORT */
+/* Eliminamos el fondo y los filtros del body */
 body {
-  background: url("../public/juez.jpg") no-repeat center center fixed;
-  background-size: cover;
-  position: relative;
+  /* ... otras propiedades ... */
+  min-height: 100vh;
+  /* YA NO DEBE HABER background: url(...) NI background-size: cover; AQUÍ */
+  position: relative; /* Mantener si es necesario para el stacking del contenido */
 }
 
-/* Capa de blur global */
+/* 1. CLASE FIX PARA IMAGEN */
+.background-fix {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2; /* Va detrás de todo */
+  
+  /* Mueve las propiedades de fondo aquí */
+  background: url("../public/juez.jpg") no-repeat center center;
+  background-size: cover; /* Garantiza que siempre cubra el 100% del viewport */
+}
+
+/* 2. CAPA DE BLUR/OSCURECIMIENTO */
+/* Mantenemos body::before para la capa de blur/brightness */
 body::before {
   content: "";
   position: fixed;
@@ -46,5 +64,5 @@ body::before {
   height: 100%;
   backdrop-filter: blur(25px) brightness(0.6);
   -webkit-backdrop-filter: blur(25px) brightness(0.6);
-  z-index: -1;
+  z-index: -1; /* Va encima de la imagen, pero debajo del contenido */
 }
