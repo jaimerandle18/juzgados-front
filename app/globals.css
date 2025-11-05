@@ -31,28 +31,36 @@
 }
 
 /* ❌ ELIMINAMOS la imagen y el fixed del body */
+/* Limpieza del body */
 body {
-  /* background: url("../public/juez.jpg") no-repeat center center fixed; <-- ¡Eliminar! */
-  /* background-size: cover; <-- ¡Eliminar! */
-  position: relative; /* Puedes dejar esto */
+  /* Asegúrate de que no haya background: url(...) ni filters aquí */
+  position: relative; 
 }
 
-/* ✅ TODO AQUI: Imagen, Fixed, Viewport y Filtros */
-body::before {
-  content: "";
-  /* Mantiene el pseudo-elemento fijo en el viewport */
-  position: fixed; 
+/* 1. CLASE PARA LA IMAGEN (CAPA INFERIOR) */
+.background-image-layer {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh; 
+  height: 100vh;
+  z-index: -3; /* El más bajo */
+  background: url("../public/juez.jpg") no-repeat center center;
+  background-size: cover;
+}
+
+/* 2. CLASE PARA EL FILTRO Y EL OSCURECIMIENTO (CAPA MEDIA) */
+.filter-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2; /* Encima de la imagen */
   
-  /* 🖼️ MOVER LA IMAGEN AQUÍ */
-  background: url("../public/juez.jpg") no-repeat center center fixed; 
-  background-size: cover; /* Ahora se calcula en base a 100vh, NO al scroll */
+  background-color: rgba(0, 0, 0, 0.4); /* Oscurecimiento */
   
-  /* Aplicamos el blur y la luminosidad (brightness) */
-  backdrop-filter: blur(25px) brightness(0.6);
-  -webkit-backdrop-filter: blur(25px) brightness(0.6);
-  z-index: -1;
+  /* Blur */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
 }
