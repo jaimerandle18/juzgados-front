@@ -39,7 +39,7 @@ export default function LoginPage() {
       setError("Credenciales incorrectas o error del servidor");
     }
     finally{
-      router.push("/login");
+      router.push("/home");
         setIsLoading(false)
     }
   };

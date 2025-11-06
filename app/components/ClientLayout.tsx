@@ -73,23 +73,23 @@ function LoadingScreen() {
 
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        // Simulamos el fetch de usuario logueado
-        const fetchUser = async () => {
-          try {
-            const res = await api.get("/usuarios/me");
-            setUsuario(res.data);
-          } catch {
-            console.warn("No se pudo obtener el usuario logueado");
-          }
-        };
-        if (!rutasOcultas.includes(pathname)){
-        fetchUser()}
-      }, []);
-  
-    useEffect(() => {
-      const timer = setTimeout(() => setIsLoading(false), 2000);
-      return () => clearTimeout(timer);
+      // Simulamos el fetch de usuario logueado
+      const fetchUser = async () => {
+        try {
+          const res = await api.get("/usuarios/me");
+          setUsuario(res.data);
+        } catch {
+          console.warn("No se pudo obtener el usuario logueado");
+        }
+      };
+      if (!rutasOcultas.includes(pathname)){
+      fetchUser()}
     }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
   
     return (
       <>
