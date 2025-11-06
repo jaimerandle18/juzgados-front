@@ -28,17 +28,21 @@ export default function LoginPage() {
 
     try {
       const res = await api.post("/auth/login", { email, password });
-      setCookie("auth_token", res.data.token);
+      setCookie("auth_token", res.data.token, {
+        path: "/",
+        secure: true,
+        sameSite: "none",
+      });      
       router.push("/home");
     } catch (err: any) {
       console.error(err);
       setError("Credenciales incorrectas o error del servidor");
     }
     finally{
+      router.push("/login");
         setIsLoading(false)
     }
   };
-
 
   return (
     <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4" style={{marginTop:"60px"}}>
