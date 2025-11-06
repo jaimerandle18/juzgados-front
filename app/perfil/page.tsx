@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "src/lib/api";
 import { UserCircle2, LogOut } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
+import { deleteCookie } from "cookies-next";
 
 export default function PerfilPage() {
   const [usuario, setUsuario] = useState<any>(null);
@@ -24,7 +25,7 @@ export default function PerfilPage() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    deleteCookie("auth_token");
     window.location.href = "/login";
   };
 
