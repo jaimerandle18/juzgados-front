@@ -17,6 +17,16 @@ export default function JuzgadoDetalle() {
   const [success, setSuccess] = useState(false);
   const [miVoto, setMiVoto] = useState<any>(null);
   const [modoEdicion, setModoEdicion] = useState(false);
+  // Asumiendo que JuzgadoCard tiene acceso a juzgado.juzgado
+const direccionCompleta = juzgado?.juzgado?.direccion;
+const ciudad = juzgado?.juzgado?.ciudad; // <-- Si la ciudad está disponible
+
+// Construye la cadena de búsqueda completa para Maps
+const queryMaps = `${direccionCompleta}${ciudad ? ', ' + ciudad : ''}`;
+
+// ... dentro de tu componente JSX
+
+
 
   // 🔹 Obtener datos del juzgado
   useEffect(() => {
@@ -125,11 +135,11 @@ export default function JuzgadoDetalle() {
   ];
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center text-white px-4 py-10"
+    <main className="min-h-screen flex flex-col items-center justify-center text-black px-4 py-10"
     style={{ marginTop: "70px" }}>
       <div
         style={{
-          background: "rgba(30, 30, 30, 0.6)",
+          background: "white",
           backdropFilter: "blur(20px) saturate(150%)",
           WebkitBackdropFilter: "blur(20px) saturate(150%)",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
@@ -143,34 +153,54 @@ export default function JuzgadoDetalle() {
         }}
       >
         <h1 className="text-2xl font-bold mb-2">{juzgado.juzgado.nombre}</h1>
-        <p className="text-gray-400 mb-4">{juzgado.juzgado.ciudad || "Sin ciudad"}</p>
-        <p className="text-gray-400 mb-4">Telefono: {juzgado.juzgado.telefono || "Sin ciudad"}</p>
-        <p className="text-gray-400 mb-4">Email: {juzgado.juzgado.email || "Sin ciudad"}</p>
+        <p className="text-black  mb-4">{juzgado.juzgado.ciudad || "Sin ciudad"}</p>
+        <p className="text-black mb-4">Telefono: {juzgado.juzgado.telefono || "Sin ciudad"}</p>
+        <p className="text-black  mb-4">Email: {juzgado.juzgado.email || "Sin ciudad"}</p>
+        <div className="mb-4">
+  <p className="text-black">
+    {/* 1. Dirección como texto simple y legible */}
+    Dirección: {direccionCompleta || "Sin especificar"}
+  </p>
 
+  {/* 2. Enlace de acción "Ver mapa" */}
+  {direccionCompleta && (
+    <a
+    style={{marginTop:"15px"}}
+      // CRÍTICO: Usar encodeURIComponent para que la dirección funcione en la URL
+      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryMaps)}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      // Estilo para hacerlo un link visible y atractivo
+      className="text-grey hover:text-rojo font-semibold text-sm transition mt-1 inline-block underline"
+    >
+      Ver mapa
+    </a>
+  )}
+</div>
         <div className="flex items-center gap-2 mb-6">
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
           <span className="text-lg font-semibold">
             {juzgado.estadisticas.promedioCalificacion.toFixed(1)} / 5
           </span>
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-gray-600 ">
             ({juzgado.estadisticas.totalVotos} votos)
           </span>
         </div>
 
         {/* 🔹 Si ya votó */}
         {miVoto && !modoEdicion ? (
-          <div className="bg-[#222] p-5 rounded-2xl text-center mb-6">
+          <div className="bg-white p-5 rounded-2xl text-center mb-6">
             <p className="text-green-500 font-semibold mb-3">✅ Ya evaluaste este juzgado</p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => setModoEdicion(true)}
-                className="bg-rojo hover:bg-red-800 px-4 py-2 rounded-xl font-semibold"
+                className="bg-#1f5691 hover:bg-[#1f5691] hover:text-white px-4 py-2 rounded-xl font-semibold"
               >
                 Modificar mi evaluación
               </button>
               <button
                 onClick={handleEliminar}
-                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-xl font-semibold"
+                className="bg-gray-600  hover:bg-gray-700 px-4 text-white py-2 rounded-xl font-semibold"
               >
                 Eliminar mi evaluación
               </button>
@@ -183,17 +213,18 @@ export default function JuzgadoDetalle() {
             {preguntas.map((p) => (
               <div key={p.id} className="mb-6">
                 <p className="mb-3 font-medium">{p.texto}</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-2 w-full max-w-lg">
                   {p.opciones.map((op) => (
                     <button
+                      style={{cursor:"pointer"}}
                       key={op}
                       type="button"
                       onClick={() => handleSelect(p.id, op)}
                       className={clsx(
                         "p-3 rounded-xl border text-sm transition-all",
                         form[p.id] === op
-                          ? "bg-rojo text-white border-rojo"
-                          : "bg-[#222] border-gray-700 hover:border-rojo"
+                          ? "bg-rojo text-black border-#1f5691 text-white"
+                          : "bg-white border- hover:border-#1f5691"
                       )}
                     >
                       {op}
@@ -212,7 +243,8 @@ export default function JuzgadoDetalle() {
 
             <button
               onClick={handleSubmit}
-              className="bg-rojo hover:bg-red-800 text-white font-semibold py-3 rounded-2xl w-full mt-4"
+              style={{cursor:"pointer"}}
+              className="bg-white hover:bg-[#1f5691] hover:text-white text-black font-semibold py-3 rounded-2xl w-full mt-4"
             >
               {miVoto ? "Actualizar evaluación" : "Enviar evaluación"}
             </button>

@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fondo: #0f0f0f;
+  --color-fondo: white;
   --color-fondo-2: #151515;
   --color-card: #1c1c1c;
-  --color-rojo: #b71c1c;
-  --color-texto: #ffffff;
+  --color-rojo: #1f5691;
+  --color-texto: black;
   --color-muted: #b0b0b0;
 }
 
@@ -31,9 +31,10 @@
 }
 
 body {
-  background: url("../public/juez.jpg") no-repeat center center fixed;
+  background: url("../public/just.jpg") no-repeat center center fixed;
   background-size: cover;
   position: relative;
+
 }
 
 /* Capa de blur global */

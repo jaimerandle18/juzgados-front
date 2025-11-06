@@ -23,14 +23,15 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
       whileHover={{ y: -6, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 200, damping: 15 ,duration: 0.3 }}
       onClick={() => router.push(`/juzgado/${id}`)}
+      
       className="
         relative
         group
         cursor-pointer
-        bg-[#1a1a1a]/80
+        bg-[white]/70
         backdrop-blur-xl
         rounded-3xl
-        shadow-[0_8px_30px_rgba(0,0,0,0.3)]
+        shadow-[0_8px_10px_rgba(0,0,0,0.1)]
         overflow-hidden
         p-6
         flex
@@ -38,7 +39,7 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
         gap-3
         border border-transparent
         hover:border-rojo
-        hover:shadow-[0_0_25px_rgba(255,0,0,0.25)]
+        hover:shadow-[0_0_25px_#1f5691]
         transition-all
         duration-100
       "
@@ -51,7 +52,7 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
           top-0
           bottom-0
           w-1.5
-          bg-gradient-to-b from-rojo to-red-800
+          bg-gradient-to-b from-rojo to-#1f5691-800
         "
       />
 
@@ -60,9 +61,9 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
         <h2 className="text-xl font-semibold tracking-tight group-hover:text-rojo transition-colors">
           {nombre}
         </h2>
-        <p style={{marginTop:"5px"}} className="text-sm text-gray-400">{ciudad || "Sin ciudad"}</p>
-        <p style={{marginTop:"5px"}}className="text-sm text-gray-400">📞 {telefono || "Sin teléfono"}</p>
-        <p style={{marginTop:"5px"}}className="text-sm text-gray-400 truncate">📧 {email || "Sin email"}</p>
+        <p style={{marginTop:"5px"}} className="text-sm text-black">{ciudad || "Sin ciudad"}</p>
+        <p style={{marginTop:"5px"}}className="text-sm text-black">📞 {telefono || "Sin teléfono"}</p>
+        <p style={{marginTop:"5px"}}className="text-sm text-black truncate">📧 {email || "Sin email"}</p>
       </div>
 
       {/* Rating */}
@@ -79,7 +80,8 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
             e.stopPropagation();
             router.push(`/juzgado/${id}`);
           }}
-          className="w-1/2 bg-rojo hover:bg-red-800 text-white font-semibold py-2.5 rounded-2xl transition"
+          style={{cursor:"pointer"}}
+          className="w-1/2 bg-grey hover:bg-[#1f5691] hover:text-white text-black font-semibold py-2.5 rounded-2xl transition"
         >
           Evaluar
         </motion.button>
@@ -90,7 +92,8 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
             e.stopPropagation();
             router.push(`/juzgado/${id}/promedios`);
           }}
-          className="w-1/2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 rounded-2xl transition"
+          style={{cursor:"pointer"}}
+          className="w-1/2 bg-gray-600  hover:bg-gray-600  text-white font-semibold py-2.5 rounded-2xl transition"
         >
           Ver Evaluaciones
         </motion.button>

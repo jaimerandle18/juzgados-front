@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "src/lib/api";
-import image from "../../public/abogadosea.png";
+import image from "../../public/agaboga.png";
 import LoadingScreen from "../components/LoadingScreen";
 
 export default function RegisterPage() {
@@ -66,50 +66,55 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
       >
-        <h1 className="text-2xl font-bold text-white mb-2">Crear cuenta</h1>
+        <h1 className="text-2xl font-bold text-black mb-2">Crear cuenta</h1>
 
         <input
           type="text"
           placeholder="Nombre"
           value={nombre}
+          style={{border:"2px solid grey"}}
           onChange={(e) => setNombre(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
           type="text"
           placeholder="Apellido"
           value={apellido}
+          style={{border:"2px solid grey"}}
           onChange={(e) => setApellido(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
           type="email"
           placeholder="Correo electrónico"
           value={email}
+          style={{border:"2px solid grey"}}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          className="bg-whitetext-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
           type="password"
           placeholder="Contraseña"
           value={contrasenia}
+          style={{border:"2px solid grey"}}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          className="bg-whitetext-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
         <button
+        style={{backgroundColor:"#1f5691"}}
           type="submit"
-          className="bg-rojo hover:bg-red-800 text-white font-semibold py-3 rounded-2xl transition w-full"
+          className="bg-#1f5691 hover:text-white font-semibold py-3 rounded-2xl transition w-full"
         >
           Registrarse
         </button>
 
-        <p className="text-sm text-gray-400 mt-3">
+        <p className="text-sm text-gray-600 mt-3">
           ¿Ya tenés cuenta?{" "}
           <a href="/login" className="text-rojo font-semibold hover:underline">
             Iniciá sesión

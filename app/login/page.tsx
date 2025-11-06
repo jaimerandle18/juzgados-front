@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
-import image from "../../public/abogadosea.png";
+import image from "../../public/agaboga.png";
 import LoadingScreen from "../components/LoadingScreen";
 
 export default function LoginPage() {
@@ -55,6 +55,7 @@ export default function LoginPage() {
         height={150}
         priority
         className="mb-8"
+        style={{marginBottom:"-12px"}}
       />
 
       {/* Formulario */}
@@ -62,7 +63,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
       >
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-black mb-2">
           Iniciar sesión
         </h1>
 
@@ -71,7 +72,8 @@ export default function LoginPage() {
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          style={{border:"2px solid grey"}}
+          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
@@ -79,7 +81,8 @@ export default function LoginPage() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          style={{border:"2px solid grey"}}
+          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         {error && (
@@ -87,14 +90,14 @@ export default function LoginPage() {
         )}
 
         <button
+          style={{backgroundColor:"#1f5691"}}
           type="submit"
-          className="bg-rojo hover:bg-red-800 text-white font-semibold py-3 rounded-2xl transition w-full"
-        >
+          className="bg-blue hover:text-white hover:bg-verde-hover font-semibold py-3 rounded-2xl transition w-full"        >
           Ingresar
         </button>
 
         {/* 🔗 Link a registro */}
-        <p className="text-sm text-gray-400 mt-3">
+        <p className="text-sm text-gray-600 mt-3">
           ¿No tenés cuenta?{" "}
           <Link
             href="/register"

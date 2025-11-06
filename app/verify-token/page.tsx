@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "src/lib/api";
-import image from "../../public/abogadosea.png";
+import image from "../../public/agaboga.png";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function VerifyTokenPage() {
@@ -71,12 +71,12 @@ setIsLoading(true)
         onSubmit={handleVerify}
         className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
       >
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-black mb-2">
           Verificá tu cuenta
         </h1>
-        <p className="text-gray-400 text-sm text-center mb-2">
+        <p className="text-gray-600 text-sm text-center mb-2">
           Ingresá el código que te enviamos a <br />
-          <span className="text-white font-semibold">{email}</span>
+          <span className="text-black font-semibold">{email}</span>
         </p>
 
         <input
@@ -84,14 +84,14 @@ setIsLoading(true)
           placeholder="Código de verificación"
           value={codigo}
           onChange={(e) => setToken(e.target.value)}
-          className="bg-[#222] text-white rounded-xl px-4 py-3 w-full text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-rojo"
+          className="bg-white text-black rounded-xl px-4 py-3 w-full text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
         <button
           type="submit"
-          className="bg-rojo hover:bg-red-800 text-white font-semibold py-3 rounded-2xl transition w-full"
+          className="bg-#1f5691 hover:bg-#1f5691-800 text-black font-semibold py-3 rounded-2xl transition w-full"
         >
           Verificar
         </button>

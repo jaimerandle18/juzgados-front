@@ -36,12 +36,12 @@ export default function PromediosJuzgado() {
   if (sinDatos) {
     return (
       <main
-        className="min-h-screen flex flex-col items-center justify-center text-white px-4 py-10"
+        className="min-h-screen flex flex-col items-center justify-center text-black px-4 py-10"
         style={{ marginTop: "70px" }}
       >
         <div
           style={{
-            background: "rgba(30, 30, 30, 0.6)",
+            background: "rgba(30, 30, 30, 0.2)",
             backdropFilter: "blur(20px) saturate(150%)",
             WebkitBackdropFilter: "blur(20px) saturate(150%)",
             boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
@@ -61,7 +61,7 @@ export default function PromediosJuzgado() {
           </p>
           <button
             onClick={() => router.push("/home")}
-            className="bg-rojo hover:bg-red-800 text-white font-semibold py-3 px-6 rounded-2xl transition"
+            className="bg-#1f5691 hover:bg-#1f5691-800 text-black font-semibold py-3 px-6 rounded-2xl transition"
           >
             Volver al inicio
           </button>
@@ -79,13 +79,13 @@ export default function PromediosJuzgado() {
 
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center text-white px-4 py-10"
+      className="min-h-screen flex flex-col items-center justify-center text-black px-4 py-10"
       style={{ marginTop: "70px" }}
     >
       {/* Contenedor principal con blur */}
       <div
         style={{
-          background: "rgba(30, 30, 30, 0.6)",
+          background: "rgba(30, 30, 30, 0.0)",
           backdropFilter: "blur(20px) saturate(150%)",
           WebkitBackdropFilter: "blur(20px) saturate(150%)",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
@@ -119,7 +119,7 @@ export default function PromediosJuzgado() {
             return (
               <div
                 key={preg.id}
-                className="bg-[#222] p-5 rounded-2xl border border-gray-700 shadow-inner"
+                className="bg-white p-5 rounded-2xl border border-gray-700 shadow-inner"
               >
                 <h2 className="text-lg font-semibold mb-4 text-rojo">
                   {preg.texto}
@@ -130,14 +130,14 @@ export default function PromediosJuzgado() {
                     <li key={o.opcion} className="flex flex-col">
                       <div className="flex justify-between text-sm mb-1">
                         <span className="font-medium">{o.opcion}</span>
-                        <span className="text-gray-400">
+                        <span className="text-gray-600 ">
                           {o.cantidad} voto(s)
                         </span>
                       </div>
 
                       <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-rojo to-red-600 rounded-full transition-all duration-700"
+                          className="h-full bg-gradient-to-r from-#1f5691 to-#1f5691-400 rounded-full transition-all duration-700"
                           style={{
                             width: `${(o.cantidad / max) * 100}%`,
                           }}

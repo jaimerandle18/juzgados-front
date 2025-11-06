@@ -39,12 +39,12 @@ export default function PerfilPage() {
 
   return (
     <main
-      className="min-h-screen text-white flex items-center justify-center p-6"
+      className="min-h-screen text-black flex items-center justify-center p-6"
       style={{ marginTop: "70px" }}
     >
       <div
         style={{
-          background: "rgba(30, 30, 30, 0.6)",
+          background: "white",
           backdropFilter: "blur(20px) saturate(150%)",
           WebkitBackdropFilter: "blur(20px) saturate(150%)",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
@@ -67,28 +67,28 @@ export default function PerfilPage() {
           >
             Perfil del Usuario
           </h1>
-          <p className="text-gray-400 text-sm font-medium">
-            ⚖️ ABOGADOS EN ACCIÓN
+          <p className="text-gray-600 text-sm font-medium">
+            ⚖️ Gobierno Abierto
           </p>
         </div>
 
         {/* Información */}
         <div className="space-y-4 border-t border-gray-700 pt-5 text-left">
           <div>
-            <p className="text-sm text-gray-400">Nombre completo</p>
-            <p className="text-lg font-semibold text-white">
+            <p className="text-sm text-gray-600 ">Nombre completo</p>
+            <p className="text-lg font-semibold text-black">
               {usuario.nombre} {usuario.apellido}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-400">Correo electrónico</p>
-            <p className="text-lg font-semibold text-white">{usuario.email}</p>
+            <p className="text-sm text-gray-600 ">Correo electrónico</p>
+            <p className="text-lg font-semibold text-black">{usuario.email}</p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-400">Evaluaciones realizadas</p>
-            <p className="text-lg font-semibold text-white">
+            <p className="text-sm text-gray-600 ">Evaluaciones realizadas</p>
+            <p className="text-lg font-semibold text-black">
               {usuario.totalEvaluaciones || 0}
             </p>
           </div>

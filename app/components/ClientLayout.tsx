@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import image from "../../public/abogadosea.png"
+import Image2 from "../../public/aga3.png"
+import image from "../../public/agaboga.png"
 import Link from "next/link";
 import { Menu, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -13,7 +14,7 @@ function LoadingScreen() {
     return (
       <motion.div
         key="loader"
-        className="fixed inset-0 flex items-center justify-center bg-black z-50"
+        className="fixed inset-0 flex items-center justify-center bg-white z-50"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -21,7 +22,7 @@ function LoadingScreen() {
       >
         {/* Glow dinámico rojo */}
         <motion.div
-          className="absolute w-48 h-48 rounded-full bg-red-600/40 blur-3xl"
+          className="absolute w-48 h-48 rounded-full bg-blue-400/40 blur-3xl"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -37,7 +38,7 @@ function LoadingScreen() {
           className="relative w-32 h-32 preserve-3d flex items-center justify-center"
         >
           {/* Logo circular */}
-          <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-[0_0_20px_#ff000033]">
+          <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-[0_0_20px_#1f5691]">
             <Image
               src={image}
               alt="Abogados en Acción"
@@ -47,7 +48,7 @@ function LoadingScreen() {
   
             {/* Brillo metálico centrado */}
             <motion.div
-              className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent mix-overlay pointer-events-none"
+              className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-r from-transparent via-black/40 to-transparent mix-overlay pointer-events-none"
               initial={{ x: "-120%" }}
               animate={{ x: "120%" }}
               transition={{
@@ -102,7 +103,7 @@ function LoadingScreen() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="bg-grisFondo text-white font-sans min-h-screen flex flex-col"
+                className=" text-black font-sans min-h-screen flex flex-col"
                 >
 <header
   style={{
@@ -110,25 +111,25 @@ function LoadingScreen() {
     top: 0,
     left: 0,
     width: "100%",
-    background: "rgba(20, 20, 20, 0.6)", // gris oscuro semitransparente
+    background: "white", // gris oscuro semitransparente
     backdropFilter: "blur(20px) saturate(140%)",
     WebkitBackdropFilter: "blur(20px) saturate(140%)",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "4px solid #1f5691",
     padding: "1rem 2rem",
     zIndex: 1000,
   }}
 >
   {/* tu contenido aquí */}
       {/* 🔹 Contenedor principal */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center" style={{backgroundColor:"white"}}>
         {/* Logo */}
         <Link
           href="/home"
           className="text-xl font-bold tracking-wide flex items-center gap-2"
           >
-             <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-[0_0_20px_#ff000033]">
-          <Image src={image}  alt="image"/></div> <span className="hidden sm:inline">ABOGADOS EN ACCIÓN</span>
+             <div style={{width:"220px"}}>
+          <Image src={Image2}  alt="image"/></div>
         </Link>
      { rutasOcultas.includes(pathname)? (<></>) : (<>
            
@@ -138,9 +139,9 @@ function LoadingScreen() {
           className="sm:hidden p-2 focus:outline-none"
         >
           {menuAbierto ? (
-            <X className="w-6 h-6 text-white" />
+            <X className="w-6 h-6 text-black" />
           ) : (
-            <Menu className="w-6 h-6 text-white" />
+            <Menu className="w-6 h-6 text-black" />
           )}
         </button>
 
@@ -161,7 +162,7 @@ function LoadingScreen() {
 
       {/* 🔹 Menú desplegable mobile */}
       {menuAbierto && (
-        <div className="absolute top-full left-0 w-full bg-black border-t border-gray-800 mt-2 p-4 sm:hidden z-40 rounded-b-2xl shadow-lg shadow-black/40 backdrop-blur-sm">
+        <div className="absolute top-full left-0 w-full bg-white border-t border-gray-800 mt-2 p-4 sm:hidden z-40 rounded-b-2xl shadow-lg shadow-black/40 backdrop-blur-sm">
           <nav className="flex flex-col gap-3">
             <Link
               href="/home"
@@ -190,7 +191,7 @@ function LoadingScreen() {
               {usuario ? (
                 <span className="text-sm text-gray-300">
                   Hola,{" "}
-                  <span className="text-white font-semibold">
+                  <span className="text-black font-semibold">
                     {usuario.nombre} {usuario.apellido}
                   </span>
                 </span>
@@ -206,7 +207,7 @@ function LoadingScreen() {
   
               <main className="flex-1">{children}</main>
   
-              <footer className="bg-gray-900 p-3 text-center text-sm text-gray-400">
+              <footer className="bg-gray-900 p-3 text-center text-sm text-gray-600 ">
                 © {new Date().getFullYear()} Abogados en Acción. Todos los derechos reservados.
               </footer>
             </motion.div>

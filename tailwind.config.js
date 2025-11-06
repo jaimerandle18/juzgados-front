@@ -8,6 +8,7 @@ module.exports = {
           rojo: "#B71C1C",
           grisOscuro: "#1E1E1E",
           grisClaro: "#B0B0B0",
+          azulMarino: '#1f5691', 
         },
         fontFamily: {
           sans: ["Inter", "system-ui", "sans-serif"],

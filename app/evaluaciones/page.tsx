@@ -17,20 +17,20 @@ export default function MisEvaluaciones() {
 
   if (!evaluaciones.length)
     return (
-      <p className="text-center mt-20 text-gray-400">
+      <p className="text-center mt-20 text-gray-600 ">
         No hiciste evaluaciones aún.
       </p>
     );
 
   return (
     <main
-      className="min-h-screen text-white flex flex-col items-center p-6"
+      className="min-h-screen text-black flex flex-col items-center p-6"
       style={{ marginTop: "70px" }}
     >
       {/* Fondo con blur y transparencia */}
       <div
         style={{
-          background: "rgba(30, 30, 30, 0.6)",
+          background: "white",
           backdropFilter: "blur(20px) saturate(150%)",
           WebkitBackdropFilter: "blur(20px) saturate(150%)",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
@@ -45,7 +45,7 @@ export default function MisEvaluaciones() {
         <h1
           className="text-3xl font-bold text-center mb-8 tracking-tight"
           style={{
-            color: "white",
+            color: "black",
             textShadow: "0 2px 10px rgba(255,255,255,0.15)",
           }}
         >
@@ -57,7 +57,7 @@ export default function MisEvaluaciones() {
             <li
               key={ev.id}
               style={{
-                background: "rgba(45, 45, 45, 0.6)",
+                background: "rgba(45, 45, 45, 0.1)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
                 border: "1px solid rgba(255,255,255,0.08)",
@@ -69,7 +69,7 @@ export default function MisEvaluaciones() {
             >
               <div>
                 <p className="font-semibold text-lg">{ev.juzgado}</p>
-                <p className="text-sm text-gray-400">{ev.ciudad}</p>
+                <p className="text-sm text-gray-600 ">{ev.ciudad}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(ev.fecha).toLocaleDateString("es-AR")}
                 </p>
@@ -81,7 +81,7 @@ export default function MisEvaluaciones() {
                     className={`w-5 h-5 ${
                       i < ev.puntuacion
                         ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-600"
+                        : "text-gray-600 "
                     }`}
                   />
                 ))}

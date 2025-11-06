@@ -16,7 +16,7 @@ export default function ResumenJuzgadoPage({
 }) {
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center text-white px-4 py-10"
+      className="min-h-screen flex flex-col items-center justify-center text-black px-4 py-10"
       style={{ marginTop: "70px" }}
     >
       {/* Contenedor principal con blur */}
@@ -43,7 +43,7 @@ export default function ResumenJuzgadoPage({
         >
           Juzgado Nacional en lo Civil Nº {params.id}
         </h1>
-        <p className="text-gray-400 mb-8 tracking-wide">PROMEDIO GENERAL</p>
+        <p className="text-gray-600  mb-8 tracking-wide">PROMEDIO GENERAL</p>
 
         {/* Promedio principal */}
         <div className="flex flex-col items-center justify-center mb-10">
@@ -53,7 +53,7 @@ export default function ResumenJuzgadoPage({
               <Star
                 key={i}
                 className={`w-8 h-8 ${
-                  i <= 4 ? "fill-red-600 text-red-600" : "text-gray-700"
+                  i <= 4 ? "fill-#1f5691-400 text-rojo-400" : "text-gray-700"
                 }`}
               />
             ))}
@@ -93,7 +93,7 @@ export default function ResumenJuzgadoPage({
         <div className="mt-10">
           <Link
             href="/"
-            className="text-rojo underline hover:text-red-700 transition text-sm"
+            className="text-rojo underline hover:text-rojo-700 transition text-sm"
           >
             ← Volver al inicio
           </Link>

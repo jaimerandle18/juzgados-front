@@ -21,7 +21,7 @@ export default function VotarJuzgado({
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <h3 className="text-lg font-semibold text-white">
+      <h3 className="text-lg font-semibold text-black">
         ¿Cómo calificarías este juzgado?
       </h3>
 

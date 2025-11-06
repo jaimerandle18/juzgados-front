@@ -54,17 +54,18 @@ export default function HomePage() {
   if (loading) return <LoadingScreen key="loading" />;
 
   return (
-    <main className="min-h-screen bg-pink text-white p-6">
+    <main className="min-h-screen text-black p-6">
       <div className="max-w-6xl mx-auto">
         {/* 🔎 Barra de búsqueda */}
         <div className="relative mb-6" style={{marginTop:70}}>
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600  w-5 h-5" />
           <input
             type="text"
             placeholder="Buscar por nombre o ciudad..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#222] text-white placeholder-gray-400 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-rojo transition"
+            style={{border:"2px solid grey"}}
+            className="w-full bg-white text-black placeholder-gray-600  rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-rojo transition"
           />
         </div>
 
@@ -84,7 +85,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-400 mt-10">
+          <p className="text-center text-gray-600  mt-10">
             No se encontraron juzgados que coincidan con “{search}”.
           </p>
         )}
