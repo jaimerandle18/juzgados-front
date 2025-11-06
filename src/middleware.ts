@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
 
   // rutas públicas
-  const publicPaths = ["/login", "/register", "/verify-token","/"];
+  const publicPaths = ["/login", "/register", "/verify-token"];
 
   // si no hay token y la ruta no es pública, redirige a /login
   if (!token && !publicPaths.some((path) => url.pathname.startsWith(path))) {
