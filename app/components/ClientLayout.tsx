@@ -129,7 +129,7 @@ function LoadingScreen() {
           className="text-xl font-bold tracking-wide flex items-center gap-2"
           >
              <div style={{width:"220px"}}>
-          <Image src={Image2}  alt="image"/></div>
+          <Image src={Image2}  alt="image" style={{height:"40px", width:"140px"}}/></div>
         </Link>
      { rutasOcultas.includes(pathname)? (<></>) : (<>
            

@@ -86,8 +86,8 @@ export default function PromediosJuzgado() {
       <div
         style={{
           background: "rgba(30, 30, 30, 0.0)",
-          backdropFilter: "blur(20px) saturate(150%)",
-          WebkitBackdropFilter: "blur(20px) saturate(150%)",
+          backdropFilter: "blur(60px) saturate(0%)",
+          WebkitBackdropFilter: "blur(100px) saturate(0%)",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
           border: "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: "1.5rem",

@@ -28,7 +28,7 @@ export default function JuzgadoCard({ id, nombre, ciudad, promedio = 0, telefono
         relative
         group
         cursor-pointer
-        bg-[white]/70
+        bg-[white]/100
         backdrop-blur-xl
         rounded-3xl
         shadow-[0_8px_10px_rgba(0,0,0,0.1)]

@@ -55,13 +55,13 @@ export default function LoginPage() {
         height={150}
         priority
         className="mb-8"
-        style={{marginBottom:"-12px"}}
+        style={{marginBottom:"-15px"}}
       />
 
       {/* Formulario */}
       <form
         onSubmit={handleSubmit}
-        className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
+        className="bg-grisOscuro p-4 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
       >
         <h1 className="text-2xl font-bold text-black mb-2">
           Iniciar sesión

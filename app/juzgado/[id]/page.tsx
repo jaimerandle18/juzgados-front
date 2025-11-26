@@ -7,6 +7,7 @@ import { Star } from "lucide-react";
 import clsx from "clsx";
 import VotarJuzgado from "../../components/VotarJuzgado";
 import LoadingScreen from "../../components/LoadingScreen";
+import { useRouter } from "next/navigation";
 
 export default function JuzgadoDetalle() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function JuzgadoDetalle() {
   // Asumiendo que JuzgadoCard tiene acceso a juzgado.juzgado
 const direccionCompleta = juzgado?.juzgado?.direccion;
 const ciudad = juzgado?.juzgado?.ciudad; // <-- Si la ciudad está disponible
+const router = useRouter()
 
 // Construye la cadena de búsqueda completa para Maps
 const queryMaps = `${direccionCompleta}${ciudad ? ', ' + ciudad : ''}`;
@@ -68,6 +70,7 @@ const queryMaps = `${direccionCompleta}${ciudad ? ', ' + ciudad : ''}`;
       setSuccess(true);
       setModoEdicion(false);
       alert("✅ Evaluación guardada correctamente");
+      router.push("/home")
     } catch (err) {
       console.error(err);
       alert("Error al enviar evaluación");

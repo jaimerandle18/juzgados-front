@@ -41,7 +41,7 @@ export default function PerfilPage() {
   return (
     <main
       className="min-h-screen text-black flex items-center justify-center p-6"
-      style={{ marginTop: "70px" }}
+      style={{ marginTop: "40px" }}
     >
       <div
         style={{
@@ -69,7 +69,7 @@ export default function PerfilPage() {
             Perfil del Usuario
           </h1>
           <p className="text-gray-600 text-sm font-medium">
-            ⚖️ Gobierno Abierto
+            ⚖️ Justicia abierta
           </p>
         </div>
 

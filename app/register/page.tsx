@@ -49,7 +49,7 @@ export default function RegisterPage() {
   
 
   return (
-    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-16 px-4"style={{marginTop:"60px"}}>
+    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4"style={{marginTop:"60px"}}>
         {loading && <LoadingScreen/>}
       {/* 🧑‍⚖️ Logo */}
       <Image
@@ -58,13 +58,13 @@ export default function RegisterPage() {
         width={150}
         height={150}
         priority
-        className="mb-8"
+        style={{marginBottom:"-20px"}}
       />
 
       {/* Formulario */}
       <form
         onSubmit={handleSubmit}
-        className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
+        className="bg-grisOscuro p-4 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
       >
         <h1 className="text-2xl font-bold text-black mb-2">Crear cuenta</h1>
 
