@@ -14,13 +14,14 @@ export type Juzgado = {
   promedio?: number;
   totalVotos?: number;
   telefono: string;
-  email: string
+  email: string;
 };
 
 export default function HomePage() {
   const [juzgados, setJuzgados] = useState<Juzgado[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [fuero, setFuero] = useState<"todos" | "federal" | "nacional">("todos");
 
   useEffect(() => {
     const fetchJuzgados = async () => {
@@ -36,36 +37,70 @@ export default function HomePage() {
     fetchJuzgados();
   }, []);
 
-  // 🔍 Filtrado mejorado: permite buscar varias palabras
+  // 📌 Función que detecta si un juzgado es federal según su nombre
+  const esFederal = (nombre: string) => {
+    return nombre.toLowerCase().includes("federal");
+  };
+
+  // 🔍 Filtrado por búsqueda + fuero
   const juzgadosFiltrados = useMemo(() => {
     const term = search.toLowerCase().trim();
-    if (!term) return juzgados;
-
-    // Dividir búsqueda en palabras (por ejemplo: "juzgado buenos aires")
-    const palabras = term.split(/\s+/);
 
     return juzgados.filter((j) => {
+      const isFederal = esFederal(j.nombre);
+
+      // 🟦 Filtrar por fuero
+      if (fuero === "federal" && !isFederal) return false;
+      if (fuero === "nacional" && isFederal) return false;
+
+      // 🟥 Filtrar por texto
+      if (!term) return true;
+      const palabras = term.split(/\s+/);
       const texto = `${j.nombre ?? ""} ${j.ciudad ?? ""}`.toLowerCase();
-      // Cada palabra debe estar incluida en el texto
       return palabras.every((p) => texto.includes(p));
     });
-  }, [search, juzgados]);
+  }, [search, juzgados, fuero]);
 
   if (loading) return <LoadingScreen key="loading" />;
 
   return (
-    <main className="min-h-screen text-black p-6">
+    <main className="min-h-screen text-black pt-25 p-6">
       <div className="max-w-6xl mx-auto">
+
+        {/* 🔵 BOTONES DE FILTRO POR FUERO */}
+        <div className="flex gap-3 mb-6 justify-center">
+          <button
+            onClick={() => setFuero("todos")}
+            className={`px-4 py-2 rounded-xl border 
+            ${fuero === "todos" ? "bg-rojo text-white" : "bg-white text-black border-gray-400"}`}>
+            Todos
+          </button>
+
+          <button
+            onClick={() => setFuero("federal")}
+            className={`px-4 py-2 rounded-xl border 
+            ${fuero === "federal" ? "bg-rojo text-white" : "bg-white text-black border-gray-400"}`}>
+            Federal
+          </button>
+
+          <button
+            onClick={() => setFuero("nacional")}
+            className={`px-4 py-2 rounded-xl border 
+            ${fuero === "nacional" ? "bg-rojo text-white" : "bg-white text-black border-gray-400"}`}>
+            Nacional
+          </button>
+        </div>
+
         {/* 🔎 Barra de búsqueda */}
-        <div className="relative mb-6" style={{marginTop:70}}>
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600  w-5 h-5" />
+        <div className="relative mb-6" style={{ marginTop: 20 }}>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 w-5 h-5" />
           <input
             type="text"
             placeholder="Buscar por nombre o ciudad..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{border:"2px solid grey"}}
-            className="w-full bg-white text-black placeholder-gray-600  rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-rojo transition"
+            style={{ border: "2px solid grey" }}
+            className="w-full bg-white text-black placeholder-gray-600 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-rojo transition"
           />
         </div>
 
@@ -85,7 +120,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-600  mt-10">
+          <p className="text-center text-gray-600 mt-10">
             No se encontraron juzgados que coincidan con “{search}”.
           </p>
         )}
