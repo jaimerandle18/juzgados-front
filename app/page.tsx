@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Scale, Gavel, Globe2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/router";
-import { useNavigate, useNavigation } from "react-router-dom";
 
 export default function Home() {
   // Si está en "/" y no hay token → enviar a login
