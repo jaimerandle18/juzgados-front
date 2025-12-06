@@ -25,7 +25,7 @@ export default function EditarForm({ id, miVoto }: any) {
   ];
 
   const handleSelect = (key: any, value: any) => {
-    setForm(prev=> ({ ...prev, [key]: value }));
+    setForm((prev:any)=> ({ ...prev, [key]: value }));
   };
 
   const guardarCambios = async () => {
