@@ -1,218 +1,210 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import Image2 from "../../public/aga3.png"
-import image from "../../public/agaboga.png"
 import Link from "next/link";
-import { Menu, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { api } from "src/lib/api";
-/* 🔹 Pantalla de carga con logo girando y brillo metálico */
-function LoadingScreen() {
-    return (
-      <motion.div
-        key="loader"
-        className="fixed inset-0 flex items-center justify-center bg-white z-50"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
-      >
-        {/* Glow dinámico rojo */}
-        <motion.div
-          className="absolute w-48 h-48 rounded-full bg-blue-400/40 blur-3xl"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-  
-        <motion.div
-          initial={{ rotateY: 0 }}
-          animate={{ rotateY: 360 }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "linear",
-          }}
-          className="relative w-32 h-32 preserve-3d flex items-center justify-center"
-        >
-          {/* Logo circular */}
-          <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-[0_0_20px_#1f5691]">
-            <Image
-              src={image}
-              alt="Abogados en Acción"
-              fill
-              className="object-contain"
-            />
-  
-            {/* Brillo metálico centrado */}
-            <motion.div
-              className="absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-r from-transparent via-black/40 to-transparent mix-overlay pointer-events-none"
-              initial={{ x: "-120%" }}
-              animate={{ x: "120%" }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.2,
-                ease: "easeInOut",
-              }}
-            />
-          </div>
-        </motion.div>
-      </motion.div>
-    );
-  }
-  
-  /* 🔹 Layout principal con transición de fade */
-  export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const [usuario, setUsuario] = useState<{ nombre: string; apellido: string } | null>(null);
-    const pathname = usePathname();
-    const [menuAbierto, setMenuAbierto] = useState(false);
+import { motion } from "framer-motion";
+import { Menu, X, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { getCookie } from "cookies-next";
+import logo from "../../public/dataJury1.png";
+import RouteLoader from "./RouteLoader";
 
-    const rutasOcultas = ["/login", "/register", "/verify-token"];
-
-    const [isLoading, setIsLoading] = useState(true);
-    useEffect(() => {
-      // Simulamos el fetch de usuario logueado
-      const fetchUser = async () => {
-        try {
-          const res = await api.get("/usuarios/me");
-          setUsuario(res.data);
-        } catch {
-          console.warn("No se pudo obtener el usuario logueado");
-        }
-      };
-      if (!rutasOcultas.includes(pathname)){
-      fetchUser()}
-    }, []);
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
+    // Si existe cookie auth_token → está logueado
+    const token = getCookie("auth_token");
+    setIsLogged(!!token);
+  }, []);
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = getCookie("auth_token");
+      setIsLogged(!!token);
+    };
+  
+    // Cada 500ms chequea si la cookie cambió
+    const interval = setInterval(checkAuth, 500);
+  
+    return () => clearInterval(interval);
   }, []);
   
-    return (
-      <>
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-              <LoadingScreen key="loading" />
-            ) : (
-                <motion.div
-                key="content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-                className=" text-black font-sans min-h-screen flex flex-col"
-                >
-<header
-  style={{
-    position: "fixed",          // se mantiene fija arriba
-    top: 0,
-    left: 0,
-    width: "100%",
-    background: "white", // gris oscuro semitransparente
-    backdropFilter: "blur(20px) saturate(140%)",
-    WebkitBackdropFilter: "blur(20px) saturate(140%)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    borderBottom: "4px solid #1f5691",
-    padding: "1rem 2rem",
-    zIndex: 1000,
-  }}
->
-  {/* tu contenido aquí */}
-      {/* 🔹 Contenedor principal */}
-      <div className="flex justify-between items-center" style={{backgroundColor:"white"}}>
-        {/* Logo */}
-        <Link
-          href="/home"
-          className="text-xl font-bold tracking-wide flex items-center gap-2"
-          >
-             <div style={{width:"220px"}}>
-          <Image src={Image2}  alt="image" style={{height:"40px", width:"140px"}}/></div>
-        </Link>
-     { rutasOcultas.includes(pathname)? (<></>) : (<>
-           
-        {/* 🔹 Botón de menú (solo mobile) */}
-        <button
-          onClick={() => setMenuAbierto(!menuAbierto)}
-          className="sm:hidden p-2 focus:outline-none"
+
+  const navItems = [
+    { label: "Inicio", href: "/" },
+    { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
+    { label: "Mi perfil", href: "/perfil" },
+  ];
+
+  return (
+    <div 
+      className="
+        min-h-screen 
+        bg-gradient-to-br from-gray-100 via-white to-blue-90 
+        text-gray-900 
+        relative
+      "
+    >
+
+      {/* Background deco */}
+      <div 
+        className="
+          pointer-events-none absolute inset-0 
+          bg-[radial-gradient(circle_at_30%_20%,rgba(0,140,255,0.18),transparent_60%)]
+        "
+      />
+
+      {/* NAVBAR */}
+      <header className="fixed top-0 left-0 w-full z-50">
+        <div 
+          className="
+            backdrop-blur-xl bg-white/70 
+            border-b border-gray-300/50 
+            shadow-[0_8px_20px_rgba(0,0,0,0.05)]
+            relative
+          "
         >
-          {menuAbierto ? (
-            <X className="w-6 h-6 text-black" />
-          ) : (
-            <Menu className="w-6 h-6 text-black" />
-          )}
-        </button>
 
-        {/* 🔹 Navegación desktop */}
-        <nav className="hidden sm:flex items-center gap-6">
-          <Link href="/home" className="hover:text-rojo font-medium">
-            Inicio
-          </Link>
-          <Link href="/evaluaciones" className="hover:text-rojo font-medium">
-            Mis Evaluaciones
-          </Link>
-          <Link href="/perfil" className="hover:text-rojo font-medium">
-            Perfil
-          </Link>
-        </nav>
-        </>)}
-      </div>
+          {/* Subtle gradient bottom */}
+          <div 
+            className="
+              absolute bottom-[-20px] left-0 w-full h-[20px] 
+              bg-gradient-to-b from-white/60 to-transparent
+              pointer-events-none
+            "
+          />
 
-      {/* 🔹 Menú desplegable mobile */}
-      {menuAbierto && (
-        <div className="absolute top-full left-0 w-full bg-white border-t border-gray-800 mt-2 p-4 sm:hidden z-40 rounded-b-2xl shadow-lg shadow-black/40 backdrop-blur-sm">
-          <nav className="flex flex-col gap-3">
-            <Link
-              href="/home"
-              className="hover:text-rojo font-medium"
-              onClick={() => setMenuAbierto(false)}
-            >
-              Inicio
-            </Link>
-            <Link
-              href="/evaluaciones"
-              className="hover:text-rojo font-medium"
-              onClick={() => setMenuAbierto(false)}
-            >
-              Mis Evaluaciones
-            </Link>
-            <Link
-              href="/perfil"
-              className="hover:text-rojo font-medium"
-              onClick={() => setMenuAbierto(false)}
-            >
-              Perfil
-            </Link>
+          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
-            <div className="flex items-center gap-2 border-t border-gray-700 pt-3 mt-2">
-              <UserCircle2 className="w-5 h-5 text-gray-300" />
-              {usuario ? (
-                <span className="text-sm text-gray-300">
-                  Hola,{" "}
-                  <span className="text-black font-semibold">
-                    {usuario.nombre} {usuario.apellido}
-                  </span>
-                </span>
-              ) : (
-                  <span className="text-sm text-gray-500 italic">Cargando...</span>
-                )}
-                
-                </div>
-                </nav>
-                </div>
+            {/* LOGO */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Link href="/" className="hover:opacity-80 transition block">
+                <Image 
+                  src={logo} 
+                  alt="Data Jury" 
+                  priority 
+                  width={110}
+                  height={50}
+                  style={{ objectFit: "contain" }}
+                />
+              </Link>
+            </motion.div>
+
+            {/* ===========================
+                DESKTOP NAV (solo si logueado)
+               =========================== */}
+            {isLogged && (
+              <nav className="hidden md:flex space-x-6 text-sm font-medium items-center">
+                {navItems.map((item) => {
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`
+                        px-3 py-1 rounded-md transition
+                        ${
+                          active
+                            ? "text-blue-600 bg-blue-100 shadow-sm"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }
+                      `}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+
+                {/* Logout Desktop */}
+                <Link
+                  href="/logout"
+                  className="
+                    px-3 py-1 rounded-md border font-semibold
+                    text-red-600 border-red-500
+                    hover:bg-red-50 transition
+                    flex items-center gap-1
+                  "
+                >
+                  <LogOut className="w-4 h-4" />
+                  Salir
+                </Link>
+              </nav>
             )}
-    </header>
-  
-              <main className="flex-1">{children}</main>
-  
-              <footer className="bg-gray-900 p-3 text-center text-sm text-gray-600 ">
-                © {new Date().getFullYear()} Abogados en Acción. Todos los derechos reservados.
-              </footer>
+
+            {/* MOBILE TOGGLE (solo logueado) */}
+            {isLogged && (
+              <button className="md:hidden text-gray-700" onClick={() => setOpen(!open)}>
+                {open ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+              </button>
+            )}
+          </div>
+
+          {/* ===========================
+              MOBILE NAV (solo logueado)
+             =========================== */}
+          {isLogged && open && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="
+                md:hidden bg-white/90 backdrop-blur-xl px-6 pb-4 space-y-3 
+                border-t border-gray-200/70
+              "
+            >
+              {navItems.map((item) => {
+                const active = pathname === item.href;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`
+                      block py-2 text-lg font-semibold rounded-md px-3 transition
+                      ${
+                        active
+                          ? "bg-blue-100 text-blue-700"
+                          : "text-gray-800 hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              {/* Logout mobile */}
+              <Link
+                href="/logout"
+                onClick={() => setOpen(false)}
+                className="
+                  block py-2 text-lg font-bold 
+                  text-red-600 border border-red-500
+                  rounded-md px-3 text-center
+                  hover:bg-red-50 transition
+                  flex items-center justify-center gap-2
+                "
+              >
+                <LogOut className="w-5 h-5" />
+                Cerrar sesión
+              </Link>
             </motion.div>
           )}
-        </AnimatePresence>
-      </>
-    );
-  }
+        </div>
+      </header>
+
+      {/* MAIN */}
+      <main className="pt-28 px-6 max-w-6xl mx-auto">
+      <RouteLoader />
+        {children}
+      </main>
+    </div>
+  );
+}

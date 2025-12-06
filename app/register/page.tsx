@@ -4,29 +4,30 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "src/lib/api";
-import image from "../../public/agaboga.png";
 import LoadingScreen from "../components/LoadingScreen";
+import logo from "../../public/dataJury1.png";
 
 export default function RegisterPage() {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
-  const [contrasenia, setPassword] = useState("");
+  const [contrasenia, setContrasenia] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
-  const [loading, setLoading]= useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // primero prevenís el reload
+    e.preventDefault();
     setError("");
-    setLoading(true); // recién acá mostrás el loader
-  
+    setLoading(true);
+
     if (!nombre || !apellido || !email || !contrasenia) {
       setError("Completá todos los campos");
       setLoading(false);
       return;
     }
-  
+
     try {
       const res = await api.post("/auth/register", {
         nombre,
@@ -34,90 +35,70 @@ export default function RegisterPage() {
         email,
         contrasenia,
       });
-  
-      if (res.status === 200 || res.status === 201) {
-        console.log(`📧 Token enviado a ${email}`);
-        localStorage.setItem("email_verificacion", email);
-        await router.push("/verify-token");
-        setLoading(false);
-      }
-    } catch (err: any) {
+
+      localStorage.setItem("email_verificacion", email);
+      router.push("/verify-token");
+    } catch (err) {
       console.error(err);
-      setError("Error al registrarse. Intente nuevamente.");
+      setError("Error al registrarse");
+      setLoading(false);
     }
   };
-  
 
   return (
-    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4"style={{marginTop:"60px"}}>
-        {loading && <LoadingScreen/>}
-      {/* 🧑‍⚖️ Logo */}
-      <Image
-        src={image}
-        alt="Abogados en Acción"
-        width={150}
-        height={150}
-        priority
-        style={{marginBottom:"-20px"}}
-      />
+    <main className="min-h-screen  flex flex-col items-center px-4 pt-10" >
+      {loading && <LoadingScreen />}
 
-      {/* Formulario */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-grisOscuro p-4 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
-      >
-        <h1 className="text-2xl font-bold text-black mb-2">Crear cuenta</h1>
 
+      {/* TÍTULO */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold tracking-tight">Crear cuenta</h1>
+        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+      </div>
+
+      <form className="w-full max-w-sm flex flex-col gap-5" onSubmit={handleSubmit}>
         <input
-          type="text"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Nombre"
           value={nombre}
-          style={{border:"2px solid grey"}}
           onChange={(e) => setNombre(e.target.value)}
-          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
-          type="text"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Apellido"
           value={apellido}
-          style={{border:"2px solid grey"}}
           onChange={(e) => setApellido(e.target.value)}
-          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
-          type="email"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Correo electrónico"
           value={email}
-          style={{border:"2px solid grey"}}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-whitetext-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
         />
 
         <input
           type="password"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Contraseña"
           value={contrasenia}
-          style={{border:"2px solid grey"}}
-          onChange={(e) => setPassword(e.target.value)}
-          className="bg-whitetext-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
+          onChange={(e) => setContrasenia(e.target.value)}
         />
 
         {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
         <button
-        style={{backgroundColor:"#1f5691"}}
           type="submit"
-          className="bg-#1f5691 hover:text-white font-semibold py-3 rounded-2xl transition w-full"
+          className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-semibold shadow-md transition"
         >
           Registrarse
         </button>
 
-        <p className="text-sm text-gray-600 mt-3">
-          ¿Ya tenés cuenta?{" "}
-          <a href="/login" className="text-rojo font-semibold hover:underline">
-            Iniciá sesión
+        <p className="text-sm text-gray-700 text-center mt-2">
+          ¿Ya tenés cuenta?
+          <a href="/login" className="text-blue-600 font-semibold ml-1 hover:underline">
+            Iniciar sesión
           </a>
         </p>
       </form>

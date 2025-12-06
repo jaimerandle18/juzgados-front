@@ -4,94 +4,69 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "src/lib/api";
-import image from "../../public/agaboga.png";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "../components/LoadingScreen";
+import logo from "../../public/dataJury1.png";
 
 export default function VerifyTokenPage() {
   const [email, setEmail] = useState<string | null>(null);
-  const [codigo, setToken] = useState("");
+  const [codigo, setCodigo] = useState("");
   const [error, setError] = useState("");
+  const [loading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [loading, setIsLoading] = useState(false)
 
-  // ✅ obtener el email almacenado al registrarse
   useEffect(() => {
-    const savedEmail = localStorage.getItem("email_verificacion");
-    if (savedEmail) {
-      setEmail(savedEmail);
-    } else {
-      // si no hay email guardado, lo manda al registro
-      router.push("/register");
-    }
+    const saved = localStorage.getItem("email_verificacion");
+    if (!saved) router.push("/register");
+    else setEmail(saved);
   }, [router]);
 
   const handleVerify = async (e: React.FormEvent) => {
-setIsLoading(true)
     e.preventDefault();
     setError("");
-
-    if (!codigo || !email) {
-      setError("Faltan datos para verificar");
-      return;
-    }
+    setIsLoading(true);
 
     try {
-      const res = await api.post("/auth/verify", {
-        email,
-        codigo,
-      });
+      const res = await api.post("/auth/verify", { email, codigo });
 
-      if (res.status === 200) {
-        alert("Cuenta verificada ✅");
-        localStorage.removeItem("email_verificacion"); // limpiamos el localStorage
-        router.push("/home");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Token inválido o expirado ❌");
-    }
-    finally{
-      setIsLoading(false)
+      alert("Cuenta verificada ✅");
+      localStorage.removeItem("email_verificacion");
+      router.push("/");
+    } catch {
+      setError("Código inválido o expirado");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-16 px-4">
-      {loading && <LoadingScreen/>}
-      <Image
-        src={image}
-        alt="Abogados en Acción"
-        width={150}
-        height={150}
-        priority
-        className="mb-8"
-      />
+    <main className="min-h-screen flex flex-col items-center px-4 pt-10">
+      {loading && <LoadingScreen />}
 
-      <form
-        onSubmit={handleVerify}
-        className="bg-grisOscuro p-6 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
-      >
-        <h1 className="text-2xl font-bold text-black mb-2">
-          Verificá tu cuenta
-        </h1>
-        <p className="text-gray-600 text-sm text-center mb-2">
-          Ingresá el código que te enviamos a <br />
-          <span className="text-black font-semibold">{email}</span>
+      {/* TÍTULO */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold tracking-tight">Verificá tu cuenta</h1>
+        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+      </div>
+
+      <form onSubmit={handleVerify} className="w-full max-w-sm flex flex-col gap-5">
+        <p className="text-gray-700 text-center mb-1">
+          Ingresá el código enviado a:
         </p>
+        <p className="text-blue-700 font-semibold text-center mb-4">{email}</p>
 
         <input
           type="text"
           placeholder="Código de verificación"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full text-center tracking-widest focus:ring-2 focus:ring-blue-400"
           value={codigo}
-          onChange={(e) => setToken(e.target.value)}
-          className="bg-white text-black rounded-xl px-4 py-3 w-full text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-rojo"
+          onChange={(e) => setCodigo(e.target.value)}
         />
 
-        {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+        {error && <p className="text-red-500 text-center text-sm">{error}</p>}
 
         <button
           type="submit"
-          className="bg-#1f5691 hover:bg-#1f5691-800 text-black font-semibold py-3 rounded-2xl transition w-full"
+          className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-semibold shadow-md transition"
         >
           Verificar
         </button>

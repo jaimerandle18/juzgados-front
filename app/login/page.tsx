@@ -2,111 +2,129 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
-import image from "../../public/agaboga.png";
 import LoadingScreen from "../components/LoadingScreen";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [loading,setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setIsLoading(true)
     e.preventDefault();
+    setIsLoading(true);
     setError("");
 
     if (!email || !password) {
       setError("Ingresá tus credenciales");
+      setIsLoading(false);
       return;
     }
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", { email, contrasenia: password });
+
       setCookie("auth_token", res.data.token, {
         path: "/",
         secure: true,
         sameSite: "none",
-      });      
-      router.push("/home");
-    } catch (err: any) {
+      });
+
+      router.push("/");
+    } catch (err) {
       console.error(err);
-      setError("Credenciales incorrectas o error del servidor");
-    }
-    finally{
-      router.push("/home");
-        setIsLoading(false)
+      setError("Credenciales incorrectas");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-fondo flex flex-col justify-start items-center pt-8 px-4" style={{marginTop:"60px"}}>
-        {loading && <LoadingScreen/>}
-      {/* 🧑‍⚖️ Logo */}
-      <Image
-        src={image}
-        alt="Abogados en Acción"
-        width={150}
-        height={150}
-        priority
-        className="mb-8"
-        style={{marginBottom:"-15px"}}
-      />
+    <main className="min-h-screen flex flex-col items-center pt-14 px-4">
+      {loading && <LoadingScreen />}
 
-      {/* Formulario */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-grisOscuro p-4 rounded-3xl shadow-card w-full max-w-sm flex flex-col gap-4 items-center"
+      {/* TÍTULO */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
+        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+      </div>
+
+      {/* FORM CON CARD */}
+      <div
+        className="
+          w-full max-w-sm 
+          flex flex-col
+          space-y-10          /* MÁS ESPACIO ENTRE INPUTS EN MOBILE */
+          md:space-y-5       /* Más compacto en desktop */
+        "
       >
-        <h1 className="text-2xl font-bold text-black mb-2">
-          Iniciar sesión
-        </h1>
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
 
-        <input
-          type="email"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{border:"2px solid grey"}}
-          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
-        />
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            className="
+              bg-white border border-gray-300 rounded-xl 
+              px-4 py-4 w-full 
+              focus:ring-2 focus:ring-blue-400
+              text-gray-900
+              mt-10
+              md:mt-1
+            "
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{border:"2px solid grey"}}
-          className="bg-white text-black rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-rojo"
-        />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            className="
+              bg-white border border-gray-300 rounded-xl 
+              px-4 py-4 w-full
+              focus:ring-2 focus:ring-blue-400
+              text-gray-900
+              mt-1
+              md:mt-1
+            "
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        {error && (
-          <p className="text-red-500 text-sm font-medium">{error}</p>
-        )}
+          {error && (
+            <p className="text-red-500 text-sm font-semibold text-center">
+              {error}
+            </p>
+          )}
 
-        <button
-          style={{backgroundColor:"#1f5691"}}
-          type="submit"
-          className="bg-blue hover:text-white hover:bg-verde-hover font-semibold py-3 rounded-2xl transition w-full"        >
-          Ingresar
-        </button>
+          <button
+            type="submit"
+            className="
+              bg-blue-600 hover:bg-blue-700 
+              text-white py-4 rounded-2xl 
+              font-semibold shadow-lg 
+              hover:-translate-y-0.5 transition-all
+               mt-7
+              md:mt-1
+            "
+          >
+            Ingresar
+          </button>
+        </form>
 
-        {/* 🔗 Link a registro */}
-        <p className="text-sm text-gray-600 mt-3">
-          ¿No tenés cuenta?{" "}
+        <p className="text-sm text-gray-700 text-center">
+          ¿No tenés cuenta?
           <Link
             href="/register"
-            className="text-rojo font-semibold hover:underline"
+            className="text-blue-600 font-semibold ml-1 hover:underline"
           >
             Registrate
           </Link>
         </p>
-      </form>
+      </div>
     </main>
   );
 }

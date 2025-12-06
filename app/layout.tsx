@@ -1,17 +1,20 @@
+// app/layout.tsx
 import "./globals.css";
-import ClientLayout from "./components/ClientLayout";
-
+import ClientLayout from "@/components/ClientLayout";
+import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "Abogados en Acción",
-  description: "Opiniones y valoraciones de los juzgados argentinos",
+  title: "Data Jury",
+  description: "Sistema de valoración de juzgados",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body className="navbar">
-        <ClientLayout>{children}</ClientLayout>
+      <body className="bg-gray-100 min-h-screen">
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );
