@@ -32,7 +32,9 @@ export default function LoginPage() {
         path: "/",
         secure: true,
         sameSite: "none",
+        httpOnly: true, // ← probá poniéndolo en true
       });
+      
 
       router.push("/");
     } catch (err) {
