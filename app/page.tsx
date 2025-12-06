@@ -2,15 +2,10 @@
 import { motion } from "framer-motion";
 import { Scale, Gavel, Globe2 } from "lucide-react";
 
-
 export default function Home() {
-  // Si está en "/" y no hay token → enviar a login
-
-
   return (
     <main className="min-h-screen px-6 pt-20 text-white from-black to-gray-900">
 
-      {/* Contenedor principal */}
       <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
         <MenuCard
           href="/fueros/categorias/nacionales"
@@ -49,13 +44,15 @@ function MenuCard({ href, title, icon, gradient }: any) {
       style={{ color: "black" }}
       className={`
         relative overflow-hidden group 
-        rounded-2xl 
-        p-15 sm:p-6         /* MÁS ESPACIO EN MOBILE */
-        shadow-xl 
+        rounded-2xl shadow-xl 
         bg-gradient-to-r ${gradient}
-        font-bold 
-        text-xl sm:text-lg /* TEXTO UN POCO MÁS GRANDE EN MOBILE */
-        flex items-center gap-10 sm:gap-4
+        p-6
+
+        /* MOBILE: icono arriba, texto centrado */
+        flex flex-col items-center text-center gap-4
+
+        /* DESKTOP: icono + texto en fila */
+        sm:flex-row sm:text-left sm:items-center sm:gap-6
       `}
     >
       {/* Glow */}
@@ -63,14 +60,16 @@ function MenuCard({ href, title, icon, gradient }: any) {
 
       {/* Icono */}
       <div
-        className="p-3 sm:p-3 rounded-xl backdrop-blur-sm"
+        className="p-4 rounded-xl backdrop-blur-sm"
         style={{ backgroundColor: "lab(77.5052% -6.4629 -36.42)" }}
       >
         {icon}
       </div>
 
       {/* Texto */}
-      <span className="tracking-wide">{title}</span>
+      <span className="tracking-wide font-bold text-lg sm:text-xl break-words">
+        {title}
+      </span>
     </motion.a>
   );
 }
