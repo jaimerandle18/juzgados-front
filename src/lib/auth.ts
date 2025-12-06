@@ -11,3 +11,4 @@ export const getMe = () =>
 
 export const getMyVotes = () =>
   api.get("/usuarios/votes");
+

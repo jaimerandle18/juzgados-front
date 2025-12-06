@@ -28,7 +28,12 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
       console.log(res, "RES")
-      setCookie("auth_token", res.data.token)
+      setCookie("auth_token", res.data.token, {
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      
       router.push("/");
     } catch (err) {
       console.error(err);
