@@ -1,18 +1,11 @@
 "use client";
-import { getCookie } from "cookies-next";
 import { motion } from "framer-motion";
 import { Scale, Gavel, Globe2 } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/router";
+
 
 export default function Home() {
   // Si está en "/" y no hay token → enviar a login
-  const pathname = usePathname()
-  const token = getCookie("auth_token")
-  const router = useRouter()
-if (pathname === "/" && !token) {
-  router.push("/login");
-}
+
 
   return (
     <main className="min-h-screen px-6 pt-20 text-white from-black to-gray-900">
