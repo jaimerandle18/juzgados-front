@@ -100,7 +100,7 @@ function ReviewBars({ votos }: any) {
     return acc;
   }, {});
 
-  const maxCount = Math.max(...Object.values(cantidades), 1);
+  const maxCount = Math.max(...(Object.values(cantidades) as number[]), 1);
 
   return (
     <div className="space-y-2">
