@@ -27,15 +27,8 @@ export default function LoginPage() {
 
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
-
-      setCookie("auth_token", res.data.token, {
-        path: "/",
-        secure: false,
-        sameSite: "none",
-        httpOnly: false, // ← probá poniéndolo en true
-      });
-      
-
+      console.log(res, "RES")
+      setCookie("auth_token", res.data.token)
       router.push("/");
     } catch (err) {
       console.error(err);
