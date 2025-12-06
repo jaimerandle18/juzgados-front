@@ -30,9 +30,9 @@ export default function LoginPage() {
 
       setCookie("auth_token", res.data.token, {
         path: "/",
-        secure: true,
+        secure: false,
         sameSite: "none",
-        httpOnly: true, // ← probá poniéndolo en true
+        httpOnly: false, // ← probá poniéndolo en true
       });
       
 
