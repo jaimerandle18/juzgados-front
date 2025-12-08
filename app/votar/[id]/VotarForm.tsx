@@ -171,23 +171,6 @@ export default function VotarForm({
           <p className="font-semibold">¡Evaluación enviada con éxito!</p>
         </div>
       )}
-
-      {/* ANIMACIÓN DEL TOAST */}
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        .animate-slideIn {
-          animation: slideIn 0.4s ease-out;
-        }
-      `}</style>
     </main>
   );
 }

@@ -56,7 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <header className="fixed top-0 left-0 w-full z-50">
         <div 
           className="
-            backdrop-blur-xl bg-white/70 
+            backdrop-blur-xl bg-white
             border-b border-gray-300/50 
             shadow-[0_8px_20px_rgba(0,0,0,0.05)]
             relative
