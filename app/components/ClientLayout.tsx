@@ -17,8 +17,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     // Si existe cookie auth_token → está logueado
-    const token = getCookie("auth_token");
+    const token = sessionStorage.getItem("auth_token")
     setIsLogged(!!token);
+  }, []);
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = sessionStorage.getItem("auth_token");
+      setIsLogged(!!token);
+    };
+  
+    // Cada 500ms chequea si la cookie cambió
+    const interval = setInterval(checkAuth, 500);
+  
+    return () => clearInterval(interval);
   }, []);
   
 
