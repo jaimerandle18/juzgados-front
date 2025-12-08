@@ -7,7 +7,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getCookie } from "cookies-next";
-import logo from "../../public/dataJury1.png";
+import logo from "../../public/aga3.png";
 import RouteLoader from "./RouteLoader";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
