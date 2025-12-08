@@ -118,19 +118,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 })}
 
                 {/* Logout Desktop */}
-                <Link
-                  onClick={() => setOpen(true)}
-                  href="/logout"
-                  className="
-                    px-3 py-1 rounded-md border font-semibold
-                    text-red-600 border-red-500
-                    hover:bg-red-50 transition
-                    flex items-center gap-1
-                  "
-                >
-                  <LogOut className="w-4 h-4" />
-                  Salir
-                </Link>
+                <button
+  onClick={() => window.location.href = "/logout"}
+  className="
+    px-3 py-1 rounded-md border font-semibold
+    text-red-600 border-red-500
+    hover:bg-red-50 transition
+    flex items-center gap-1
+  "
+>
+  <LogOut className="w-4 h-4" />
+  Salir
+</button>
+
               </nav>
             )}
 
