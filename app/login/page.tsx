@@ -26,6 +26,14 @@ export default function LoginPage() {
     }
 
     try {
+      const res = await api.post("/auth/login", { email, contrasenia: password });
+
+      setCookie("auth_token", res.data.token, {
+        path: "/",
+        secure: true,
+        sameSite: "none",
+      });
+
       router.push("/");
     } catch (err) {
       console.error(err);
