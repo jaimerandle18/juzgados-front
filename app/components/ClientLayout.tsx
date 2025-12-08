@@ -7,7 +7,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getCookie } from "cookies-next";
-import logo from "../../public/aga3.png";
+import logo from "../../public/dataJury1.png";
 import RouteLoader from "./RouteLoader";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -56,7 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <header className="fixed top-0 left-0 w-full z-50">
         <div 
           className="
-            backdrop-blur-xl bg-white
+            backdrop-blur-xl bg-white/80 
             border-b border-gray-300/50 
             shadow-[0_8px_20px_rgba(0,0,0,0.05)]
             relative
