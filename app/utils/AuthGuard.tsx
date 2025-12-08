@@ -8,20 +8,20 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Rutas que NO requieren autenticación
+  // Rutas que NO requieren login
   const publicRoutes = ["/login", "/register", "/verify-token"];
 
   useEffect(() => {
     const token = getCookie("auth_token");
 
-    // Si estoy en una ruta pública → no hago nada
+    // Si estoy en una ruta pública → siempre permitir
     if (publicRoutes.includes(pathname)) return;
 
-    // Si NO tengo token → redirijo a login
+    // Si estoy en ruta protegida y NO tengo token → ir a login
     if (!token) {
       router.replace("/login");
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
   return <>{children}</>;
 }

@@ -8,23 +8,19 @@ export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
 });
 
-// AGREGO TOKEN AUTOMÁTICO
+// 👉 Adjuntar token automáticamente
 api.interceptors.request.use((config) => {
-  const token = getCookie("auth_token"); // ← AHORA SÍ
+  const token = getCookie("auth_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// SI EXPIRA → logout automático
+// 👉 NO BORRAR COOKIES ACÁ
+// El AuthGuard es el único responsable de redirigir.
+// Esto evita que Next borre cookies por preloads o SSR.
 api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      // saco la cookie inválida
-      document.cookie =
-        "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
-      window.location.href = "/login";
-    }
-    return Promise.reject(err);
+  (response) => response,
+  (error) => {
+    return Promise.reject(error);
   }
 );
