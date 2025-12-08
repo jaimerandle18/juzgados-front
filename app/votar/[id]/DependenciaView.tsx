@@ -166,7 +166,7 @@ export default function DependenciaView({ data }: { data: any }) {
       ======================================================= */}
       {tieneHijos && (
         <section>
-          <h2 className="text-2xl font-bold mb-4">Subdependencias</h2>
+          <h2 className="text-2xl font-bold mb-4">Salas:</h2>
 
           <div className="grid gap-5 sm:grid-cols-2">
             {hijos.map((c: any, i: number) => (
