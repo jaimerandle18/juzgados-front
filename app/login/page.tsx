@@ -28,12 +28,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
 
-      setCookie("auth_token", res.data.token, {
-        path: "/",
-        maxAge: 60 * 60 * 12 * 1, // 7 días
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      });
+      setCookie("auth_token", res.data.token);
       
 
       router.push("/");
