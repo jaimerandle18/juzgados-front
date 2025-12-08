@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { getCookie } from "cookies-next";
 import { useEffect } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -12,7 +11,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const publicRoutes = ["/login", "/register", "/verify-token"];
 
   useEffect(() => {
-    const token = getCookie("auth_token");
+    const token =  sessionStorage.getItem("auth_token")
 
     // Si estoy en una ruta pública → no hago nada
     if (publicRoutes.includes(pathname)) return;

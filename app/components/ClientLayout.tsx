@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import RouteLoader from "./RouteLoader";
 

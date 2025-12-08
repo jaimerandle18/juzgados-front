@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 
@@ -28,7 +27,6 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
       sessionStorage.setItem("auth_token", res.data.token);
-      
       router.push("/");
     } catch (err) {
       console.error(err);

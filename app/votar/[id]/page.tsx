@@ -1,11 +1,10 @@
-import { cookies } from "next/headers";
+
 import VotarWrapper from "./VotarWrapper";
 
 export default async function Page({ params }: any) {
   const { id } = await params;
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value || "";
+  const token = sessionStorage.getItem("auth_token")
 
   // Consultamos si ya votó antes
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/dependencias/${id}`, {
