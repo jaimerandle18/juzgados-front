@@ -178,20 +178,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               })}
 
               {/* Logout mobile */}
-              <Link
-                href="/logout"
-                onClick={() => setOpen(false)}
-                className="
-                  block py-2 text-lg font-bold 
-                  text-red-600 border border-red-500
-                  rounded-md px-3 text-center
-                  hover:bg-red-50 transition
-                  flex items-center justify-center gap-2
-                "
-              >
-                <LogOut className="w-5 h-5" />
-                Cerrar sesión
-              </Link>
+              <button
+  onClick={() => window.location.href = "/logout"}
+  className="
+    px-3 py-1 rounded-md border font-semibold
+    text-red-600 border-red-500
+    hover:bg-red-50 transition
+    flex items-center gap-1
+  "
+>
+  <LogOut className="w-4 h-4" />
+  Cerrar sesion
+</button>
+
             </motion.div>
           )}
         </div>
