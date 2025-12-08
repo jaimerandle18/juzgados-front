@@ -4,11 +4,20 @@ import { useState } from "react";
 import { api } from "../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 
-export default function VotarForm({ id, dependenciaNombre }: { id: string, dependenciaNombre:string }) {
+export default function VotarForm({
+  id,
+  dependenciaNombre,
+}: {
+  id: string;
+  dependenciaNombre: string;
+}) {
   const [puntuacion, setPuntuacion] = useState(0);
   const [form, setForm] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+
+  const router = useRouter();
 
   const preguntas = [
     {
@@ -76,11 +85,15 @@ export default function VotarForm({ id, dependenciaNombre }: { id: string, depen
     });
 
     setSuccess(true);
+
+    // Mostrar toast y redirigir después de 2s
+    setTimeout(() => {
+      router.push("/mis-evaluaciones");
+    }, 2000);
   };
 
   return (
     <main className="pt-10 pb-20 px-6 max-w-3xl mx-auto text-gray-900">
-
       {/* TÍTULO */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight">
@@ -134,30 +147,47 @@ export default function VotarForm({ id, dependenciaNombre }: { id: string, depen
 
       {/* ENVIAR */}
       <button
-  type="button"
-  onClick={enviar}
-  className="
-    mt-14 w-full py-4 rounded-2xl text-white font-semibold
-    bg-blue-600 hover:bg-blue-700 
-    shadow-lg hover:-translate-y-0.5 transition-all
-  "
->
-  Enviar evaluación
-</button>
+        type="button"
+        onClick={enviar}
+        className="
+          mt-14 w-full py-4 rounded-2xl text-white font-semibold
+          bg-blue-600 hover:bg-blue-700 
+          shadow-lg hover:-translate-y-0.5 transition-all
+        "
+      >
+        Enviar evaluación
+      </button>
 
+      {/* TOAST */}
+      {success && (
+        <div
+          className="
+            fixed top-6 right-6 z-50 px-5 py-4 rounded-2xl
+            bg-green-100/80 backdrop-blur-md border border-green-300
+            shadow-lg animate-slideIn flex items-center gap-2 text-green-800
+          "
+        >
+          <span className="text-xl">✓</span>
+          <p className="font-semibold">¡Evaluación enviada con éxito!</p>
+        </div>
+      )}
 
-{success && (
-  <div
-    className="
-      fixed top-6 right-6 z-50 px-5 py-4 rounded-2xl
-      bg-green-100/80 backdrop-blur-md border border-green-300
-      shadow-lg animate-slideIn flex items-center gap-2 text-green-800
-    "
-  >
-    <span className="text-xl">✓</span>
-    <p className="font-semibold">¡Evaluación enviada con éxito!</p>
-  </div>
-)}
+      {/* ANIMACIÓN DEL TOAST */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.4s ease-out;
+        }
+      `}</style>
     </main>
   );
 }
