@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import RouteLoader from "./RouteLoader";
 
@@ -16,12 +17,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     // Si existe cookie auth_token → está logueado
-    const token = sessionStorage.getItem("auth_token")
+    const token = getCookie("auth_token");
     setIsLogged(!!token);
   }, []);
   useEffect(() => {
     const checkAuth = () => {
-      const token = sessionStorage.getItem("auth_token");
+      const token = getCookie("auth_token");
       setIsLogged(!!token);
     };
   

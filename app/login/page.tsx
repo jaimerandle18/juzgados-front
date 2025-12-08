@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 
@@ -26,7 +27,13 @@ export default function LoginPage() {
 
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
-      sessionStorage.setItem("auth_token", res.data.token);
+      setCookie("auth_token", res.data.token, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,   // 7 días
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+      
       router.push("/");
     } catch (err) {
       console.error(err);

@@ -1,11 +1,13 @@
-
+import { cookies } from "next/headers";
 
 /* ===========================================================
    📄 PAGE — Evaluaciones por Dependencia
 =========================================================== */
 export default async function Page({ params }: any) {
   const { id } = await params;
-  const token = sessionStorage.getItem("auth_token")
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/votos/${id}`,

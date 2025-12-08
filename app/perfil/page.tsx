@@ -1,8 +1,11 @@
 "use client";
 
+import { cookies } from "next/headers";
 
-export default async function Page() {
-  const token =  sessionStorage.getItem("auth_token")
+
+export default async function Page() {  
+  const cookieStore =await cookies();
+  const token = cookieStore.get("auth_token")?.value;
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/me`, {
     headers: { Authorization: `Bearer ${token ?? ""}` },
     cache: "no-store",
