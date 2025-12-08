@@ -20,17 +20,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const token = getCookie("auth_token");
     setIsLogged(!!token);
   }, []);
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = getCookie("auth_token");
-      setIsLogged(!!token);
-    };
-  
-    // Cada 500ms chequea si la cookie cambió
-    const interval = setInterval(checkAuth, 500);
-  
-    return () => clearInterval(interval);
-  }, []);
   
 
   const navItems = [
