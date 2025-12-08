@@ -102,7 +102,7 @@ export default function DependenciaView({ data }: { data: any }) {
        hover:shadow-xl hover:-translate-y-1 transition-all
      "
    >
-     Evaluar dependencia →
+     Evaluar →
    </a>
  
    <a
