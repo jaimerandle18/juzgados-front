@@ -16,10 +16,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
-    // Si existe cookie auth_token → está logueado
+    // Solo correr del lado del cliente
     const token = getCookie("auth_token");
-    setIsLogged(!!token);
-  }, []);
+    console.log(token, "token")
+    // Esto evita parpadeos y renders raros:
+    // Siempre interpretamos UNDEFINED como "no decido todavía"
+    if (typeof token === "string" && token.length > 0) {
+      setIsLogged(true);
+    } else {
+      setIsLogged(false);
+    }
+  }, [pathname]);
   
 
   const navItems = [
