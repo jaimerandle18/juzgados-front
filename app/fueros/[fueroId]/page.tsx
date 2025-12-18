@@ -111,12 +111,30 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
               Tribunales Orales en lo Criminal y Correccional
             </h2>
             <p className="mt-2 text-gray-700">
-              {tribunalesCriminal.length} tribunales
+              {tribunalesCriminal.length} Tribunales
             </p>
             <p className="mt-4 text-sm font-medium text-blue-600 underline">
               Ver listado →
             </p>
           </a>
+          {/* E) Juzgados Nacionales de Ejecución Penal */}
+<a
+  href={`/dependencia/2224`}
+  className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+>
+  <h2 className="text-2xl font-semibold text-gray-900">
+    Juzgados Nacionales de Ejecución Penal
+  </h2>
+
+  <p className="mt-2 text-gray-700">
+    5 juzgados
+  </p>
+
+  <p className="mt-4 text-sm font-medium text-blue-600 underline">
+    Ver juzgados →
+  </p>
+</a>
+
         </div>
       </main>
     );
