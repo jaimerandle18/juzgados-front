@@ -38,7 +38,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <div 
       className="
         min-h-screen 
-        bg-gradient-to-br from-gray-100 via-white to-blue-90 
+        bg-gradient-to-br from-gray-200 via-white to-blue-90 
         text-gray-900 
         relative
       "
@@ -56,7 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <header className="fixed top-0 left-0 w-full z-50">
         <div 
           className="
-            backdrop-blur-xl bg-white/80 
+            backdrop-blur-xl bg-white/90
             border-b border-gray-300/50 
             shadow-[0_8px_20px_rgba(0,0,0,0.05)]
             relative

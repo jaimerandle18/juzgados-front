@@ -64,20 +64,21 @@ export default function LoginPage() {
       >
         <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
 
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            className="
-              bg-white border border-gray-300 rounded-xl 
-              px-4 py-4 w-full 
-              focus:ring-2 focus:ring-blue-400
-              text-gray-900
-              mt-10
-              md:mt-1
-            "
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <input
+  type="email"
+  placeholder="Correo electrónico"
+  className="
+    bg-white border border-gray-300 rounded-xl 
+    px-4 py-4 w-full 
+    focus:ring-2 focus:ring-blue-400
+    text-gray-900
+    mt-10
+    md:mt-1
+  "
+  value={email}
+  onChange={(e) => setEmail(e.target.value.toLowerCase())}
+/>
+
 
           <input
             type="password"

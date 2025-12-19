@@ -109,12 +109,13 @@ const [folio, setFolio] = useState("");
 />
 
 
-        <input
-          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+<input
+  type="email"
+  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
+  placeholder="Correo electrónico"
+  value={email}
+  onChange={(e) => setEmail(e.target.value.toLowerCase())}
+/>
 
         <input
           type="password"
