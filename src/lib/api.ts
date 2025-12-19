@@ -6,6 +6,7 @@ import { getCookie } from "cookies-next";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+  timeout: 180000,
 });
 
 // 👉 Adjuntar token automáticamente

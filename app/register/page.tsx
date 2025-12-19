@@ -14,6 +14,9 @@ export default function RegisterPage() {
   const [contrasenia, setContrasenia] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tomo, setTomo] = useState("");
+const [folio, setFolio] = useState("");
+
 
   const router = useRouter();
 
@@ -22,11 +25,11 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
 
-    if (!nombre || !apellido || !email || !contrasenia) {
-      setError("Completá todos los campos");
-      setLoading(false);
-      return;
-    }
+   if (!nombre || !apellido || !email || !contrasenia || !tomo || !folio) {
+  setError("Completá todos los campos");
+  setLoading(false);
+  return;
+   }
 
     try {
       const res = await api.post("/auth/register", {
@@ -34,7 +37,9 @@ export default function RegisterPage() {
         apellido,
         email,
         contrasenia,
-      });
+        tomo,
+        folio,
+      });      
 
       localStorage.setItem("email_verificacion", email);
       router.push("/verify-token");
@@ -47,7 +52,11 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen  flex flex-col items-center px-4 pt-10" >
-      {loading && <LoadingScreen />}
+     {loading && (
+  <LoadingScreen
+    message="Estamos validando tu matrícula con el Colegio Público de Abogados. Esto puede tardar unos segundos, por favor no cierres la página."
+  />
+)}
 
 
       {/* TÍTULO */}
@@ -55,6 +64,17 @@ export default function RegisterPage() {
         <h1 className="text-4xl font-extrabold tracking-tight">Crear cuenta</h1>
         <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
       </div>
+      <div className="mb-6 w-full max-w-sm rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+  <strong>Importante:</strong>  
+  Para validar tu matrícula, ingresá <strong>exactamente</strong> el mismo
+  <strong> nombre, apellido, tomo y folio</strong> con el que estás registrado
+  en el <strong>Colegio Público de Abogados</strong>.
+  <br />
+  <span className="block mt-1 text-blue-700">
+    Si los datos no coinciden, no podremos validar tu cuenta.
+  </span>
+</div>
+
 
       <form className="w-full max-w-sm flex flex-col gap-5" onSubmit={handleSubmit}>
         <input
@@ -70,6 +90,24 @@ export default function RegisterPage() {
           value={apellido}
           onChange={(e) => setApellido(e.target.value)}
         />
+        <input
+  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
+  placeholder="Tomo (hasta 3 dígitos)"
+  value={tomo}
+  onChange={(e) =>
+    setTomo(e.target.value.replace(/\D/g, "").slice(0, 3))
+  }
+/>
+
+<input
+  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
+  placeholder="Folio (hasta 4 dígitos)"
+  value={folio}
+  onChange={(e) =>
+    setFolio(e.target.value.replace(/\D/g, "").slice(0, 4))
+  }
+/>
+
 
         <input
           className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
