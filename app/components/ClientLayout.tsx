@@ -53,7 +53,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       />
 
       {/* NAVBAR */}
-      <header className="fixed top-0 left-0 w-full z-50">
+      <header
+  className="fixed left-0 w-full z-50"
+  style={{ top: "var(--safe-top)" }}
+>
+
         <div 
           className="
             backdrop-blur-xl bg-white/90
@@ -196,7 +200,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </header>
 
       {/* MAIN */}
-      <main className="pt-28 px-6 max-w-6xl mx-auto">
+      <main
+  className="px-6 max-w-6xl mx-auto"
+  style={{ paddingTop: "calc(7rem + var(--safe-top))" }}
+>
+
       <RouteLoader />
         {children}
       </main>
