@@ -1,8 +1,27 @@
 "use client";
 import { motion } from "framer-motion";
 import { Scale, Gavel, Globe2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { App } from "@capacitor/app";
 
 export default function Home() {
+
+  if (Capacitor.isNativePlatform()) {
+    StatusBar.setOverlaysWebView({ overlay: false });
+    StatusBar.setStyle({ style: Style.Light });
+  }
+
+
+if (Capacitor.isNativePlatform()) {
+  App.addListener("backButton", ({ canGoBack }) => {
+    if (canGoBack) {
+      window.history.back();
+    } else {
+      App.exitApp();
+    }
+  });
+}
   return (
     <main className="min-h-screen px-6 pt-20 text-white from-black to-gray-900">
 
