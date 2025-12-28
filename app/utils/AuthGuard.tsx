@@ -9,7 +9,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   // Rutas que NO requieren login
-  const publicRoutes = ["/login", "/register", "/verify-token"];
+  const publicRoutes = ["/login", "/register", "/verify-token", "/privacyPolicy"];
 
   useEffect(() => {
     const token = getCookie("auth_token");
