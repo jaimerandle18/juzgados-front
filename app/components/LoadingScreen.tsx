@@ -26,7 +26,6 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
           src={image}
           alt="Abogados en Acción"
           fill
-          priority
           className="object-contain"
         />
       </motion.div>
