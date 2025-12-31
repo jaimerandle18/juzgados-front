@@ -12,8 +12,8 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50 px-6 text-center">
       <motion.div
-        initial={{ rotateY: 0 }}
-        animate={{ rotateY: 360 }}
+        initial={{ rotate: 0 }}
+        animate={{ rotate: 360 }}
         transition={{
           repeat: Infinity,
           duration: 1.5,
@@ -26,6 +26,7 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
           src={image}
           alt="Abogados en Acción"
           fill
+          priority
           className="object-contain"
         />
       </motion.div>
