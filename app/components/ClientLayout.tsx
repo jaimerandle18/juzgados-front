@@ -9,6 +9,8 @@ import Image from "next/image";
 import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import RouteLoader from "./RouteLoader";
+import GlobalLoadingScreen from "./GlobalLoadingScreen";
+import { hideLoader, showLoader } from "./globalLoader";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,11 +22,31 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     setIsLogged(typeof token === "string" && token.length > 0);
   }, [pathname]);
 
+useEffect(() => {
+  // cada vez que cambia la ruta, apagamos el loader
+  hideLoader();
+}, [pathname]);
+
+
   const navItems = [
     { label: "Inicio", href: "/" },
     { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
     { label: "Mi perfil", href: "/perfil" },
   ];
+
+const logoutWithLoader = () => {
+  // 1) Mostrar loader YA
+  showLoader("Cerrando sesión…");
+
+  // 2) Darle 1 frame al navegador para renderizarlo
+  requestAnimationFrame(() => {
+    // opcional: un pelín más para asegurar en iOS/WebView
+    setTimeout(() => {
+      window.location.href = "/logout";
+    }, 50);
+  });
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-200 via-white to-blue-90 text-gray-900 relative">
@@ -97,7 +119,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 })}
 
                 <button
-                  onClick={() => (window.location.href = "/logout")}
+                  onClick={() => logoutWithLoader()}
                   className="
                     px-3 py-1 rounded-md border font-semibold
                     text-red-600 border-red-500
@@ -149,7 +171,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               })}
 
               <button
-                onClick={() => (window.location.href = "/logout")}
+                 onClick={() => {
+                  setOpen(false);
+                  logoutWithLoader();
+                }}
                 className="
                   px-3 py-1 rounded-md border font-semibold
                   text-red-600 border-red-500
@@ -170,7 +195,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         className="px-6 max-w-6xl mx-auto"
         style={{ paddingTop: "calc(7rem + var(--safe-top))" }}
       >
-        <RouteLoader />
+        <GlobalLoadingScreen />
         {children}
       </main>
     </div>

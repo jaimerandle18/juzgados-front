@@ -4,6 +4,7 @@ import { Scale, Gavel, Globe2 } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
+import { showLoader } from "./components/globalLoader";
 
 export default function Home() {
 
@@ -55,6 +56,7 @@ function MenuCard({ href, title, icon, gradient }: any) {
   return (
     <motion.a
       href={href}
+      onClick={() => showLoader()}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.98 }}
       initial={{ opacity: 0, y: 20 }}

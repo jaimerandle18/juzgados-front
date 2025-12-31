@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../src/lib/api";
 import clsx from "clsx";
+import AnchorWithLoader from "@/components/AnchorWithLoader";
 
 export default function MisEvaluacionesPage() {
   const [evaluaciones, setEvaluaciones] = useState<any[]>([]);
@@ -90,7 +91,7 @@ export default function MisEvaluacionesPage() {
 
             {/* Botones */}
             <div className="flex gap-3 w-full md:w-auto">
-              <a
+              <AnchorWithLoader
                 href={`/votar/${v.dependencia_id}/editar`}
                 className="
                   flex-1 md:flex-none px-4 py-2 rounded-xl border 
@@ -99,7 +100,7 @@ export default function MisEvaluacionesPage() {
                 "
               >
                 Editar
-              </a>
+              </AnchorWithLoader>
 
               <button
                 onClick={() => setDeleteTarget(v)}
@@ -113,7 +114,7 @@ export default function MisEvaluacionesPage() {
               </button>
 
               {/* Solo Desktop */}
-              <a
+              <AnchorWithLoader
                 href={`/dependencia/${v.dependencia_id}`}
                 className="
                   hidden md:inline-flex px-4 py-2 rounded-xl border 
@@ -122,7 +123,7 @@ export default function MisEvaluacionesPage() {
                 "
               >
                 Ver
-              </a>
+              </AnchorWithLoader>
             </div>
           </div>
         ))}

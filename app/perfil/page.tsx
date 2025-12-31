@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import AnchorWithLoader from "@/components/AnchorWithLoader";
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -93,7 +94,7 @@ export default async function Page() {
         )}
 
         {/* BOTÓN LOGOUT */}
-        <a
+        <AnchorWithLoader
           href="/logout"
           className="
             inline-block w-full text-center
@@ -104,7 +105,7 @@ export default async function Page() {
           "
         >
           Cerrar sesión
-        </a>
+        </AnchorWithLoader>
       </div>
     </main>
   );

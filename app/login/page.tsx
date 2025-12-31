@@ -6,6 +6,7 @@ import Link from "next/link";
 import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
+import { navigateWithLoader } from "@/components/NavigateWithLoader";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,7 +35,10 @@ export default function LoginPage() {
         secure: true,
       });
       
-      router.push("/");
+     navigateWithLoader(
+      router,
+      "/"
+     )
     } catch (err) {
       console.error(err);
       setError("Credenciales incorrectas");

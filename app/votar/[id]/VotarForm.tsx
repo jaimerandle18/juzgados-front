@@ -5,6 +5,7 @@ import { api } from "../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import { navigateWithLoader } from "@/components/NavigateWithLoader";
 
 export default function VotarForm({
   id,
@@ -88,7 +89,7 @@ export default function VotarForm({
 
     // Mostrar toast y redirigir después de 2s
     setTimeout(() => {
-      router.push("/mis-evaluaciones");
+     navigateWithLoader(router,"/mis-evaluaciones");
     }, 2000);
   };
 

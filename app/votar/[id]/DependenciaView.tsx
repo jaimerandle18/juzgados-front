@@ -1,5 +1,6 @@
 "use client";
 
+import { showLoader } from "@/components/globalLoader";
 import { motion } from "framer-motion";
 
 // ======================
@@ -160,6 +161,7 @@ function ChildrenGrid({
 
           return (
             <motion.a
+            onClick={() => showLoader()}
               key={c.id}
               href={`/dependencia/${c.id}`}
               initial={{ opacity: 0, y: 6 }}

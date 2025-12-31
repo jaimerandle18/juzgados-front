@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { showLoader } from "./globalLoader";
 
 function StarRating({ promedio = 0, cantidad = 0 }) {
   const filled = Math.round(Number(promedio) || 0);
@@ -39,6 +40,7 @@ export default function DependenciasGrid({
       <div className="grid gap-5 sm:grid-cols-2">
         {items.map((d: any, i: number) => (
           <motion.a
+          onClick={() => showLoader()}
             key={d.id}
             href={`/dependencia/${d.id}`}
             initial={{ opacity: 0, y: 6 }}

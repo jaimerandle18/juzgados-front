@@ -6,6 +6,7 @@ import Image from "next/image";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import logo from "../../public/dataJury1.png";
+import { navigateWithLoader } from "@/components/NavigateWithLoader";
 
 export default function VerifyTokenPage() {
   const [email, setEmail] = useState<string | null>(null);
@@ -16,7 +17,7 @@ export default function VerifyTokenPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("email_verificacion");
-    if (!saved) router.push("/register");
+    if (!saved) navigateWithLoader(router, "/register");
     else setEmail(saved);
   }, [router]);
 
@@ -30,7 +31,7 @@ export default function VerifyTokenPage() {
 
       alert("Cuenta verificada ✅");
       localStorage.removeItem("email_verificacion");
-      router.push("/");
+      navigateWithLoader(router,"/");
     } catch {
       setError("Código inválido o expirado");
     } finally {
