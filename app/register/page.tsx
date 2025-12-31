@@ -6,8 +6,6 @@ import Image from "next/image";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import logo from "../../public/dataJury1.png";
-import { useNavigate } from "@/components/useNavigate";
-import AnchorWithLoader from "@/components/AnchorsWithLoaders";
 
 export default function RegisterPage() {
   const [nombre, setNombre] = useState("");
@@ -20,7 +18,7 @@ export default function RegisterPage() {
 const [folio, setFolio] = useState("");
 
 
- const navigate = useNavigate()
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +42,7 @@ const [folio, setFolio] = useState("");
       });      
 
       localStorage.setItem("email_verificacion", email);
-      navigate("/verify-token");
+      router.push("/verify-token");
     } catch (err) {
       console.error(err);
       setError("Error al registrarse");
@@ -138,9 +136,9 @@ const [folio, setFolio] = useState("");
 
         <p className="text-sm text-gray-700 text-center mt-2">
           ¿Ya tenés cuenta?
-          <AnchorWithLoader href="/login" className="text-blue-600 font-semibold ml-1 hover:underline">
+          <a href="/login" className="text-blue-600 font-semibold ml-1 hover:underline">
             Iniciar sesión
-          </AnchorWithLoader>
+          </a>
         </p>
       </form>
     </main>

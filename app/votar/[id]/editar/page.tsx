@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import EditarForm from "./EditarForm";
-import AnchorWithLoader from "@/components/AnchorsWithLoaders";
 
 export default async function Page({ params }: any) {
   const { id } = await params;
@@ -26,7 +25,7 @@ export default async function Page({ params }: any) {
     return (
       <div className="pt-20 text-center">
         <h1 className="text-xl font-semibold text-red-600">Todavía no votaste esta dependencia</h1>
-        <AnchorWithLoader href={`/votar/${id}`} className="text-blue-600 underline mt-4 block">Ir a votar</AnchorWithLoader>
+        <a href={`/votar/${id}`} className="text-blue-600 underline mt-4 block">Ir a votar</a>
       </div>
     );
   }

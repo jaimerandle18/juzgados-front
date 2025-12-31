@@ -6,14 +6,13 @@ import Link from "next/link";
 import { setCookie } from "cookies-next";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
-import { useNavigate } from "@/components/useNavigate";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setIsLoading] = useState(false);
-  const navigate = useNavigate()
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +34,7 @@ export default function LoginPage() {
         secure: true,
       });
       
-      navigate("/");
+      router.push("/");
     } catch (err) {
       console.error(err);
       setError("Credenciales incorrectas");
