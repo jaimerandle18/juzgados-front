@@ -10,31 +10,33 @@ type LoadingScreenProps = {
 
 export default function LoadingScreen({ message }: LoadingScreenProps) {
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50 px-6 text-center">
-      <motion.div
-        initial={{ rotateY: 0 }}
-        animate={{ rotateY: 360 }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.5,
-          ease: "linear",
-        }}
-        style={{ transformStyle: "preserve-3d" } as React.CSSProperties}
-        className="relative w-32 h-32 mb-6"
-      >
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white px-6 text-center">
+      
+<motion.div
+  initial={{ rotateY: 0 }}
+  animate={{ rotateY: 360 }}
+  transition={{
+    repeat: Infinity,
+    duration: 1.5,
+    ease: "linear",
+  }}
+  style={{ transformStyle: "preserve-3d" } as React.CSSProperties}
+  className="relative w-32 h-32 mb-6"
+>
         <Image
           src={image}
-          alt="Abogados en Acción"
+          alt="Cargando"
           fill
+          priority
           className="object-contain"
         />
       </motion.div>
 
-      {message && (
-        <p className="text-gray-700 text-sm max-w-sm leading-relaxed">
-          {message}
-        </p>
-      )}
+      <p className="text-gray-700 text-sm max-w-sm leading-relaxed">
+        {message ?? "Cargando…"}
+      </p>
     </div>
   );
 }
+
+

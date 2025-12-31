@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useNavigate } from "@/components/useNavigate";
 
 function StarRating({ promedio = 0, cantidad = 0 }) {
   const filled = Math.round(Number(promedio) || 0);
@@ -10,7 +11,9 @@ function StarRating({ promedio = 0, cantidad = 0 }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
-          className={`text-yellow-400 text-lg ${n <= filled ? "" : "opacity-30"}`}
+          className={`text-yellow-400 text-lg ${
+            n <= filled ? "" : "opacity-30"
+          }`}
         >
           ★
         </span>
@@ -30,6 +33,8 @@ export default function DependenciasGrid({
   items: any[];
   titulo?: string;
 }) {
+  const navigate = useNavigate();
+
   if (!items || items.length === 0) return null;
 
   return (
@@ -38,15 +43,18 @@ export default function DependenciasGrid({
 
       <div className="grid gap-5 sm:grid-cols-2">
         {items.map((d: any, i: number) => (
-          <motion.a
+          <motion.button
             key={d.id}
-            href={`/dependencia/${d.id}`}
+            type="button"
+            onClick={() => navigate(`/dependencia/${d.id}`)}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: i * 0.05 }}
-            className="block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-            border border-gray-200 shadow-md hover:shadow-xl
-            hover:-translate-y-1 transition-all group"
+            className="
+              block text-left p-5 rounded-2xl bg-white/70 backdrop-blur-lg
+              border border-gray-200 shadow-md hover:shadow-xl
+              hover:-translate-y-1 transition-all group
+            "
           >
             <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
               {d.nombre}
@@ -68,7 +76,7 @@ export default function DependenciasGrid({
             <p className="mt-3 text-sm font-medium text-blue-600 group-hover:underline">
               Ver detalle →
             </p>
-          </motion.a>
+          </motion.button>
         ))}
       </div>
     </section>

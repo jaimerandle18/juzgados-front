@@ -1,3 +1,5 @@
+import AnchorWithLoader from "@/components/AnchorsWithLoaders";
+
 export default async function Page({ params }: { params: Promise<{ fueroId: string }> }) {
   const { fueroId } = await params;
 
@@ -52,7 +54,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
         <div className="grid gap-6">
           {/* A) Cámara Nacional de Casación */}
           {datos.camara_casacion && (
-            <a
+            <AnchorWithLoader
               href={`/dependencia/${datos.camara_casacion.id}`}
               className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
             >
@@ -65,12 +67,12 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
               <p className="mt-4 text-sm font-medium text-blue-600 underline">
                 Ver detalle →
               </p>
-            </a>
+            </AnchorWithLoader>
           )}
 
           {/* B) Cámara Nacional de Apelaciones */}
           {datos.camara_apelaciones && (
-            <a
+            <AnchorWithLoader
               href={`/dependencia/${datos.camara_apelaciones.id}`}
               className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
             >
@@ -83,11 +85,11 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
               <p className="mt-4 text-sm font-medium text-blue-600 underline">
                 Ver detalle →
               </p>
-            </a>
+            </AnchorWithLoader>
           )}
 
           {/* C) Tribunales Orales de Menores */}
-          <a
+          <AnchorWithLoader
             href={`/fueros/${fueroId}/tribunales-menores`}
             className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
           >
@@ -100,10 +102,10 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
             <p className="mt-4 text-sm font-medium text-blue-600 underline">
               Ver listado →
             </p>
-          </a>
+          </AnchorWithLoader>
 
           {/* D) Tribunales Orales en lo Criminal y Correccional */}
-          <a
+          <AnchorWithLoader
             href={`/fueros/${fueroId}/tribunales-criminal`}
             className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
           >
@@ -116,9 +118,9 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
             <p className="mt-4 text-sm font-medium text-blue-600 underline">
               Ver listado →
             </p>
-          </a>
+          </AnchorWithLoader>
           {/* E) Juzgados Nacionales de Ejecución Penal */}
-<a
+<AnchorWithLoader
   href={`/dependencia/2224`}
   className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
 >
@@ -133,7 +135,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   <p className="mt-4 text-sm font-medium text-blue-600 underline">
     Ver juzgados →
   </p>
-</a>
+</AnchorWithLoader>
 
         </div>
       </main>
@@ -169,7 +171,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
       <div className="grid gap-6">
         {/* CARD CÁMARA */}
         {camara && (
-          <a
+          <AnchorWithLoader
             href={`/dependencia/${camara.id}`}
             className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
           >
@@ -182,11 +184,11 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
             <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
               Ver más →
             </p>
-          </a>
+          </AnchorWithLoader>
         )}
 
         {/* CARD JUZGADOS */}
-        <a
+        <AnchorWithLoader
           href={`/fueros/${fueroId}/juzgados`}
           className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
         >
@@ -201,7 +203,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
             Ver listado →
           </p>
-        </a>
+        </AnchorWithLoader>
       </div>
     </main>
   );

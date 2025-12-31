@@ -1,5 +1,6 @@
 "use client";
 
+import AnchorWithLoader from "@/components/AnchorsWithLoaders";
 import { motion } from "framer-motion";
 
 // ======================
@@ -250,21 +251,21 @@ if (esCamaraApelacionesCriminal) {
       {/* BOTONES SOLO SI NO TIENE HIJOS */}
       {!tieneHijos && (
         <div className="mb-12 flex flex-col md:flex-row gap-6 justify-center">
-          <a
+          <AnchorWithLoader
             href={`/votar/${dep.id}`}
             className="px-8 py-4 rounded-2xl bg-gradient-to-r 
             from-blue-500 to-blue-600 text-white font-semibold shadow-lg"
           >
             Evaluar →
-          </a>
+          </AnchorWithLoader>
 
-          <a
+          <AnchorWithLoader
             href={`/dependencia/${dep.id}/evaluaciones`}
             className="px-8 py-4 rounded-2xl bg-gradient-to-r 
             from-green-500 to-blue-600 text-white font-semibold shadow-lg"
           >
             Ver evaluaciones →
-          </a>
+          </AnchorWithLoader>
         </div>
       )}
 

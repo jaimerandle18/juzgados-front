@@ -6,6 +6,7 @@ import AuthGuard from "./utils/AuthGuard";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
+import { LoadingProvider } from "./components/LoadingContext";
 
 export const metadata = {
   title: "Data Jury",
@@ -31,11 +32,13 @@ if (Capacitor.isNativePlatform()) {
   return (
     <html lang="es">
       <body className="bg-gray-100 min-h-screen">
+        <LoadingProvider>
         <ClientLayout>
         <AuthGuard>
           {children}
           </AuthGuard>
         </ClientLayout>
+        </LoadingProvider>
       </body>
     </html>
   );

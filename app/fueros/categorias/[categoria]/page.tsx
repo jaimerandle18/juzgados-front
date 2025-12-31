@@ -1,3 +1,5 @@
+import AnchorWithLoader from "@/components/AnchorsWithLoaders";
+
 interface PageProps {
   params: Promise<{ categoria: string }>;
 }
@@ -36,7 +38,7 @@ export default async function Page({ params }: PageProps) {
       <div className="grid sm:grid-cols-2 gap-6">
         
         {fueros.map((f: any) => (
-          <a
+          <AnchorWithLoader
             key={f.id}
             href={`/fueros/${f.id}`}
             className="
@@ -58,7 +60,7 @@ export default async function Page({ params }: PageProps) {
             <div className="mt-2 w-12 h-[3px] bg-blue-400 rounded-full group-hover:w-20 transition-all" />
 
      
-          </a>
+          </AnchorWithLoader>
         ))}
 
       </div>

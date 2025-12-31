@@ -6,19 +6,20 @@ import Image from "next/image";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import logo from "../../public/dataJury1.png";
+import { useNavigate } from "@/components/useNavigate";
 
 export default function VerifyTokenPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
   const [error, setError] = useState("");
   const [loading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate()
 
   useEffect(() => {
     const saved = localStorage.getItem("email_verificacion");
-    if (!saved) router.push("/register");
+    if (!saved) navigate("/register");
     else setEmail(saved);
-  }, [router]);
+  }, [navigate]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +31,7 @@ export default function VerifyTokenPage() {
 
       alert("Cuenta verificada ✅");
       localStorage.removeItem("email_verificacion");
-      router.push("/");
+      navigate("/");
     } catch {
       setError("Código inválido o expirado");
     } finally {

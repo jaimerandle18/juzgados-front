@@ -5,9 +5,10 @@ import VotarForm from "./VotarForm";
 import { api } from "src/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigate } from "@/components/useNavigate";
 
 export default function VotarWrapper({ id, miVoto, dependenciaNombre }: any) {
-  const router = useRouter();
+  const navigate = useNavigate()
 
   // Estado para el modal
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function VotarWrapper({ id, miVoto, dependenciaNombre }: any) {
     try {
       await api.delete(`/votos/${id}`);
       setDeleteTarget(null);
-      router.push("/mis-evaluaciones");
+      navigate("/mis-evaluaciones");
     } catch (err) {
       console.error("Error borrando evaluación", err);
     }

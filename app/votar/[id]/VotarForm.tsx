@@ -5,6 +5,7 @@ import { api } from "../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import { useNavigate } from "@/components/useNavigate";
 
 export default function VotarForm({
   id,
@@ -17,7 +18,7 @@ export default function VotarForm({
   const [form, setForm] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
 
-  const router = useRouter();
+  const navigate = useNavigate()
 
   const preguntas = [
     {
@@ -88,7 +89,7 @@ export default function VotarForm({
 
     // Mostrar toast y redirigir después de 2s
     setTimeout(() => {
-      router.push("/mis-evaluaciones");
+      navigate("/mis-evaluaciones");
     }, 2000);
   };
 
