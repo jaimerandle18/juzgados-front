@@ -26,14 +26,20 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
           src={image}
           alt="Abogados en Acción"
           fill
+          priority
           className="object-contain"
         />
       </motion.div>
 
-      {message && (
+      {message  && (
         <p className="text-gray-700 text-sm max-w-sm leading-relaxed">
           {message}
         </p>
+      )}
+      {!message && (
+           <p className="text-gray-700 text-sm max-w-sm leading-relaxed">
+           Cargando...
+         </p>
       )}
     </div>
   );
