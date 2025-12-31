@@ -49,7 +49,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex flex-col items-center pt-14 px-4">
-      {loading && <LoadingScreen />}
 
       {/* TÍTULO */}
       <div className="text-center mb-12">
