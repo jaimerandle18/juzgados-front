@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import EditarForm from "./EditarForm";
+import AnchorWithLoader from "@/components/AnchorWithLoader";
 
 export default async function Page({ params }: any) {
   const { id } = await params;
