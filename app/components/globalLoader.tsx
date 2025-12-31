@@ -2,7 +2,7 @@ let showLoaderFn: ((message?: string) => void) | null = null;
 let hideLoaderFn: (() => void) | null = null;
 
 let showTime = 0;
-const MIN_DURATION = 500; // 👈 1.5 segundos
+const MIN_DURATION = 1500; // 👈 1.5 segundos
 
 export function registerLoader(
   show: (message?: string) => void,
