@@ -40,7 +40,10 @@ export default function LoginPage() {
       console.error(err);
       setError("Credenciales incorrectas");
     } finally {
-      setIsLoading(false);
+      navigateWithLoader(
+        router,
+        "/"
+       )
     }
   };
 
