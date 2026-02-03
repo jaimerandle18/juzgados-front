@@ -7,10 +7,14 @@ import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
 
-export const metadata = {
-  title: "Data Jury",
-  description: "Sistema de valoración de juzgados",
+export const metadata = { title: "Data Jury", description: "Sistema de valoración de juzgados" };
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
+
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   if (Capacitor.isNativePlatform()) {
@@ -30,13 +34,15 @@ if (Capacitor.isNativePlatform()) {
 }
   return (
     <html lang="es">
-      <body className="bg-gray-100 min-h-screen">
-        <ClientLayout>
-        <AuthGuard>
-          {children}
-          </AuthGuard>
-        </ClientLayout>
-      </body>
+   <body className="min-h-screen">
+  <div className="dj-bg" aria-hidden />
+  <ClientLayout>
+    <AuthGuard>{children}</AuthGuard>
+  </ClientLayout>
+</body>
+
+
     </html>
   );
+  
 }

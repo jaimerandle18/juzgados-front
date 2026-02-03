@@ -45,7 +45,7 @@ export default function EditarForm({ id, miVoto }: any) {
         <h1 className="text-4xl font-extrabold tracking-tight">
           Editar evaluación
         </h1>
-        <div className="mx-auto mt-3 h-[3px] w-28 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
       {/* Estrellas */}

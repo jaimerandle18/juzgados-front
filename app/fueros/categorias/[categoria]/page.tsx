@@ -31,7 +31,7 @@ export default async function Page({ params }: PageProps) {
         </h2>
 
         {/* Subrayado animado */}
-        <div className="mx-auto mt-3 h-[3px] w-20 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
       {/* GRID */}

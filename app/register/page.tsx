@@ -64,7 +64,7 @@ const [folio, setFolio] = useState("");
       {/* TÍTULO */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight">Crear cuenta</h1>
-        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
       <div className="mb-6 w-full max-w-sm rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
   <strong>Importante:</strong>  

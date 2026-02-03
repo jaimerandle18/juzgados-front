@@ -22,7 +22,7 @@ export default async function Page() {
       {/* TÍTULO */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight">Mi Perfil</h1>
-        <div className="mx-auto mt-3 h-[3px] w-36 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
       {/* CARD DEL PERFIL */}

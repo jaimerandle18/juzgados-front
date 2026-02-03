@@ -46,7 +46,7 @@ export default function VerifyTokenPage() {
       {/* TÍTULO */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight">Verificá tu cuenta</h1>
-        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
       <form onSubmit={handleVerify} className="w-full max-w-sm flex flex-col gap-5">

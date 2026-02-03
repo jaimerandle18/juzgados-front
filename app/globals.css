@@ -1,53 +1,194 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --color-fondo: white;
-  --color-fondo-2: #151515;
-  --color-card: #1c1c1c;
-  --color-rojo: #1f5691;
-  --color-texto: black;
-  --color-muted: #b0b0b0;
+:root{
+  --color-texto:#111827;
+  --safe-top: env(safe-area-inset-top, 0px);
+  
 }
 
-@layer base {
-  html,
-  body {
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #1f1f1f 0%, #0f0f0f 40%, #0b0b0b 100%);
-    color: var(--color-texto);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+@layer base{
+  html,body{
+    min-height:100vh;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-text-size-adjust:100%;
+    color:var(--color-texto);
+  }
+  body{
+    position:relative;
+    overflow-x:hidden;
+    padding-top:var(--safe-top);
+    background:#f3f4f6;
   }
 }
-/* Para permitir efecto 3D sin romper TypeScript */
-/* Permite rotación 3D */
-.preserve-3d {
-  transform-style: preserve-3d;
-}
 
-/* Brillo metálico con ángulo */
-.mix-overlay {
-  mix-blend-mode: overlay;
-  transform: rotate(15deg);
-}
-
-body {
-  background: url("../public/just.jpg") no-repeat center center fixed;
-  background-size: cover;
-  position: relative;
-}
-
-/* Capa de blur global */
-body::before {
-  content: "";
+/* ✅ Fondo global real (no pseudo-elementos) */
+.dj-bg{
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(25px) brightness(0.6);
-  -webkit-backdrop-filter: blur(25px) brightness(0.6);
+  inset: 0;
   z-index: -1;
+  pointer-events: none;
+
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+
+  /* ORDEN CORRECTO:
+     1) velo (arriba)
+     2) highlight (arriba)
+     3) imagen (arriba de la base)
+     4) base clara (abajo del todo)
+  */
+  background-image:
+    /* 1) Velo blanco: tapa casi todo, pero en bottom-right es transparente */
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,255,255,0.10) 18%,
+      rgba(255,255,255,0.55) 42%,
+      rgba(255,255,255,0.88) 72%,
+      rgba(255,255,255,0.98) 100%
+    ),
+
+    /* 2) Celeste suave (para el “fondo blanco medio celeste”) */
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(0,140,255,0.18) 0%,
+      transparent 60%
+    ),
+
+    /* 3) Imagen (tiene que estar ANTES de la base) */
+    url("/just.jpg"),
+
+    /* 4) Base clara (abajo) */
+    linear-gradient(to bottom right, #e5e7eb, #ffffff, #dbeafe);
+
+  /* No uses filter acá si querés que la imagen se vea nítida */
+  transform: translate3d(0,0,0);
+  will-change: transform;
 }
-:root {
-  --safe-top: env(safe-area-inset-top);
+
+
+
+/* ✅ Safari mode: desactivar blur que dispara el bug */
+.is-safari .backdrop-blur-xl{
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+
+/* (opcional) en Safari, subir opacidad del header para que quede igual sin blur */
+.is-safari header > div{
+  background-color: rgba(255,255,255,0.96) !important;
+}
+/* ===== Glass card cross-browser (Safari + Android) ===== */
+.dj-card {
+  background: rgba(255, 255, 255, 0.72); /* fallback SIEMPRE visible */
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  border-radius: 1rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Si el navegador soporta blur real, lo usamos y bajamos opacidad */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .dj-card {
+    background: rgba(255, 255, 255, 0.32);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+}
+
+/* Bloque del icono celeste (consistente) */
+.dj-card-icon {
+  background: rgba(0, 140, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0.9rem;
+}
+
+/* blur suave del icono si se puede */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .dj-card-icon {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
+/* =========================
+   BOTONES SAFARI SAFE
+   ========================= */
+
+   .dj-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 1rem 2rem;
+    border-radius: 1.25rem;
+  
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    white-space: nowrap;
+  
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+  
+    /* 🔑 evita bugs de Safari */
+    isolation: isolate;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Contenido arriba del gradiente */
+  .dj-btn-content {
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Gradiente real (Safari NO lo rompe acá) */
+  .dj-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  
+    border-radius: inherit;
+    transition: filter 0.2s ease;
+  }
+  
+  /* Azul */
+  .dj-btn-blue::before {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+  }
+  
+  /* Verde → azul */
+  .dj-btn-green::before {
+    background: linear-gradient(90deg, #22c55e, #2563eb);
+  }
+  
+  /* Hover / active */
+  .dj-btn:hover::before {
+    filter: brightness(1.05);
+  }
+  
+  .dj-btn:active {
+    transform: scale(0.97);
+  }
+  /* ===== Gradiente Safari-safe para líneas finitas ===== */
+.dj-grad-line{
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.dj-grad-line::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  /* mismo gradiente que Tailwind from-blue-400 to-blue-600 */
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
 }

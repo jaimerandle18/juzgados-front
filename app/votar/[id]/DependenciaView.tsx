@@ -80,7 +80,8 @@ function Header({ dep }: { dep: any }) {
   return (
     <div className="text-center mb-10">
       <h1 className="text-4xl font-extrabold tracking-tight">{dep.nombre}</h1>
-      <div className="mx-auto mt-3 h-[3px] w-32 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+      <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
+
     </div>
   );
 }
@@ -251,23 +252,22 @@ if (esCamaraApelacionesCriminal) {
 
       {/* BOTONES SOLO SI NO TIENE HIJOS */}
       {!tieneHijos && (
-        <div className="mb-12 flex flex-col md:flex-row gap-6 justify-center">
-          <a
-            href={`/votar/${dep.id}`}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r 
-            from-blue-500 to-blue-600 text-white font-semibold shadow-lg"
-          >
-            Evaluar →
-          </a>
-
-          <a
-            href={`/dependencia/${dep.id}/evaluaciones`}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r 
-            from-green-500 to-blue-600 text-white font-semibold shadow-lg"
-          >
-            Ver evaluaciones →
-          </a>
-        </div>
+     <div className="mb-12 flex flex-col md:flex-row gap-6 justify-center">
+     <a
+       href={`/votar/${dep.id}`}
+       className="dj-btn dj-btn-blue"
+     >
+       <span className="dj-btn-content">Evaluar →</span>
+     </a>
+   
+     <a
+       href={`/dependencia/${dep.id}/evaluaciones`}
+       className="dj-btn dj-btn-green"
+     >
+       <span className="dj-btn-content">Ver evaluaciones →</span>
+     </a>
+   </div>
+   
       )}
 
       {/* 👥 INTEGRANTES (SIEMPRE IGUAL) */}

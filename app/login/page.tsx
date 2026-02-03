@@ -17,35 +17,62 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
+  
     if (!email || !password) {
       setError("Ingresá tus credenciales");
       return;
     }
-
+  
     try {
+      console.log("submit start");
+  
       const res = await api.post("/auth/login", { email, contrasenia: password });
-      setCookie("auth_token", res.data.token, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,   // 7 días
-        sameSite: "lax",
-        secure: true,
-      });
-      
-     navigateWithLoader(
-      router,
-      "/"
-     )
+      const token = res?.data?.token;
+  
+      console.log("login response token:", token);
+  
+      if (!token || typeof token !== "string") {
+        setError("No llegó token del backend");
+        return;
+      }
+  
+      const isHttps = window.location.protocol === "https:";
+      const maxAge = 60 * 60 * 24 * 7;
+  
+      // 1) Cookie nativa (lo más compatible)
+      // Nota: Secure SOLO si estás en https
+      document.cookie =
+        `auth_token=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax` +
+        (isHttps ? "; Secure" : "");
+  
+      // 2) localStorage
+      try {
+        localStorage.setItem("auth_token", token);
+      } catch (e) {
+        console.error("localStorage error:", e);
+      }
+  
+      // 3) sessionStorage
+      try {
+        sessionStorage.setItem("auth_token", token);
+      } catch (e) {
+        console.error("sessionStorage error:", e);
+      }
+  
+      // Verificación inmediata
+      console.log("document.cookie now:", document.cookie);
+      console.log("localStorage now:", localStorage.getItem("auth_token"));
+      console.log("sessionStorage now:", sessionStorage.getItem("auth_token"));
+  
+      // navegación
+      router.push("/");
+      router.refresh();
     } catch (err) {
-      console.error(err);
+      console.error("login error:", err);
       setError("Credenciales incorrectas");
-    } finally {
-      navigateWithLoader(
-        router,
-        "/"
-       )
     }
   };
+  
 
   return (
     <main className="min-h-screen flex flex-col items-center pt-14 px-4">
@@ -53,7 +80,7 @@ export default function LoginPage() {
       {/* TÍTULO */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
-        <div className="mx-auto mt-3 h-[3px] w-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+        <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
       {/* FORM CON CARD */}
