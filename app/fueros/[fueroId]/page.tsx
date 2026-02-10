@@ -13,8 +13,10 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   const nombreFuero = fuero?.nombre ?? "";
 
   const esJNCC =
-    nombreFuero.toLowerCase().includes("criminal") &&
-    nombreFuero.toLowerCase().includes("correccional");
+  fuero?.tipo === "nacional" &&
+  nombreFuero.toLowerCase().includes("criminal") &&
+  nombreFuero.toLowerCase().includes("correccional");
+
 
   // ==========================
   // CASO ESPECIAL JNCC
@@ -156,6 +158,23 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
     { cache: "no-store" }
   );
   const juzgados = await juzgadosRes.json();
+  console.log(juzgados,"juzgados")
+
+  const list = Array.isArray(juzgados) ? juzgados : [];
+
+const tribunalesOrales = list.filter((d) =>
+  /^tribunal\b/i.test(d.nombre ?? "")
+);
+
+const juzgadosSolo = list.filter((d) =>
+  /^juzgado\b/i.test(d.nombre ?? "")
+);
+
+const otros = list.filter((d) => {
+  const n = (d.nombre ?? "").toLowerCase();
+  return !n.startsWith("juzgado") && !n.startsWith("tribunal oral");
+});
+
 
   return (
     <main className="pt-10 pb-20 px-6 text-gray-900 max-w-3xl mx-auto">
@@ -188,22 +207,47 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
         )}
 
         {/* CARD JUZGADOS */}
-        <AnchorWithLoader
-          href={`/fueros/${fueroId}/juzgados`}
-          className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
-        >
-          <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-            Juzgados
-          </h2>
+       {/* CARD JUZGADOS */}
+       {juzgadosSolo.length>0 && (
+<AnchorWithLoader
+  href={`/fueros/${fueroId}/juzgados?tipo=juzgado`}
+  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
+>
+  <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+    Juzgados
+  </h2>
+  <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">
+    {juzgadosSolo.length} juzgados encontrados
+  </p>
+  <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
+    Ver listado →
+  </p>
+</AnchorWithLoader>
+       )}
 
-          <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">
-            {Array.isArray(juzgados) ? juzgados.length : 0} juzgados encontrados
-          </p>
+{/* CARD TRIBUNALES ORALES */}
+{tribunalesOrales.length>0 && (
+<AnchorWithLoader
+  href={`/fueros/${fueroId}/tribunales-orales`}
+  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
+>
+  <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+    Tribunales Orales
+  </h2>
+  <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">
+    {tribunalesOrales.length} tribunales encontrados
+  </p>
+  <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
+    Ver listado →
+  </p>
+</AnchorWithLoader>)}
 
-          <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
-            Ver listado →
-          </p>
-        </AnchorWithLoader>
+{otros.length > 0 && (
+  <div className="text-xs text-gray-500">
+    Nota: {otros.length} dependencias no clasificadas.
+  </div>
+)}
+
       </div>
     </main>
   );

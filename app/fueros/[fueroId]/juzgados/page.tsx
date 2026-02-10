@@ -7,6 +7,9 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   
     const juzgados = await res.json();
   
+    const juzgadosOnly = juzgados.filter((t: any) =>
+      t.nombre.toLowerCase().includes("juzgado")
+    );
     return (
       <main className="pt-10 pb-20 px-6 max-w-4xl mx-auto text-gray-900">
   
@@ -19,7 +22,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   
         {/* GRID */}
         <div className="grid gap-6 sm:grid-cols-2">
-          {juzgados.map((j: any) => (
+          {juzgadosOnly.map((j: any) => (
             <a
               key={j.id}
               href={`/dependencia/${j.id}`}

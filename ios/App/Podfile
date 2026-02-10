@@ -22,5 +22,20 @@ target 'App' do
 end
 
 post_install do |installer|
+  # Mantener lo que ya tenías de Capacitor
   assertDeploymentTarget(installer)
+
+  # --- Patch macOS: reemplazar readlink -f por greadlink -f (coreutils) ---
+  installer.pods_project.targets.each do |t|
+    t.shell_script_build_phases.each do |phase|
+      next unless phase.shell_script
+      phase.shell_script = phase.shell_script.gsub("readlink -f", "greadlink -f")
+    end
+  end
+
+  Dir.glob("Pods/Target Support Files/**/**-frameworks.sh").each do |path|
+    text = File.read(path)
+    next unless text.include?("readlink -f")
+    File.write(path, text.gsub("readlink -f", "greadlink -f"))
+  end
 end
