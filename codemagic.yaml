@@ -37,7 +37,6 @@ workflows:
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      # ⚠️ IMPORTANT: use COPY (no pod install) instead of SYNC
       - name: Capacitor copy iOS (no pods)
         script: |
           set -euo pipefail
@@ -60,53 +59,19 @@ workflows:
           POD_BIN="$(gem env gemdir)/bin/pod"
           test -x "$POD_BIN"
 
-          # ✅ Patch Podfile BEFORE pod install (this is what fixes "higher minimum deployment target")
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
           echo "Podfile platform now:"
           grep -n "platform :ios" "$PODFILE" || true
 
-          # Install pods
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
-          # Fix rsync symlink issue in CocoaPods frameworks script
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
-
-      - name: Inject PrivacyInfo.xcprivacy into Capacitor/Cordova frameworks (pre-archive)
-        script: |
-          set -euo pipefail
-          : "${BUILD_NUM:?BUILD_NUM not set}"
-
-          SRC="ios/privacy/PrivacyInfo.xcprivacy"
-          test -f "$SRC"
-
-          echo "Searching frameworks in node_modules..."
-          CAP_DIR="$(find node_modules -type d -name "Capacitor.framework" | head -n 1)"
-          COR_DIR="$(find node_modules -type d -name "Cordova.framework" | head -n 1)"
-
-          echo "CAP_DIR=$CAP_DIR"
-          echo "COR_DIR=$COR_DIR"
-
-          if [ -z "$CAP_DIR" ]; then
-            echo "❌ Capacitor.framework not found in node_modules"
-            exit 1
-          fi
-          if [ -z "$COR_DIR" ]; then
-            echo "❌ Cordova.framework not found in node_modules"
-            exit 1
-          fi
-
-          cp -f "$SRC" "$CAP_DIR/PrivacyInfo.xcprivacy"
-          cp -f "$SRC" "$COR_DIR/PrivacyInfo.xcprivacy"
-
-          echo "✅ Injected manifests:"
-          ls -la "$CAP_DIR/PrivacyInfo.xcprivacy"
-          ls -la "$COR_DIR/PrivacyInfo.xcprivacy"
 
       - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
@@ -114,27 +79,24 @@ workflows:
           : "${BUILD_NUM:?BUILD_NUM not set}"
           echo "Using BUILD_NUM=$BUILD_NUM"
 
-          echo "Info.plist files:"
           find ios -name "Info.plist" -print
 
           while IFS= read -r PLIST; do
-            echo "-> Setting CFBundleVersion in $PLIST"
             /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
               || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
             /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
-      - name: Archive + Export IPA (manual signing)
+      - name: Archive (manual signing)
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
 
           rm -rf build
-          mkdir -p build/ipa
+          mkdir -p build
 
           echo "Archiving with BUILD_NUM=$BUILD_NUM"
 
-          # 1) Archive (force numeric build number at build-settings level too)
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
@@ -146,7 +108,58 @@ workflows:
             CURRENT_PROJECT_VERSION="$BUILD_NUM" \
             archive | tee build/xcodebuild_archive.log
 
-          # 2) Create exportOptions.plist via plutil
+      - name: Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign
+        script: |
+          set -euo pipefail
+
+          SRC="ios/privacy/PrivacyInfo.xcprivacy"
+          test -f "$SRC"
+
+          APP_DIR="build/App.xcarchive/Products/Applications/App.app"
+          test -d "$APP_DIR"
+
+          FW_DIR="$APP_DIR/Frameworks"
+          test -d "$FW_DIR"
+
+          echo "Frameworks in archive:"
+          ls -la "$FW_DIR" || true
+
+          # Targets Apple complains about:
+          CAP_FW="$FW_DIR/Capacitor.framework"
+          COR_FW="$FW_DIR/Cordova.framework"
+
+          if [ ! -d "$CAP_FW" ]; then
+            echo "❌ Capacitor.framework not found in archive Frameworks"
+            exit 1
+          fi
+          if [ ! -d "$COR_FW" ]; then
+            echo "❌ Cordova.framework not found in archive Frameworks"
+            exit 1
+          fi
+
+          cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
+          cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
+
+          echo "✅ Injected privacy manifests into archive:"
+          ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
+          ls -la "$COR_FW/PrivacyInfo.xcprivacy"
+
+          # Re-sign modified frameworks using the same identity available in keychain
+          SIGN_ID="Apple Distribution: Jaime Randle (R8W6XUCMDD)"
+          echo "Re-signing frameworks with: $SIGN_ID"
+          /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$CAP_FW"
+          /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$COR_FW"
+
+          echo "Verifying codesign..."
+          /usr/bin/codesign -vv "$CAP_FW"
+          /usr/bin/codesign -vv "$COR_FW"
+
+      - name: Export IPA
+        script: |
+          set -euo pipefail
+
+          mkdir -p build/ipa
+
           cat > build/export_options.json <<'EOF'
           {
             "method": "app-store-connect",
@@ -164,7 +177,6 @@ workflows:
           plutil -convert xml1 build/export_options.json -o build/export_options.plist
           plutil -lint build/export_options.plist
 
-          # 3) Export IPA
           xcodebuild \
             -exportArchive \
             -archivePath build/App.xcarchive \
@@ -174,17 +186,16 @@ workflows:
           echo "IPAs found:"
           find build -name "*.ipa" -print || true
 
-          # 4) Verify inside IPA (Info.plist + privacy manifests)
+      - name: Verify IPA (Info.plist + privacy manifests)
+        script: |
+          set -euo pipefail
+
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
           echo "IPA: $IPA_PATH"
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
 
           APP_PLIST="$TMPDIR/Payload/App.app/Info.plist"
-          echo "App plist in IPA: $APP_PLIST"
-
-          echo "CFBundleShortVersionString:"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PLIST"
           echo "CFBundleVersion:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
 
@@ -192,7 +203,7 @@ workflows:
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
 
-          echo "✅ OK: IPA contains privacy manifests + numeric build version."
+          echo "✅ OK"
 
     artifacts:
       - build/ipa/*.ipa
