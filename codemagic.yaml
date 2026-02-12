@@ -5,6 +5,9 @@ workflows:
 
     environment:
       node: 20
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.datajury.app
 
     integrations:
       app_store_connect: codemagic
@@ -24,15 +27,35 @@ workflows:
 
       - name: Build IPA
         script: |
+          # Crear exportOptions.plist dinámico
+          cat > export_options.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>compileBitcode</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+
+          # Archive
           xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
             -archivePath build/App.xcarchive archive
 
+          # Export IPA
           xcodebuild -exportArchive \
             -archivePath build/App.xcarchive \
-            -exportOptionsPlist /Users/builder/export_options.plist \
+            -exportOptionsPlist export_options.plist \
             -exportPath build/ipa
 
     artifacts:
