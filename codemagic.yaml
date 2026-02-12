@@ -5,6 +5,12 @@ workflows:
 
     environment:
       node: 22
+      vars:
+        BUNDLE_ID: "com.datajury.app"
+        TEAM_ID: "R8W6XUCMDD"
+        SIGN_CERT: "Apple Distribution"
+        # Si tu profile en Apple se llama distinto, poné el nombre exacto acá
+        PROFILE_NAME: "com.datajury.app"
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.datajury.app
@@ -41,11 +47,46 @@ workflows:
         script: |
           set -euo pipefail
           set -x
-          ls -la ios || true
-          ls -la ios/App || true
           npx cap sync ios
           ls -la ios || true
           ls -la ios/App || true
+
+      - name: "Install Codemagic CLI tools"
+        script: |
+          set -euo pipefail
+          python3 -m pip install --user codemagic-cli-tools
+          echo 'export PATH="$HOME/Library/Python/3.*/bin:$PATH"' >> "$CM_ENV" || true
+          # Set PATH for current shell too
+          export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
+          which codemagic || true
+          codemagic --version || true
+
+      - name: "Fetch signing files + apply provisioning profiles"
+        script: |
+          set -euo pipefail
+          set -x
+
+          # Ensure codemagic cli is in PATH (covers different python minor versions)
+          export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
+
+          # Init keychain
+          keychain initialize
+
+          # Fetch certs/profiles from App Store Connect integration
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+          # Install certificates in keychain
+          keychain add-certificates
+
+          # Apply profiles to Xcode project (this is what you're missing)
+          xcode-project use-profiles \
+            --project ios/App/App.xcodeproj
+
+          # Debug: show what profiles got installed
+          security find-identity -v -p codesigning || true
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
       - name: "Force numeric CFBundleVersion (all Info.plist)"
         script: |
@@ -59,7 +100,7 @@ workflows:
             /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
-      - name: "Archive (SPM: project) + TeamID"
+      - name: "Archive (SPM: project) signed"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
@@ -67,8 +108,7 @@ workflows:
           rm -rf build
           mkdir -p build
 
-          TEAM_ID="R8W6XUCMDD"
-          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID"
+          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID BUNDLE_ID=$BUNDLE_ID"
 
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -80,7 +120,6 @@ workflows:
             COMPILER_INDEX_STORE_ENABLE=NO \
             CURRENT_PROJECT_VERSION="$BUILD_NUM" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_STYLE=Manual \
             archive | tee build/xcodebuild_archive.log
 
       - name: "Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign"
