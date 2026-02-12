@@ -49,15 +49,48 @@ workflows:
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
+      - name: Create export options plist
+        script: |
+          cat > export_options.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>R8W6XUCMDD</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.datajury.app</key>
+              <string>com.datajury.app</string>
+            </dict>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>compileBitcode</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+
+          ls -la export_options.plist
+
       - name: Build IPA (Codemagic)
         script: |
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
-            --scheme "App"
+            --scheme "App" \
+            --export-options-plist "export_options.plist"
+
+          echo "Searching IPAs..."
+          find . -maxdepth 6 -name "*.ipa" -print || true
 
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/logs/*.log
+      - "**/*.ipa"
 
     publishing:
       app_store_connect:
