@@ -59,13 +59,16 @@ workflows:
             /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
-      - name: "Archive (SPM: project)"
+      - name: "Archive (SPM: project) + TeamID"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
 
           rm -rf build
           mkdir -p build
+
+          TEAM_ID="R8W6XUCMDD"
+          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID"
 
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -76,6 +79,8 @@ workflows:
             -archivePath build/App.xcarchive \
             COMPILER_INDEX_STORE_ENABLE=NO \
             CURRENT_PROJECT_VERSION="$BUILD_NUM" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
             archive | tee build/xcodebuild_archive.log
 
       - name: "Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign"
@@ -152,6 +157,7 @@ workflows:
 
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
+          echo "✅ OK"
 
     artifacts:
       - "build/ipa/*.ipa"
