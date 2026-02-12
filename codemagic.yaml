@@ -46,17 +46,14 @@ workflows:
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
-          # Fix rsync symlink issue
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
-
           cd ../..
 
       - name: Build IPA (Codemagic)
         script: |
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
-            --scheme "App" \
-            --configuration "Release"
+            --scheme "App"
 
     artifacts:
       - build/ios/ipa/*.ipa
