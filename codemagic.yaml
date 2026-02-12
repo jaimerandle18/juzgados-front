@@ -18,7 +18,7 @@ workflows:
           set -euo pipefail
           npm ci
 
-      - name: Debug Capacitor versions (must be consistent)
+      - name: Debug Capacitor versions
         script: |
           set -euo pipefail
           node -v
@@ -30,91 +30,26 @@ workflows:
           set -euo pipefail
           npm run build || echo "Next build skipped"
 
-      - name: Compute numeric build number (automatic)
+      - name: Compute numeric build number
         script: |
           set -euo pipefail
           BUILD_NUM_LOCAL="$(date +%s)"
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      - name: Capacitor ensure iOS + sync
+      - name: Capacitor sync iOS
         script: |
           set -euo pipefail
           set -x
 
-          echo "=== BEFORE ensure iOS ==="
-          ls -la || true
           ls -la ios || true
           ls -la ios/App || true
 
-          # If iOS project does not exist, create it
-          if [ ! -f "ios/App/Podfile" ]; then
-            echo "ios/App/Podfile not found → running npx cap add ios"
-            npx cap add ios
-          fi
-
-          # Sync native project
           npx cap sync ios
 
-          echo "=== AFTER sync ==="
+          echo "After sync:"
           ls -la ios || true
           ls -la ios/App || true
-          test -f ios/App/Podfile
-
-      - name: CocoaPods install (fix rbenv shim + logs)
-        script: |
-          set -euo pipefail
-          set -x
-
-          ruby -v || true
-          gem -v || true
-
-          # Install CocoaPods using current Ruby (rbenv in Codemagic)
-          gem install cocoapods -N --no-document
-          rbenv rehash || true
-
-          echo "PATH=$PATH"
-          which ruby || true
-          which gem || true
-          which pod || true
-
-          pod --version
-
-          echo "=== iOS tree before pod install ==="
-          ls -la ios || true
-          ls -la ios/App || true
-
-          PODFILE="ios/App/Podfile"
-          test -f "$PODFILE"
-
-          echo "=== Podfile BEFORE patch ==="
-          sed -n '1,220p' "$PODFILE"
-
-          # Force iOS deployment target
-          sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
-          echo "Podfile platform now:"
-          grep -n "platform :ios" "$PODFILE" || true
-
-          cd ios/App
-          rm -rf Pods Podfile.lock
-
-          mkdir -p ../../build
-
-          set +e
-          pod install --repo-update --verbose 2>&1 | tee ../../build/pod_install.log
-          POD_STATUS="${PIPESTATUS[0]}"
-          set -e
-
-          if [ "$POD_STATUS" -ne 0 ]; then
-            echo "❌ pod install failed with status $POD_STATUS"
-            echo "=== LAST 200 lines of pod_install.log ==="
-            tail -n 200 ../../build/pod_install.log || true
-            exit "$POD_STATUS"
-          fi
-
-          # Fix rsync symlink issue if exists
-          sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
-          cd ../..
 
       - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
@@ -122,15 +57,13 @@ workflows:
           : "${BUILD_NUM:?BUILD_NUM not set}"
           echo "Using BUILD_NUM=$BUILD_NUM"
 
-          find ios -name "Info.plist" -print
-
           while IFS= read -r PLIST; do
             /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
               || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
             /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
-      - name: Archive (manual signing)
+      - name: Archive (SPM: project)
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
@@ -141,7 +74,7 @@ workflows:
           echo "Archiving with BUILD_NUM=$BUILD_NUM"
 
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
@@ -187,11 +120,9 @@ workflows:
           ls -la "$COR_FW/PrivacyInfo.xcprivacy"
 
           SIGN_ID="Apple Distribution: Jaime Randle (R8W6XUCMDD)"
-          echo "Re-signing frameworks with: $SIGN_ID"
           /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$CAP_FW"
           /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$COR_FW"
 
-          echo "Verifying codesign..."
           /usr/bin/codesign -vv "$CAP_FW"
           /usr/bin/codesign -vv "$COR_FW"
 
@@ -224,7 +155,6 @@ workflows:
             -exportOptionsPlist build/export_options.plist \
             -exportPath build/ipa | tee build/xcodebuild_export.log
 
-          echo "IPAs found:"
           find build -name "*.ipa" -print || true
 
       - name: Verify IPA (Info.plist + privacy manifests)
@@ -237,19 +167,15 @@ workflows:
           unzip -q "$IPA_PATH" -d "$TMPDIR"
 
           APP_PLIST="$TMPDIR/Payload/App.app/Info.plist"
-          echo "CFBundleVersion:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
 
-          echo "Checking privacy manifests inside IPA frameworks..."
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
-
           echo "✅ OK"
 
     artifacts:
       - build/ipa/*.ipa
       - build/*.log
-      - build/pod_install.log
 
     publishing:
       app_store_connect:
