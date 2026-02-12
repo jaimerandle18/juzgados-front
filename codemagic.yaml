@@ -40,48 +40,58 @@ workflows:
       - name: Capacitor copy iOS (no pods)
         script: |
           set -euo pipefail
-          npx cap copy ios
+          npx cap sync ios
 
-      - name: Install Ruby 3 (brew) + CocoaPods + Patch Podfile + Pods install
+      - name: CocoaPods install (robusto + logs)
         script: |
           set -euo pipefail
           set -x
 
-          # Ensure greadlink exists (for your patches)
-          sudo mkdir -p /usr/local/bin
-          sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
+          # (Opcional) ver Ruby actual del runner
+          ruby -v || true
+          gem -v || true
 
-          # Install modern Ruby (no brew update)
-          brew install ruby
-
-          RUBY_PREFIX="$(brew --prefix ruby)"
-          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-
-          ruby -v
-          gem -v
-
-          # Install CocoaPods using this Ruby (no system Ruby 2.6)
-          gem install cocoapods -N
+          # Usar el Ruby del sistema/runner; evitar brew install ruby
+          # Instalar CocoaPods (pin opcional)
+          gem install cocoapods -N --no-document
 
           POD_BIN="$(gem env gemdir)/bin/pod"
           test -x "$POD_BIN"
           "$POD_BIN" --version
+          "$POD_BIN" env || true
 
-          # Patch Podfile BEFORE pod install (bala de plata)
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
+
+          echo "=== Podfile BEFORE patch ==="
+          sed -n '1,220p' "$PODFILE"
+
+          # Patch platform (seguro)
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
           echo "Podfile platform now:"
           grep -n "platform :ios" "$PODFILE" || true
 
-          # Install pods
           cd ios/App
           rm -rf Pods Podfile.lock
-          "$POD_BIN" repo update
-          "$POD_BIN" install --repo-update
 
-          # Fix rsync symlink issue in CocoaPods frameworks script
+          # IMPORTANTE: verbose + log
+          set +e
+          "$POD_BIN" install --repo-update --verbose 2>&1 | tee ../../build/pod_install.log
+          POD_STATUS="${PIPESTATUS[0]}"
+          set -e
+
+          if [ "$POD_STATUS" -ne 0 ]; then
+            echo "❌ pod install failed with status $POD_STATUS"
+            echo "=== Podfile AFTER patch ==="
+            sed -n '1,260p' Podfile || true
+            echo "=== LAST 200 lines of pod_install.log ==="
+            tail -n 200 ../../build/pod_install.log || true
+            exit "$POD_STATUS"
+          fi
+
+          # Fix rsync symlink issue (si existe el script)
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
+
           cd ../..
 
 
