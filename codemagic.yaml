@@ -53,13 +53,12 @@ workflows:
           # Fix rsync symlink issue in CocoaPods frameworks script
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
-      - name: Increment build number (automatic)
+      - name: Set iOS build number (automatic, numeric)
         script: |
           set -euo pipefail
-          cd ios/App
-          agvtool new-version -all "$CM_BUILD_ID"
-          cd ../..
-
+          BUILD_NUM="${CM_BUILD_NUMBER:-$CM_BUILD_ID}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ios/App/App/Info.plist
 
       - name: Archive + Export IPA (manual signing)
         script: |
