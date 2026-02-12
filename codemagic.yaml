@@ -42,27 +42,32 @@ workflows:
           set -euo pipefail
           npx cap copy ios
 
-      - name: CocoaPods install (bypass rbenv) + Patch Podfile platform
+      - name: Install Ruby 3 (brew) + CocoaPods + Patch Podfile + Pods install
         script: |
           set -euo pipefail
           set -x
 
-          # Use system ruby directly (avoid rbenv wrappers)
-          SYS_RUBY="/usr/bin/ruby"
-          SYS_GEM="/usr/bin/gem"
+          # Ensure greadlink exists (for your patches)
+          sudo mkdir -p /usr/local/bin
+          sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          "$SYS_RUBY" -v
-          "$SYS_GEM" -v
+          # Install modern Ruby (no brew update)
+          brew install ruby
 
-          # Install CocoaPods into system ruby (idempotent)
-          sudo "$SYS_GEM" install cocoapods -N
+          RUBY_PREFIX="$(brew --prefix ruby)"
+          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-          # Find pod binary installed by system gem
-          POD_BIN="$(sudo "$SYS_GEM" env gemdir)/bin/pod"
+          ruby -v
+          gem -v
+
+          # Install CocoaPods using this Ruby (no system Ruby 2.6)
+          gem install cocoapods -N
+
+          POD_BIN="$(gem env gemdir)/bin/pod"
           test -x "$POD_BIN"
           "$POD_BIN" --version
 
-          # Patch Podfile BEFORE pod install
+          # Patch Podfile BEFORE pod install (bala de plata)
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
