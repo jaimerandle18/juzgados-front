@@ -15,7 +15,6 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
 // 👉 NO BORRAR COOKIES ACÁ
 // El AuthGuard es el único responsable de redirigir.
 // Esto evita que Next borre cookies por preloads o SSR.
