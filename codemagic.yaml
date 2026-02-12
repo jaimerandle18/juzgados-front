@@ -28,7 +28,7 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: Install Ruby 3 + CocoaPods (modern setup)
+      - name: Install Ruby (brew) + CocoaPods (avoid rbenv pod) + Pods install
         script: |
           set -euo pipefail
 
@@ -36,26 +36,42 @@ workflows:
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          echo "Installing Ruby via Homebrew..."
+          # Install Ruby via Homebrew
           brew update
           brew install ruby
 
           RUBY_PREFIX="$(brew --prefix ruby)"
-          export PATH="$RUBY_PREFIX/bin:$PATH"
+          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
           echo "Ruby:"
-          ruby -v
+          "$RUBY_PREFIX/bin/ruby" -v
 
-          echo "Installing CocoaPods..."
-          gem install cocoapods -N
+          echo "Gem:"
+          "$RUBY_PREFIX/bin/gem" -v
 
-          echo "Pod:"
-          pod --version
+          echo "Install CocoaPods:"
+          "$RUBY_PREFIX/bin/gem" install cocoapods -N
+
+          # Use the pod that belongs to the brew ruby gem bin
+          POD_BIN="$RUBY_PREFIX/bin/pod"
+          if [ ! -x "$POD_BIN" ]; then
+            # fallback: sometimes gem bin goes here
+            POD_BIN="$(dirname "$($RUBY_PREFIX/bin/gem env gemdir)")/bin/pod"
+          fi
+
+          echo "Which pod:"
+          command -v pod || true
+          echo "Using pod at:"
+          echo "$POD_BIN"
+
+          "$POD_BIN" --version
 
           cd ios/App
           rm -rf Pods Podfile.lock
-          pod repo update
-          pod install --repo-update
+          "$POD_BIN" repo update
+          "$POD_BIN" install --repo-update
+
+          test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
           cd ../..
 
       - name: Build IPA
