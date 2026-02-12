@@ -62,14 +62,9 @@ workflows:
 
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
 
-          # Initialize Codemagic keychain
           keychain initialize
-
-          # This imports the certificates/profiles you already uploaded/managed in Codemagic
-          # and applies provisioning profiles to the project targets.
           xcode-project use-profiles --project ios/App/App.xcodeproj
 
-          # Debug
           security find-identity -v -p codesigning || true
           ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
@@ -107,9 +102,10 @@ workflows:
             DEVELOPMENT_TEAM="$TEAM_ID" \
             archive | tee build/xcodebuild_archive.log
 
-      - name: "Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign"
+      - name: "Inject PrivacyInfo.xcprivacy into embedded frameworks + re-sign (robust)"
         script: |
           set -euo pipefail
+          set -x
 
           SRC="ios/privacy/PrivacyInfo.xcprivacy"
           test -f "$SRC"
@@ -117,23 +113,40 @@ workflows:
           APP_DIR="build/App.xcarchive/Products/Applications/App.app"
           test -d "$APP_DIR"
 
-          FW_DIR="$APP_DIR/Frameworks"
-          test -d "$FW_DIR"
+          echo "=== Embedded frameworks found in App.app ==="
+          find "$APP_DIR" -maxdepth 3 -type d -name "*.framework" -print || true
 
-          CAP_FW="$FW_DIR/Capacitor.framework"
-          COR_FW="$FW_DIR/Cordova.framework"
+          # Find Capacitor.framework anywhere inside the app bundle
+          CAP_FW="$(find "$APP_DIR" -maxdepth 4 -type d -name "Capacitor.framework" | head -n 1 || true)"
+          if [ -z "$CAP_FW" ]; then
+            echo "❌ Capacitor.framework not found anywhere inside App.app (cannot inject privacy manifest)"
+            exit 1
+          fi
 
-          test -d "$CAP_FW"
-          test -d "$COR_FW"
+          # Find Cordova.framework (may or may not exist depending on build/SPM)
+          COR_FW="$(find "$APP_DIR" -maxdepth 4 -type d -name "Cordova.framework" | head -n 1 || true)"
+          if [ -z "$COR_FW" ]; then
+            echo "⚠️ Cordova.framework not found inside App.app (skipping Cordova injection)"
+          fi
 
+          echo "Capacitor.framework path: $CAP_FW"
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
-          cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
+          ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
 
+          if [ -n "$COR_FW" ]; then
+            echo "Cordova.framework path: $COR_FW"
+            cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
+            ls -la "$COR_FW/PrivacyInfo.xcprivacy"
+          fi
+
+          echo "Re-signing modified frameworks with: $SIGN_IDENTITY"
           /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$CAP_FW"
-          /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$COR_FW"
-
           /usr/bin/codesign -vv "$CAP_FW"
-          /usr/bin/codesign -vv "$COR_FW"
+
+          if [ -n "$COR_FW" ]; then
+            /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$COR_FW"
+            /usr/bin/codesign -vv "$COR_FW"
+          fi
 
       - name: "Export IPA"
         script: |
@@ -178,8 +191,9 @@ workflows:
           APP_PLIST="$TMPDIR/Payload/App.app/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
 
-          ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
-          ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
+          echo "Checking privacy manifests inside IPA..."
+          find "$TMPDIR/Payload/App.app" -maxdepth 4 -name "PrivacyInfo.xcprivacy" -print || true
+
           echo "✅ OK"
 
     artifacts:
