@@ -37,28 +37,31 @@ workflows:
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      - name: Capacitor copy iOS (no pods)
+      - name: Capacitor sync iOS
         script: |
           set -euo pipefail
           npx cap sync ios
 
-      - name: CocoaPods install (robusto + logs)
+      - name: CocoaPods install (fix rbenv shim + logs)
         script: |
           set -euo pipefail
           set -x
 
-          # (Opcional) ver Ruby actual del runner
           ruby -v || true
           gem -v || true
 
-          # Usar el Ruby del sistema/runner; evitar brew install ruby
-          # Instalar CocoaPods (pin opcional)
+          # Install CocoaPods for the current Ruby (Codemagic often uses rbenv)
           gem install cocoapods -N --no-document
 
-          POD_BIN="$(gem env gemdir)/bin/pod"
-          test -x "$POD_BIN"
-          "$POD_BIN" --version
-          "$POD_BIN" env || true
+          # If rbenv is present, refresh shims so `pod` becomes available on PATH
+          rbenv rehash || true
+
+          echo "PATH=$PATH"
+          which ruby || true
+          which gem || true
+          which pod || true
+
+          pod --version
 
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
@@ -66,7 +69,7 @@ workflows:
           echo "=== Podfile BEFORE patch ==="
           sed -n '1,220p' "$PODFILE"
 
-          # Patch platform (seguro)
+          # Force iOS deployment target (keep your original intent)
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
           echo "Podfile platform now:"
           grep -n "platform :ios" "$PODFILE" || true
@@ -74,9 +77,11 @@ workflows:
           cd ios/App
           rm -rf Pods Podfile.lock
 
-          # IMPORTANTE: verbose + log
+          # Run pod install with verbose logging and capture to artifact
+          mkdir -p ../../build
+
           set +e
-          "$POD_BIN" install --repo-update --verbose 2>&1 | tee ../../build/pod_install.log
+          pod install --repo-update --verbose 2>&1 | tee ../../build/pod_install.log
           POD_STATUS="${PIPESTATUS[0]}"
           set -e
 
@@ -89,11 +94,9 @@ workflows:
             exit "$POD_STATUS"
           fi
 
-          # Fix rsync symlink issue (si existe el script)
+          # Fix rsync symlink issue in CocoaPods frameworks script (if present)
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
-
           cd ../..
-
 
       - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
@@ -230,6 +233,7 @@ workflows:
     artifacts:
       - build/ipa/*.ipa
       - build/*.log
+      - build/pod_install.log
 
     publishing:
       app_store_connect:
