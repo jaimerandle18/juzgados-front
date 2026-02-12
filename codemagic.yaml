@@ -53,12 +53,22 @@ workflows:
           # Fix rsync symlink issue in CocoaPods frameworks script
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
-      - name: Set iOS build number (automatic, numeric)
+      - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
           set -euo pipefail
           BUILD_NUM="${CM_BUILD_NUMBER:-$CM_BUILD_ID}"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" ios/App/App/Info.plist
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ios/App/App/Info.plist
+          echo "Using BUILD_NUM=$BUILD_NUM"
+
+          echo "Info.plist files:"
+          find ios -name "Info.plist" -print
+
+          while IFS= read -r PLIST; do
+            echo "-> Setting in $PLIST"
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
+              || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
+            /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
+          done < <(find ios -name "Info.plist")
+
 
       - name: Archive + Export IPA (manual signing)
         script: |
@@ -105,6 +115,17 @@ workflows:
 
           echo "IPAs found:"
           find build -name "*.ipa" -print || true
+          # 4) Verify CFBundleVersion INSIDE the IPA
+          
+          IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
+          echo "IPA: $IPA_PATH"
+          TMPDIR="$(mktemp -d)"
+          unzip -q "$IPA_PATH" -d "$TMPDIR"
+          APP_PLIST="$(find "$TMPDIR/Payload" -name "Info.plist" | head -n 1)"
+          echo "App plist in IPA: $APP_PLIST"
+          echo "CFBundleVersion in IPA:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
+
 
     artifacts:
       - build/ipa/*.ipa
