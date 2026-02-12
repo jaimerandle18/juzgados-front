@@ -9,6 +9,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.datajury.app
       vars:
+        BUNDLE_ID: "com.datajury.app"
         TEAM_ID: "R8W6XUCMDD"
 
     integrations:
@@ -19,6 +20,13 @@ workflows:
         script: |
           set -euo pipefail
           npm ci
+
+      - name: "Debug Capacitor versions"
+        script: |
+          set -euo pipefail
+          node -v
+          npm -v
+          npm ls @capacitor/core @capacitor/ios @capacitor/cli || true
 
       - name: "Build Next.js (optional)"
         script: |
@@ -44,12 +52,28 @@ workflows:
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
           codemagic --version || true
 
-      - name: "Use Codemagic uploaded signing files"
+      - name: "Import signing certs + install profiles (required for export)"
         script: |
           set -euo pipefail
+          set -x
+
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
+
+          # 1) Create/unlock a dedicated keychain
           keychain initialize
+
+          # 2) ✅ IMPORTANT: import the certificates you have stored in Codemagic
+          # Without this, `security find-identity` will show 0 and export will fail.
+          keychain add-certificates
+
+          # 3) Install / apply provisioning profiles to the Xcode project targets
           xcode-project use-profiles --project ios/App/App.xcodeproj
+
+          echo "=== Codesigning identities (must NOT be 0) ==="
+          security find-identity -v -p codesigning || true
+
+          echo "=== Provisioning profiles installed ==="
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
       - name: "Force numeric CFBundleVersion (all Info.plist)"
         script: |
@@ -103,7 +127,7 @@ workflows:
           </plist>
           EOF
 
-      - name: "Inject PrivacyInfo.xcprivacy into frameworks (NO re-sign)"
+      - name: "Inject PrivacyInfo.xcprivacy into frameworks (no manual re-sign)"
         script: |
           set -euo pipefail
           set -x
@@ -114,16 +138,13 @@ workflows:
           APP_DIR="build/App.xcarchive/Products/Applications/App.app"
           test -d "$APP_DIR"
 
-          echo "=== Embedded frameworks found ==="
-          find "$APP_DIR" -maxdepth 4 -type d -name '*.framework' -print || true
-
           CAP_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Capacitor.framework" | head -n 1 || true)"
+          COR_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Cordova.framework" | head -n 1 || true)"
+
           if [ -z "$CAP_FW" ]; then
             echo "❌ Capacitor.framework not found"
             exit 1
           fi
-
-          COR_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Cordova.framework" | head -n 1 || true)"
 
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
           ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
@@ -133,9 +154,9 @@ workflows:
             ls -la "$COR_FW/PrivacyInfo.xcprivacy"
           fi
 
-          echo "✅ Injected manifests. Export step will re-sign IPA."
+          echo "✅ Injected manifests. Export will sign."
 
-      - name: "Export IPA"
+      - name: "Export IPA (manual signing)"
         script: |
           set -euo pipefail
           mkdir -p build/ipa
@@ -143,8 +164,12 @@ workflows:
           cat > build/export_options.json <<'EOF'
           {
             "method": "app-store-connect",
+            "signingStyle": "manual",
             "teamID": "R8W6XUCMDD",
-            "signingStyle": "automatic",
+            "signingCertificate": "Apple Distribution",
+            "provisioningProfiles": {
+              "com.datajury.app": "com.datajury.app"
+            },
             "stripSwiftSymbols": true,
             "compileBitcode": false
           }
@@ -167,6 +192,7 @@ workflows:
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
+          echo "Privacy manifests found:"
           find "$TMPDIR/Payload/App.app" -maxdepth 6 -name "PrivacyInfo.xcprivacy" -print || true
 
     artifacts:
