@@ -15,33 +15,49 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
+          set -euo pipefail
           npm ci
 
       - name: Build Next.js (optional)
         script: |
+          set -euo pipefail
           npm run build || echo "Next build skipped"
 
       - name: Sync Capacitor iOS
         script: |
+          set -euo pipefail
           npx cap sync ios
 
-      - name: CocoaPods clean install + greadlink fix
+      - name: CocoaPods install (must generate xcconfig)
         script: |
-          # Fix: Pods script expects greadlink (GNU readlink). macOS runner has readlink only.
+          set -euo pipefail
+
+          # Fix: some Pods scripts expect greadlink
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
+          echo "Pod version:"
+          pod --version
+
           cd ios/App
+
+          # Clean + install Pods
           rm -rf Pods Podfile.lock
           pod repo update
-          pod install
+          pod install --repo-update
+
+          # HARD CHECK: fail if xcconfig didn't get generated
+          test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
+
+          echo "Pods OK:"
+          ls -la "Pods/Target Support Files/Pods-App" | head -n 50
+
           cd ../..
 
       - name: Build IPA
         script: |
           set -euo pipefail
 
-          # Create exportOptions.plist dynamically
           cat > export_options.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -59,11 +75,9 @@ workflows:
           </plist>
           EOF
 
-          # Clean build folder
           rm -rf build
           mkdir -p build
 
-          # Archive
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
@@ -75,7 +89,6 @@ workflows:
             COMPILER_INDEX_STORE_ENABLE=NO \
             archive | tee build/xcodebuild_archive.log
 
-          # Export IPA
           xcodebuild \
             -exportArchive \
             -archivePath build/App.xcarchive \
