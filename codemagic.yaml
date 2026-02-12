@@ -28,58 +28,34 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: Ruby + CocoaPods (bypass rbenv) + Pods install
+      - name: Install Ruby 3 + CocoaPods (modern setup)
         script: |
           set -euo pipefail
 
-          # Fix: some Pods scripts expect greadlink
+          # Fix greadlink missing
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          # ---- Bypass rbenv shims ----
-          # Remove rbenv-related env vars if present
-          unset RBENV_VERSION RBENV_ROOT RBENV_SHELL || true
+          echo "Installing Ruby via Homebrew..."
+          brew update
+          brew install ruby
 
-          # Reset PATH to avoid rbenv shims taking precedence
-          export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          RUBY_PREFIX="$(brew --prefix ruby)"
+          export PATH="$RUBY_PREFIX/bin:$PATH"
 
-          echo "Which ruby (PATH):"
-          command -v ruby || true
+          echo "Ruby:"
+          ruby -v
 
-          # Prefer system Ruby if available
-          if [ -x /usr/bin/ruby ] && [ -x /usr/bin/gem ]; then
-            RUBY_BIN="/usr/bin/ruby"
-            GEM_BIN="/usr/bin/gem"
-          else
-            echo "System Ruby not found. Installing Ruby via Homebrew..."
-            command -v brew >/dev/null 2>&1 || (echo "Homebrew not found on runner" && exit 1)
-            brew update
-            brew install ruby
-            RUBY_PREFIX="$(brew --prefix ruby)"
-            RUBY_BIN="$RUBY_PREFIX/bin/ruby"
-            GEM_BIN="$RUBY_PREFIX/bin/gem"
-            export PATH="$RUBY_PREFIX/bin:$PATH"
-          fi
+          echo "Installing CocoaPods..."
+          gem install cocoapods -N
 
-          echo "Ruby version:"
-          "$RUBY_BIN" -v
-          echo "Gem version:"
-          "$GEM_BIN" -v
-
-          # Install CocoaPods via gems (no rbenv)
-          sudo "$GEM_BIN" install cocoapods -N
-
-          echo "Pod version:"
+          echo "Pod:"
           pod --version
 
-          # Pods install
           cd ios/App
           rm -rf Pods Podfile.lock
           pod repo update
           pod install --repo-update
-
-          # Ensure xcconfig exists (avoid later archive error)
-          test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
           cd ../..
 
       - name: Build IPA
