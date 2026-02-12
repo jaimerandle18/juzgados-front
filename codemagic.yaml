@@ -49,30 +49,29 @@ workflows:
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
-      - name: Create export options plist
+       - name: Create export options plist (via plutil)
         script: |
-          printf '%s\n' \
-          '<?xml version="1.0" encoding="UTF-8"?>' \
-          '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
-          '<plist version="1.0">' \
-          '<dict>' \
-          '  <key>method</key>' \
-          '  <string>app-store-connect</string>' \
-          '  <key>signingStyle</key>' \
-          '  <string>automatic</string>' \
-          '  <key>teamID</key>' \
-          '  <string>R8W6XUCMDD</string>' \
-          '  <key>stripSwiftSymbols</key>' \
-          '  <true/>' \
-          '  <key>compileBitcode</key>' \
-          '  <false/>' \
-          '</dict>' \
-          '</plist>' \
-          > export_options.plist
+          set -euo pipefail
 
-          echo "Plist created:"
-          cat export_options.plist
-          
+          cat > export_options.json <<'EOF'
+          {
+            "method": "app-store-connect",
+            "signingStyle": "automatic",
+            "teamID": "R8W6XUCMDD",
+            "stripSwiftSymbols": true,
+            "compileBitcode": false
+          }
+          EOF
+
+          # Convert JSON -> valid XML plist
+          plutil -convert xml1 export_options.json -o export_options.plist
+
+          echo "Lint plist:"
+          plutil -lint export_options.plist
+
+          echo "Plist preview:"
+          head -n 20 export_options.plist
+
       - name: Build IPA (Codemagic)
         script: |
           xcode-project build-ipa \
