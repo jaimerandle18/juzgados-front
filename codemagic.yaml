@@ -39,7 +39,6 @@ workflows:
           export PATH="$RUBY_PREFIX/bin:$PATH"
 
           gem install cocoapods -N
-
           POD_BIN="$(gem env gemdir)/bin/pod"
 
           cd ios/App
@@ -52,26 +51,16 @@ workflows:
 
           cd ../..
 
-      - name: Archive App (Codemagic will export automatically)
+      - name: Build IPA (Codemagic)
         script: |
-          set -e
-
-          rm -rf build
-          mkdir -p build
-
-          xcodebuild \
-            -workspace ios/App/App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination "generic/platform=iOS" \
-            -archivePath build/App.xcarchive \
-            -allowProvisioningUpdates \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            archive
+          xcode-project build-ipa \
+            --workspace "ios/App/App.xcworkspace" \
+            --scheme "App" \
+            --configuration "Release"
 
     artifacts:
-      - build/App.xcarchive
+      - build/ios/ipa/*.ipa
+      - build/ios/logs/*.log
 
     publishing:
       app_store_connect:
