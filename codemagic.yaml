@@ -51,32 +51,28 @@ workflows:
 
       - name: Create export options plist
         script: |
-          cat > export_options.plist <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>teamID</key>
-            <string>R8W6XUCMDD</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.datajury.app</key>
-              <string>com.datajury.app</string>
-            </dict>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>compileBitcode</key>
-            <false/>
-          </dict>
-          </plist>
-          EOF
+          printf '%s\n' \
+          '<?xml version="1.0" encoding="UTF-8"?>' \
+          '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+          '<plist version="1.0">' \
+          '<dict>' \
+          '  <key>method</key>' \
+          '  <string>app-store-connect</string>' \
+          '  <key>signingStyle</key>' \
+          '  <string>automatic</string>' \
+          '  <key>teamID</key>' \
+          '  <string>R8W6XUCMDD</string>' \
+          '  <key>stripSwiftSymbols</key>' \
+          '  <true/>' \
+          '  <key>compileBitcode</key>' \
+          '  <false/>' \
+          '</dict>' \
+          '</plist>' \
+          > export_options.plist
 
-          ls -la export_options.plist
-
+          echo "Plist created:"
+          cat export_options.plist
+          
       - name: Build IPA (Codemagic)
         script: |
           xcode-project build-ipa \
