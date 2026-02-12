@@ -25,9 +25,19 @@ workflows:
         script: |
           npx cap sync ios
 
+      - name: CocoaPods clean install (fix pods embed frameworks)
+        script: |
+          cd ios/App
+          rm -rf Pods Podfile.lock
+          pod repo update
+          pod install
+          cd ../..
+
       - name: Build IPA
         script: |
-          # Crear exportOptions.plist dinámico
+          set -euo pipefail
+
+          # export options
           cat > export_options.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -45,21 +55,32 @@ workflows:
           </plist>
           EOF
 
-          # Archive
-          xcodebuild -workspace ios/App/App.xcworkspace \
+          # Clean build folder
+          rm -rf build
+          mkdir -p build
+
+          # Archive (guardar log para ver el error real si falla)
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath build/App.xcarchive archive
+            -destination "generic/platform=iOS" \
+            -archivePath build/App.xcarchive \
+            -allowProvisioningUpdates \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            archive | tee build/xcodebuild_archive.log
 
           # Export IPA
-          xcodebuild -exportArchive \
+          xcodebuild \
+            -exportArchive \
             -archivePath build/App.xcarchive \
             -exportOptionsPlist export_options.plist \
-            -exportPath build/ipa
+            -exportPath build/ipa | tee build/xcodebuild_export.log
 
     artifacts:
       - build/ipa/*.ipa
+      - build/*.log
 
     publishing:
       app_store_connect:
