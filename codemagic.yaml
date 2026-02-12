@@ -6,6 +6,9 @@ workflows:
     environment:
       node: 20
 
+    integrations:
+      app_store_connect: codemagic
+
     scripts:
       - name: Install dependencies
         script: |
