@@ -15,91 +15,46 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          set -euo pipefail
           npm ci
 
       - name: Build Next.js (optional)
         script: |
-          set -euo pipefail
           npm run build || echo "Next build skipped"
 
       - name: Sync Capacitor iOS
         script: |
-          set -euo pipefail
           npx cap sync ios
 
-      - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
+      - name: Install Ruby + CocoaPods + Pods install
         script: |
-          set -euo pipefail
+          set -e
 
-          # Fix greadlink missing
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          # Install Ruby via Homebrew (runner Ruby is too old / rbenv shims)
           brew update
           brew install ruby
 
           RUBY_PREFIX="$(brew --prefix ruby)"
-          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          export PATH="$RUBY_PREFIX/bin:$PATH"
 
-          "$RUBY_PREFIX/bin/ruby" -v
-          "$RUBY_PREFIX/bin/gem" -v
+          gem install cocoapods -N
 
-          "$RUBY_PREFIX/bin/gem" install cocoapods -N
-
-          GEMDIR="$("$RUBY_PREFIX/bin/gem" env gemdir)"
-          POD_BIN="$GEMDIR/bin/pod"
-          test -x "$POD_BIN"
-
-          "$POD_BIN" --version
+          POD_BIN="$(gem env gemdir)/bin/pod"
 
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
-          # Patch CocoaPods embed frameworks script to avoid broken symlink copy
-          FRAMEWORKS_SH="Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh"
-          if [ -f "$FRAMEWORKS_SH" ]; then
-            echo "Patching $FRAMEWORKS_SH: --links -> --copy-links"
-            sed -i '' 's/--links/--copy-links/g' "$FRAMEWORKS_SH"
-          fi
+          # Fix rsync symlink issue
+          sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
 
-          test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
           cd ../..
 
-      - name: Build IPA
+      - name: Archive App (Codemagic will export automatically)
         script: |
-          set -euo pipefail
-
-          cat > export_options.plist <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-
-            <key>signingStyle</key>
-            <string>automatic</string>
-
-            <key>teamID</key>
-            <string>R8W6XUCMDD</string>
-
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.datajury.app</key>
-              <string>com.datajury.app</string>
-            </dict>
-
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>compileBitcode</key>
-            <false/>
-          </dict>
-          </plist>
-          EOF
+          set -e
 
           rm -rf build
           mkdir -p build
@@ -113,18 +68,10 @@ workflows:
             -archivePath build/App.xcarchive \
             -allowProvisioningUpdates \
             COMPILER_INDEX_STORE_ENABLE=NO \
-            archive | tee build/xcodebuild_archive.log
-
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist export_options.plist \
-            -exportPath build/ipa \
-            -allowProvisioningUpdates | tee build/xcodebuild_export.log
+            archive
 
     artifacts:
-      - build/ipa/*.ipa
-      - build/*.log
+      - build/App.xcarchive
 
     publishing:
       app_store_connect:
