@@ -1,6 +1,6 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
-platform :ios, '13.0'
+platform :ios, '14.0'
 use_frameworks!
 
 # workaround to avoid Xcode caching of Pods that requires
@@ -26,7 +26,7 @@ post_install do |installer|
   assertDeploymentTarget(installer)
 
   # ✅ Force minimum iOS deployment target for ALL Pods (fix "required a higher minimum deployment target")
-  min_ios = '13.0'  # si sigue fallando, subilo a '14.0'
+  min_ios = '14.0'  # si sigue fallando, subilo a '14.0'
 
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
