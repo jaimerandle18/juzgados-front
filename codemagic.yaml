@@ -5,13 +5,13 @@ workflows:
 
     environment:
       node: 22
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.datajury.app
       vars:
         BUNDLE_ID: "com.datajury.app"
         TEAM_ID: "R8W6XUCMDD"
         SIGN_IDENTITY: "Apple Distribution: Jaime Randle (R8W6XUCMDD)"
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.datajury.app
 
     integrations:
       app_store_connect: codemagic
@@ -45,8 +45,6 @@ workflows:
         script: |
           set -euo pipefail
           npx cap sync ios
-          ls -la ios || true
-          ls -la ios/App || true
 
       - name: "Install Codemagic CLI tools"
         script: |
@@ -55,29 +53,24 @@ workflows:
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
           codemagic --version || true
 
-      - name: "Use Codemagic uploaded signing files (NO fetch)"
+      - name: "Use Codemagic uploaded signing files"
         script: |
           set -euo pipefail
-          set -x
-
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
 
           keychain initialize
           xcode-project use-profiles --project ios/App/App.xcodeproj
 
           security find-identity -v -p codesigning || true
-          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
       - name: "Force numeric CFBundleVersion (all Info.plist)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
-          echo "Using BUILD_NUM=$BUILD_NUM"
 
           while IFS= read -r PLIST; do
             /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
               || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
-            /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
       - name: "Archive (SPM: project) signed"
@@ -87,8 +80,6 @@ workflows:
 
           rm -rf build
           mkdir -p build
-
-          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID"
 
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -102,44 +93,63 @@ workflows:
             DEVELOPMENT_TEAM="$TEAM_ID" \
             archive | tee build/xcodebuild_archive.log
 
-      - name: "Inject PrivacyInfo.xcprivacy into embedded frameworks + re-sign (robust)"
+      - name: "Create PrivacyInfo.xcprivacy (CI generated)"
+        script: |
+          set -euo pipefail
+          mkdir -p build/privacy
+
+          cat > build/privacy/PrivacyInfo.xcprivacy <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>NSPrivacyTracking</key>
+            <false/>
+            <key>NSPrivacyTrackingDomains</key>
+            <array/>
+            <key>NSPrivacyCollectedDataTypes</key>
+            <array/>
+            <key>NSPrivacyAccessedAPITypes</key>
+            <array/>
+          </dict>
+          </plist>
+          EOF
+
+          ls -la build/privacy/PrivacyInfo.xcprivacy
+
+      - name: "Inject PrivacyInfo.xcprivacy into embedded frameworks + re-sign"
         script: |
           set -euo pipefail
           set -x
 
-          SRC="ios/privacy/PrivacyInfo.xcprivacy"
+          SRC="build/privacy/PrivacyInfo.xcprivacy"
           test -f "$SRC"
 
           APP_DIR="build/App.xcarchive/Products/Applications/App.app"
           test -d "$APP_DIR"
 
           echo "=== Embedded frameworks found in App.app ==="
-          find "$APP_DIR" -maxdepth 3 -type d -name "*.framework" -print || true
+          find "$APP_DIR" -maxdepth 4 -type d -name "*.framework" -print || true
 
-          # Find Capacitor.framework anywhere inside the app bundle
-          CAP_FW="$(find "$APP_DIR" -maxdepth 4 -type d -name "Capacitor.framework" | head -n 1 || true)"
+          CAP_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Capacitor.framework" | head -n 1 || true)"
           if [ -z "$CAP_FW" ]; then
-            echo "❌ Capacitor.framework not found anywhere inside App.app (cannot inject privacy manifest)"
+            echo "❌ Capacitor.framework not found inside App.app"
             exit 1
           fi
 
-          # Find Cordova.framework (may or may not exist depending on build/SPM)
-          COR_FW="$(find "$APP_DIR" -maxdepth 4 -type d -name "Cordova.framework" | head -n 1 || true)"
+          COR_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Cordova.framework" | head -n 1 || true)"
           if [ -z "$COR_FW" ]; then
-            echo "⚠️ Cordova.framework not found inside App.app (skipping Cordova injection)"
+            echo "⚠️ Cordova.framework not found (skipping)"
           fi
 
-          echo "Capacitor.framework path: $CAP_FW"
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
           ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
 
           if [ -n "$COR_FW" ]; then
-            echo "Cordova.framework path: $COR_FW"
             cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
             ls -la "$COR_FW/PrivacyInfo.xcprivacy"
           fi
 
-          echo "Re-signing modified frameworks with: $SIGN_IDENTITY"
           /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$CAP_FW"
           /usr/bin/codesign -vv "$CAP_FW"
 
@@ -176,25 +186,16 @@ workflows:
             -exportOptionsPlist build/export_options.plist \
             -exportPath build/ipa | tee build/xcodebuild_export.log
 
-          find build -name "*.ipa" -print || true
-
-      - name: "Verify IPA (Info.plist + privacy manifests)"
+      - name: "Verify IPA (privacy manifests)"
         script: |
           set -euo pipefail
 
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
-          echo "IPA: $IPA_PATH"
-
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
 
-          APP_PLIST="$TMPDIR/Payload/App.app/Info.plist"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
-
-          echo "Checking privacy manifests inside IPA..."
-          find "$TMPDIR/Payload/App.app" -maxdepth 4 -name "PrivacyInfo.xcprivacy" -print || true
-
-          echo "✅ OK"
+          echo "Privacy manifests found:"
+          find "$TMPDIR/Payload/App.app" -maxdepth 6 -name "PrivacyInfo.xcprivacy" -print || true
 
     artifacts:
       - "build/ipa/*.ipa"
