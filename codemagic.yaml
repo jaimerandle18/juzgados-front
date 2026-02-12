@@ -11,7 +11,6 @@ workflows:
       vars:
         BUNDLE_ID: "com.datajury.app"
         TEAM_ID: "R8W6XUCMDD"
-        SIGN_IDENTITY: "Apple Distribution: Jaime Randle (R8W6XUCMDD)"
 
     integrations:
       app_store_connect: codemagic
@@ -61,6 +60,7 @@ workflows:
           keychain initialize
           xcode-project use-profiles --project ios/App/App.xcodeproj
 
+          echo "Available signing identities:"
           security find-identity -v -p codesigning || true
 
       - name: "Force numeric CFBundleVersion (all Info.plist)"
@@ -117,7 +117,7 @@ workflows:
 
           ls -la build/privacy/PrivacyInfo.xcprivacy
 
-      - name: "Inject PrivacyInfo.xcprivacy into embedded frameworks + re-sign"
+      - name: "Inject PrivacyInfo.xcprivacy into frameworks + re-sign (auto identity)"
         script: |
           set -euo pipefail
           set -x
@@ -129,18 +129,15 @@ workflows:
           test -d "$APP_DIR"
 
           echo "=== Embedded frameworks found in App.app ==="
-          find "$APP_DIR" -maxdepth 4 -type d -name "*.framework" -print || true
+          find "$APP_DIR" -maxdepth 4 -type d -name '*.framework' -print || true
 
           CAP_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Capacitor.framework" | head -n 1 || true)"
           if [ -z "$CAP_FW" ]; then
-            echo "❌ Capacitor.framework not found inside App.app"
+            echo "❌ Capacitor.framework not found"
             exit 1
           fi
 
           COR_FW="$(find "$APP_DIR" -maxdepth 5 -type d -name "Cordova.framework" | head -n 1 || true)"
-          if [ -z "$COR_FW" ]; then
-            echo "⚠️ Cordova.framework not found (skipping)"
-          fi
 
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
           ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
@@ -150,11 +147,32 @@ workflows:
             ls -la "$COR_FW/PrivacyInfo.xcprivacy"
           fi
 
-          /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$CAP_FW"
+          # ✅ Auto-detect a valid codesign identity present in the current keychain
+          echo "Available signing identities:"
+          security find-identity -v -p codesigning || true
+
+          SIGN_HASH="$(security find-identity -v -p codesigning \
+            | grep -i "Apple Distribution" \
+            | head -n 1 \
+            | awk '{print $2}')"
+
+          if [ -z "${SIGN_HASH:-}" ]; then
+            # fallback: any identity
+            SIGN_HASH="$(security find-identity -v -p codesigning | head -n 1 | awk '{print $2}')"
+          fi
+
+          if [ -z "${SIGN_HASH:-}" ]; then
+            echo "❌ No codesigning identity found in keychain"
+            exit 1
+          fi
+
+          echo "Using codesign identity hash: $SIGN_HASH"
+
+          /usr/bin/codesign --force --sign "$SIGN_HASH" --timestamp=none "$CAP_FW"
           /usr/bin/codesign -vv "$CAP_FW"
 
           if [ -n "$COR_FW" ]; then
-            /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$COR_FW"
+            /usr/bin/codesign --force --sign "$SIGN_HASH" --timestamp=none "$COR_FW"
             /usr/bin/codesign -vv "$COR_FW"
           fi
 
@@ -186,14 +204,14 @@ workflows:
             -exportOptionsPlist build/export_options.plist \
             -exportPath build/ipa | tee build/xcodebuild_export.log
 
+          find build -name "*.ipa" -print || true
+
       - name: "Verify IPA (privacy manifests)"
         script: |
           set -euo pipefail
-
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
-
           echo "Privacy manifests found:"
           find "$TMPDIR/Payload/App.app" -maxdepth 6 -name "PrivacyInfo.xcprivacy" -print || true
 
