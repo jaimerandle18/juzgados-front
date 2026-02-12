@@ -42,36 +42,39 @@ workflows:
           set -euo pipefail
           npx cap copy ios
 
-      - name: Install Ruby (brew) + CocoaPods + Patch Podfile platform + Pods install
+      - name: CocoaPods install (no brew) + Patch Podfile platform
         script: |
           set -euo pipefail
 
+          # Ensure greadlink exists for your existing script patches (safe)
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          brew update
-          brew install ruby
+          # Use system Ruby + install CocoaPods
+          ruby -v
+          gem -v
 
-          RUBY_PREFIX="$(brew --prefix ruby)"
-          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          # Install cocoapods (idempotent)
+          sudo gem install cocoapods -N || true
+          pod --version
 
-          gem install cocoapods -N
-          POD_BIN="$(gem env gemdir)/bin/pod"
-          test -x "$POD_BIN"
-
+          # Patch Podfile BEFORE pod install
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
           echo "Podfile platform now:"
           grep -n "platform :ios" "$PODFILE" || true
 
+          # Install pods
           cd ios/App
           rm -rf Pods Podfile.lock
-          "$POD_BIN" repo update
-          "$POD_BIN" install --repo-update
+          pod repo update
+          pod install --repo-update
 
+          # Fix rsync symlink issue in CocoaPods frameworks script
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
+
 
       - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
