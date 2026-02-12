@@ -37,10 +37,29 @@ workflows:
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      - name: Capacitor sync iOS
+      - name: Capacitor ensure iOS + sync
         script: |
           set -euo pipefail
+          set -x
+
+          echo "=== BEFORE ensure iOS ==="
+          ls -la || true
+          ls -la ios || true
+          ls -la ios/App || true
+
+          # If iOS project does not exist, create it
+          if [ ! -f "ios/App/Podfile" ]; then
+            echo "ios/App/Podfile not found → running npx cap add ios"
+            npx cap add ios
+          fi
+
+          # Sync native project
           npx cap sync ios
+
+          echo "=== AFTER sync ==="
+          ls -la ios || true
+          ls -la ios/App || true
+          test -f ios/App/Podfile
 
       - name: CocoaPods install (fix rbenv shim + logs)
         script: |
@@ -50,10 +69,8 @@ workflows:
           ruby -v || true
           gem -v || true
 
-          # Install CocoaPods for the current Ruby (Codemagic often uses rbenv)
+          # Install CocoaPods using current Ruby (rbenv in Codemagic)
           gem install cocoapods -N --no-document
-
-          # If rbenv is present, refresh shims so `pod` becomes available on PATH
           rbenv rehash || true
 
           echo "PATH=$PATH"
@@ -63,13 +80,17 @@ workflows:
 
           pod --version
 
+          echo "=== iOS tree before pod install ==="
+          ls -la ios || true
+          ls -la ios/App || true
+
           PODFILE="ios/App/Podfile"
           test -f "$PODFILE"
 
           echo "=== Podfile BEFORE patch ==="
           sed -n '1,220p' "$PODFILE"
 
-          # Force iOS deployment target (keep your original intent)
+          # Force iOS deployment target
           sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
           echo "Podfile platform now:"
           grep -n "platform :ios" "$PODFILE" || true
@@ -77,7 +98,6 @@ workflows:
           cd ios/App
           rm -rf Pods Podfile.lock
 
-          # Run pod install with verbose logging and capture to artifact
           mkdir -p ../../build
 
           set +e
@@ -87,14 +107,12 @@ workflows:
 
           if [ "$POD_STATUS" -ne 0 ]; then
             echo "❌ pod install failed with status $POD_STATUS"
-            echo "=== Podfile AFTER patch ==="
-            sed -n '1,260p' Podfile || true
             echo "=== LAST 200 lines of pod_install.log ==="
             tail -n 200 ../../build/pod_install.log || true
             exit "$POD_STATUS"
           fi
 
-          # Fix rsync symlink issue in CocoaPods frameworks script (if present)
+          # Fix rsync symlink issue if exists
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
@@ -149,7 +167,6 @@ workflows:
           echo "Frameworks in archive:"
           ls -la "$FW_DIR" || true
 
-          # Targets Apple complains about:
           CAP_FW="$FW_DIR/Capacitor.framework"
           COR_FW="$FW_DIR/Cordova.framework"
 
@@ -169,7 +186,6 @@ workflows:
           ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
           ls -la "$COR_FW/PrivacyInfo.xcprivacy"
 
-          # Re-sign modified frameworks using the same identity available in keychain
           SIGN_ID="Apple Distribution: Jaime Randle (R8W6XUCMDD)"
           echo "Re-signing frameworks with: $SIGN_ID"
           /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$CAP_FW"
