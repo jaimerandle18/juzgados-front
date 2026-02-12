@@ -31,9 +31,10 @@ workflows:
       - name: Compute numeric build number (automatic)
         script: |
           set -euo pipefail
-          # Always valid for Apple: 1-3 dot-separated integers. We use a single integer (unix timestamp).
-          echo "BUILD_NUM=$(date +%s)" >> "$CM_ENV"
-          echo "BUILD_NUM=$BUILD_NUM"
+          BUILD_NUM_LOCAL="$(date +%s)"
+          echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
+          echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
+
 
       - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
         script: |
