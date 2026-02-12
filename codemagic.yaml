@@ -30,11 +30,6 @@ workflows:
           set -euo pipefail
           npm run build || echo "Next build skipped"
 
-      - name: Sync Capacitor iOS
-        script: |
-          set -euo pipefail
-          npx cap sync ios
-
       - name: Compute numeric build number (automatic)
         script: |
           set -euo pipefail
@@ -42,7 +37,13 @@ workflows:
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
+      # ⚠️ IMPORTANT: use COPY (no pod install) instead of SYNC
+      - name: Capacitor copy iOS (no pods)
+        script: |
+          set -euo pipefail
+          npx cap copy ios
+
+      - name: Install Ruby (brew) + CocoaPods + Patch Podfile platform + Pods install
         script: |
           set -euo pipefail
 
@@ -59,6 +60,14 @@ workflows:
           POD_BIN="$(gem env gemdir)/bin/pod"
           test -x "$POD_BIN"
 
+          # ✅ Patch Podfile BEFORE pod install (this is what fixes "higher minimum deployment target")
+          PODFILE="ios/App/Podfile"
+          test -f "$PODFILE"
+          sed -i '' "s/platform :ios, '.*'/platform :ios, '16.0'/g" "$PODFILE" || true
+          echo "Podfile platform now:"
+          grep -n "platform :ios" "$PODFILE" || true
+
+          # Install pods
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
