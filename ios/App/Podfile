@@ -25,6 +25,19 @@ post_install do |installer|
   # Mantener lo que ya tenías de Capacitor
   assertDeploymentTarget(installer)
 
+  # ✅ Force minimum iOS deployment target for ALL Pods (fix "required a higher minimum deployment target")
+  min_ios = '13.0'  # si sigue fallando, subilo a '14.0'
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+      # Si no existe o es menor al mínimo, lo subimos
+      if current.nil? || Gem::Version.new(current) < Gem::Version.new(min_ios)
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios
+      end
+    end
+  end
+
   # --- Patch macOS: reemplazar readlink -f por greadlink -f (coreutils) ---
   installer.pods_project.targets.each do |t|
     t.shell_script_build_phases.each do |phase|
@@ -39,3 +52,4 @@ post_install do |installer|
     File.write(path, text.gsub("readlink -f", "greadlink -f"))
   end
 end
+

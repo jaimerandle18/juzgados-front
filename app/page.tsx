@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Scale, Gavel, Globe2 } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
 import { showLoader } from "./components/globalLoader";
@@ -12,15 +12,24 @@ export default function Home() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    StatusBar.setOverlaysWebView({ overlay: false });
-    StatusBar.setStyle({ style: Style.Light });
+    let handle: PluginListenerHandle | null = null;
 
-    const sub = App.addListener("backButton", ({ canGoBack }) => {
-      if (canGoBack) window.history.back();
-      else App.exitApp();
-    });
+    const setup = async () => {
+      await StatusBar.setOverlaysWebView({ overlay: false });
+      await StatusBar.setStyle({ style: Style.Light });
 
-    return () => void sub.remove();
+      handle = await App.addListener("backButton", ({ canGoBack }) => {
+        if (canGoBack) window.history.back();
+        else App.exitApp();
+      });
+    };
+
+    setup();
+
+    return () => {
+      handle?.remove();
+      handle = null;
+    };
   }, []);
 
   return (
@@ -70,10 +79,8 @@ function MenuCard({
         dj-card
         relative overflow-hidden
         p-6
-
         flex flex-col items-center text-center gap-4
         sm:flex-row sm:text-left sm:items-center sm:gap-6
-
         text-gray-900
       "
       style={{
@@ -82,16 +89,9 @@ function MenuCard({
         willChange: "transform",
       }}
     >
-      {/* glow hover suave */}
       <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity pointer-events-none" />
-
-      <div className="dj-card-icon p-4">
-        {icon}
-      </div>
-
-      <span className="tracking-wide font-bold text-lg sm:text-xl">
-        {title}
-      </span>
+      <div className="dj-card-icon p-4">{icon}</div>
+      <span className="tracking-wide font-bold text-lg sm:text-xl">{title}</span>
     </motion.a>
   );
 }
