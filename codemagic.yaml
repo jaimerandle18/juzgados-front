@@ -36,6 +36,7 @@ workflows:
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
+          # Install Ruby via Homebrew (runner Ruby is too old / rbenv shims)
           brew update
           brew install ruby
 
@@ -43,25 +44,28 @@ workflows:
           export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
           "$RUBY_PREFIX/bin/ruby" -v
+          "$RUBY_PREFIX/bin/gem" -v
+
           "$RUBY_PREFIX/bin/gem" install cocoapods -N
 
           GEMDIR="$("$RUBY_PREFIX/bin/gem" env gemdir)"
           POD_BIN="$GEMDIR/bin/pod"
           test -x "$POD_BIN"
 
+          "$POD_BIN" --version
+
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
-          # ✅ Patch CocoaPods embed frameworks script to avoid broken symlink copy
+          # Patch CocoaPods embed frameworks script to avoid broken symlink copy
           FRAMEWORKS_SH="Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh"
           if [ -f "$FRAMEWORKS_SH" ]; then
             echo "Patching $FRAMEWORKS_SH: --links -> --copy-links"
             sed -i '' 's/--links/--copy-links/g' "$FRAMEWORKS_SH"
           fi
 
-          # sanity
           test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
           cd ../..
 
@@ -75,9 +79,20 @@ workflows:
           <plist version="1.0">
           <dict>
             <key>method</key>
-            <string>app-store</string>
+            <string>app-store-connect</string>
+
             <key>signingStyle</key>
             <string>automatic</string>
+
+            <key>teamID</key>
+            <string>R8W6XUCMDD</string>
+
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.datajury.app</key>
+              <string>com.datajury.app</string>
+            </dict>
+
             <key>stripSwiftSymbols</key>
             <true/>
             <key>compileBitcode</key>
@@ -104,7 +119,8 @@ workflows:
             -exportArchive \
             -archivePath build/App.xcarchive \
             -exportOptionsPlist export_options.plist \
-            -exportPath build/ipa | tee build/xcodebuild_export.log
+            -exportPath build/ipa \
+            -allowProvisioningUpdates | tee build/xcodebuild_export.log
 
     artifacts:
       - build/ipa/*.ipa
