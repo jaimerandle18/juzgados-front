@@ -28,7 +28,7 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: Install Ruby (brew) + CocoaPods + Pods install (fixed pod path)
+      - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
         script: |
           set -euo pipefail
 
@@ -42,39 +42,26 @@ workflows:
           RUBY_PREFIX="$(brew --prefix ruby)"
           export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-          echo "Ruby:"
           "$RUBY_PREFIX/bin/ruby" -v
-
-          echo "Gem:"
-          "$RUBY_PREFIX/bin/gem" -v
-
-          echo "Install CocoaPods:"
           "$RUBY_PREFIX/bin/gem" install cocoapods -N
 
-          # Compute correct gem bin dir
           GEMDIR="$("$RUBY_PREFIX/bin/gem" env gemdir)"
           POD_BIN="$GEMDIR/bin/pod"
-
-          echo "GEMDIR: $GEMDIR"
-          echo "POD_BIN: $POD_BIN"
-
-          # If not found, fallback to gem home (rare)
-          if [ ! -x "$POD_BIN" ]; then
-            GEMHOME="$("$RUBY_PREFIX/bin/gem" env home)"
-            POD_BIN="$GEMHOME/bin/pod"
-            echo "Fallback GEMHOME: $GEMHOME"
-            echo "Fallback POD_BIN: $POD_BIN"
-          fi
-
           test -x "$POD_BIN"
-
-          "$POD_BIN" --version
 
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
+          # ✅ Patch CocoaPods embed frameworks script to avoid broken symlink copy
+          FRAMEWORKS_SH="Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh"
+          if [ -f "$FRAMEWORKS_SH" ]; then
+            echo "Patching $FRAMEWORKS_SH: --links -> --copy-links"
+            sed -i '' 's/--links/--copy-links/g' "$FRAMEWORKS_SH"
+          fi
+
+          # sanity
           test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
           cd ../..
 
