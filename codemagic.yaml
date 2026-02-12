@@ -28,7 +28,7 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: CocoaPods install (must generate xcconfig)
+      - name: Install CocoaPods (no rbenv) + Pods install
         script: |
           set -euo pipefail
 
@@ -36,21 +36,26 @@ workflows:
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          echo "Pod version:"
+          echo "Ruby:"
+          ruby -v
+
+          echo "Gem:"
+          gem -v
+
+          # Install CocoaPods via RubyGems to avoid rbenv wrapper issues
+          sudo gem install cocoapods -N
+
+          echo "Pod:"
           pod --version
 
           cd ios/App
-
-          # Clean + install Pods
           rm -rf Pods Podfile.lock
+
           pod repo update
           pod install --repo-update
 
           # HARD CHECK: fail if xcconfig didn't get generated
           test -f "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"
-
-          echo "Pods OK:"
-          ls -la "Pods/Target Support Files/Pods-App" | head -n 50
 
           cd ../..
 
