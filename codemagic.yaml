@@ -28,7 +28,7 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: Install Ruby (brew) + CocoaPods (avoid rbenv pod) + Pods install
+      - name: Install Ruby (brew) + CocoaPods + Pods install (fixed pod path)
         script: |
           set -euo pipefail
 
@@ -36,7 +36,6 @@ workflows:
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
 
-          # Install Ruby via Homebrew
           brew update
           brew install ruby
 
@@ -52,17 +51,22 @@ workflows:
           echo "Install CocoaPods:"
           "$RUBY_PREFIX/bin/gem" install cocoapods -N
 
-          # Use the pod that belongs to the brew ruby gem bin
-          POD_BIN="$RUBY_PREFIX/bin/pod"
+          # Compute correct gem bin dir
+          GEMDIR="$("$RUBY_PREFIX/bin/gem" env gemdir)"
+          POD_BIN="$GEMDIR/bin/pod"
+
+          echo "GEMDIR: $GEMDIR"
+          echo "POD_BIN: $POD_BIN"
+
+          # If not found, fallback to gem home (rare)
           if [ ! -x "$POD_BIN" ]; then
-            # fallback: sometimes gem bin goes here
-            POD_BIN="$(dirname "$($RUBY_PREFIX/bin/gem env gemdir)")/bin/pod"
+            GEMHOME="$("$RUBY_PREFIX/bin/gem" env home)"
+            POD_BIN="$GEMHOME/bin/pod"
+            echo "Fallback GEMHOME: $GEMHOME"
+            echo "Fallback POD_BIN: $POD_BIN"
           fi
 
-          echo "Which pod:"
-          command -v pod || true
-          echo "Using pod at:"
-          echo "$POD_BIN"
+          test -x "$POD_BIN"
 
           "$POD_BIN" --version
 
