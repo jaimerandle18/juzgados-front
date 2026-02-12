@@ -15,19 +15,22 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
+          set -euo pipefail
           npm ci
 
       - name: Build Next.js (optional)
         script: |
+          set -euo pipefail
           npm run build || echo "Next build skipped"
 
       - name: Sync Capacitor iOS
         script: |
+          set -euo pipefail
           npx cap sync ios
 
-      - name: Install Ruby + CocoaPods + Pods install
+      - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
         script: |
-          set -e
+          set -euo pipefail
 
           sudo mkdir -p /usr/local/bin
           sudo ln -sf /usr/bin/readlink /usr/local/bin/greadlink || true
@@ -36,56 +39,70 @@ workflows:
           brew install ruby
 
           RUBY_PREFIX="$(brew --prefix ruby)"
-          export PATH="$RUBY_PREFIX/bin:$PATH"
+          export PATH="$RUBY_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
           gem install cocoapods -N
           POD_BIN="$(gem env gemdir)/bin/pod"
+          test -x "$POD_BIN"
 
           cd ios/App
           rm -rf Pods Podfile.lock
           "$POD_BIN" repo update
           "$POD_BIN" install --repo-update
 
+          # Fix rsync symlink issue in CocoaPods frameworks script
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
-      - name: Create export options plist (via plutil)
+      - name: Archive + Export IPA (manual signing)
         script: |
           set -euo pipefail
 
-          cat > export_options.json <<'EOF'
+          rm -rf build
+          mkdir -p build/ipa
+
+          # 1) Archive
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath build/App.xcarchive \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            archive | tee build/xcodebuild_archive.log
+
+          # 2) Create a VALID exportOptions.plist via plutil (no “No Accounts”)
+          cat > build/export_options.json <<'EOF'
           {
             "method": "app-store-connect",
-            "signingStyle": "automatic",
+            "signingStyle": "manual",
             "teamID": "R8W6XUCMDD",
+            "signingCertificate": "Apple Distribution",
+            "provisioningProfiles": {
+              "com.datajury.app": "com.datajury.app"
+            },
             "stripSwiftSymbols": true,
             "compileBitcode": false
           }
           EOF
 
-          # Convert JSON -> valid XML plist
-          plutil -convert xml1 export_options.json -o export_options.plist
+          plutil -convert xml1 build/export_options.json -o build/export_options.plist
+          plutil -lint build/export_options.plist
 
-          echo "Lint plist:"
-          plutil -lint export_options.plist
+          # 3) Export IPA
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist build/export_options.plist \
+            -exportPath build/ipa | tee build/xcodebuild_export.log
 
-          echo "Plist preview:"
-          head -n 20 export_options.plist
-
-      - name: Build IPA (Codemagic)
-        script: |
-          xcode-project build-ipa \
-            --workspace "ios/App/App.xcworkspace" \
-            --scheme "App" \
-            --export-options-plist "export_options.plist"
-
-          echo "Searching IPAs..."
-          find . -maxdepth 6 -name "*.ipa" -print || true
+          echo "IPAs found:"
+          find build -name "*.ipa" -print || true
 
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/ios/logs/*.log
-      - "**/*.ipa"
+      - build/ipa/*.ipa
+      - build/*.log
 
     publishing:
       app_store_connect:
