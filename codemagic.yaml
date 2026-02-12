@@ -49,7 +49,7 @@ workflows:
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
-       - name: Create export options plist (via plutil)
+      - name: Create export options plist (via plutil)
         script: |
           set -euo pipefail
 
@@ -72,7 +72,7 @@ workflows:
           echo "Plist preview:"
           head -n 20 export_options.plist
 
-       - name: Build IPA (Codemagic)
+      - name: Build IPA (Codemagic)
         script: |
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
