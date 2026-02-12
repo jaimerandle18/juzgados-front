@@ -18,6 +18,13 @@ workflows:
           set -euo pipefail
           npm ci
 
+      - name: Debug Capacitor versions (must be consistent)
+        script: |
+          set -euo pipefail
+          node -v
+          npm -v
+          npm ls @capacitor/core @capacitor/ios @capacitor/cli || true
+
       - name: Build Next.js (optional)
         script: |
           set -euo pipefail
@@ -34,7 +41,6 @@ workflows:
           BUILD_NUM_LOCAL="$(date +%s)"
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
-
 
       - name: Install Ruby (brew) + CocoaPods + Pods install + Patch rsync links
         script: |
@@ -62,9 +68,41 @@ workflows:
           sed -i '' 's/--links/--copy-links/g' "Pods/Target Support Files/Pods-App/Pods-App-frameworks.sh" || true
           cd ../..
 
+      - name: Inject PrivacyInfo.xcprivacy into Capacitor/Cordova frameworks (pre-archive)
+        script: |
+          set -euo pipefail
+          : "${BUILD_NUM:?BUILD_NUM not set}"
+
+          SRC="ios/privacy/PrivacyInfo.xcprivacy"
+          test -f "$SRC"
+
+          echo "Searching frameworks in node_modules..."
+          CAP_DIR="$(find node_modules -type d -name "Capacitor.framework" | head -n 1)"
+          COR_DIR="$(find node_modules -type d -name "Cordova.framework" | head -n 1)"
+
+          echo "CAP_DIR=$CAP_DIR"
+          echo "COR_DIR=$COR_DIR"
+
+          if [ -z "$CAP_DIR" ]; then
+            echo "❌ Capacitor.framework not found in node_modules"
+            exit 1
+          fi
+          if [ -z "$COR_DIR" ]; then
+            echo "❌ Cordova.framework not found in node_modules"
+            exit 1
+          fi
+
+          cp -f "$SRC" "$CAP_DIR/PrivacyInfo.xcprivacy"
+          cp -f "$SRC" "$COR_DIR/PrivacyInfo.xcprivacy"
+
+          echo "✅ Injected manifests:"
+          ls -la "$CAP_DIR/PrivacyInfo.xcprivacy"
+          ls -la "$COR_DIR/PrivacyInfo.xcprivacy"
+
       - name: Force numeric CFBundleVersion (all Info.plist)
         script: |
           set -euo pipefail
+          : "${BUILD_NUM:?BUILD_NUM not set}"
           echo "Using BUILD_NUM=$BUILD_NUM"
 
           echo "Info.plist files:"
@@ -80,6 +118,7 @@ workflows:
       - name: Archive + Export IPA (manual signing)
         script: |
           set -euo pipefail
+          : "${BUILD_NUM:?BUILD_NUM not set}"
 
           rm -rf build
           mkdir -p build/ipa
@@ -126,13 +165,12 @@ workflows:
           echo "IPAs found:"
           find build -name "*.ipa" -print || true
 
-          # 4) Verify CFBundleVersion INSIDE the IPA (must be numeric)
+          # 4) Verify inside IPA (Info.plist + privacy manifests)
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
           echo "IPA: $IPA_PATH"
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
 
-          # NOTE: Your app bundle is Payload/App.app in your logs
           APP_PLIST="$TMPDIR/Payload/App.app/Info.plist"
           echo "App plist in IPA: $APP_PLIST"
 
@@ -141,7 +179,11 @@ workflows:
           echo "CFBundleVersion:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST"
 
-          echo "OK: IPA contains numeric CFBundleVersion."
+          echo "Checking privacy manifests inside IPA frameworks..."
+          ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
+          ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
+
+          echo "✅ OK: IPA contains privacy manifests + numeric build version."
 
     artifacts:
       - build/ipa/*.ipa
