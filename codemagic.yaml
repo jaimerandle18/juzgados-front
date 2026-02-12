@@ -8,9 +8,7 @@ workflows:
       vars:
         BUNDLE_ID: "com.datajury.app"
         TEAM_ID: "R8W6XUCMDD"
-        SIGN_CERT: "Apple Distribution"
-        # Si tu profile en Apple se llama distinto, poné el nombre exacto acá
-        PROFILE_NAME: "com.datajury.app"
+        SIGN_IDENTITY: "Apple Distribution: Jaime Randle (R8W6XUCMDD)"
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.datajury.app
@@ -46,7 +44,6 @@ workflows:
       - name: "Capacitor sync iOS"
         script: |
           set -euo pipefail
-          set -x
           npx cap sync ios
           ls -la ios || true
           ls -la ios/App || true
@@ -55,36 +52,24 @@ workflows:
         script: |
           set -euo pipefail
           python3 -m pip install --user codemagic-cli-tools
-          echo 'export PATH="$HOME/Library/Python/3.*/bin:$PATH"' >> "$CM_ENV" || true
-          # Set PATH for current shell too
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
-          which codemagic || true
           codemagic --version || true
 
-      - name: "Fetch signing files + apply provisioning profiles"
+      - name: "Use Codemagic uploaded signing files (NO fetch)"
         script: |
           set -euo pipefail
           set -x
 
-          # Ensure codemagic cli is in PATH (covers different python minor versions)
           export PATH="$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$HOME/Library/Python/3.10/bin:$PATH"
 
-          # Init keychain
+          # Initialize Codemagic keychain
           keychain initialize
 
-          # Fetch certs/profiles from App Store Connect integration
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
+          # This imports the certificates/profiles you already uploaded/managed in Codemagic
+          # and applies provisioning profiles to the project targets.
+          xcode-project use-profiles --project ios/App/App.xcodeproj
 
-          # Install certificates in keychain
-          keychain add-certificates
-
-          # Apply profiles to Xcode project (this is what you're missing)
-          xcode-project use-profiles \
-            --project ios/App/App.xcodeproj
-
-          # Debug: show what profiles got installed
+          # Debug
           security find-identity -v -p codesigning || true
           ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
@@ -108,7 +93,7 @@ workflows:
           rm -rf build
           mkdir -p build
 
-          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID BUNDLE_ID=$BUNDLE_ID"
+          echo "Archiving with BUILD_NUM=$BUILD_NUM TEAM_ID=$TEAM_ID"
 
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -144,9 +129,8 @@ workflows:
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
           cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
 
-          SIGN_ID="Apple Distribution: Jaime Randle (R8W6XUCMDD)"
-          /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$CAP_FW"
-          /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$COR_FW"
+          /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$CAP_FW"
+          /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --timestamp=none "$COR_FW"
 
           /usr/bin/codesign -vv "$CAP_FW"
           /usr/bin/codesign -vv "$COR_FW"
