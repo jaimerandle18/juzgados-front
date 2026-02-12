@@ -1,6 +1,6 @@
 workflows:
   ios-release:
-    name: iOS Release (Data Jury)
+    name: "iOS Release (Data Jury)"
     max_build_duration: 60
 
     environment:
@@ -13,45 +13,41 @@ workflows:
       app_store_connect: codemagic
 
     scripts:
-      - name: Install dependencies
+      - name: "Install dependencies"
         script: |
           set -euo pipefail
           npm ci
 
-      - name: Debug Capacitor versions
+      - name: "Debug Capacitor versions"
         script: |
           set -euo pipefail
           node -v
           npm -v
           npm ls @capacitor/core @capacitor/ios @capacitor/cli || true
 
-      - name: Build Next.js (optional)
+      - name: "Build Next.js (optional)"
         script: |
           set -euo pipefail
           npm run build || echo "Next build skipped"
 
-      - name: Compute numeric build number
+      - name: "Compute numeric build number"
         script: |
           set -euo pipefail
           BUILD_NUM_LOCAL="$(date +%s)"
           echo "BUILD_NUM=$BUILD_NUM_LOCAL" >> "$CM_ENV"
           echo "Computed BUILD_NUM=$BUILD_NUM_LOCAL"
 
-      - name: Capacitor sync iOS
+      - name: "Capacitor sync iOS"
         script: |
           set -euo pipefail
           set -x
-
           ls -la ios || true
           ls -la ios/App || true
-
           npx cap sync ios
-
-          echo "After sync:"
           ls -la ios || true
           ls -la ios/App || true
 
-      - name: Force numeric CFBundleVersion (all Info.plist)
+      - name: "Force numeric CFBundleVersion (all Info.plist)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
@@ -63,15 +59,13 @@ workflows:
             /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" || true
           done < <(find ios -name "Info.plist")
 
-      - name: Archive (SPM: project)
+      - name: "Archive (SPM: project)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
 
           rm -rf build
           mkdir -p build
-
-          echo "Archiving with BUILD_NUM=$BUILD_NUM"
 
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -84,7 +78,7 @@ workflows:
             CURRENT_PROJECT_VERSION="$BUILD_NUM" \
             archive | tee build/xcodebuild_archive.log
 
-      - name: Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign
+      - name: "Inject PrivacyInfo.xcprivacy into archive frameworks + re-sign"
         script: |
           set -euo pipefail
 
@@ -97,27 +91,14 @@ workflows:
           FW_DIR="$APP_DIR/Frameworks"
           test -d "$FW_DIR"
 
-          echo "Frameworks in archive:"
-          ls -la "$FW_DIR" || true
-
           CAP_FW="$FW_DIR/Capacitor.framework"
           COR_FW="$FW_DIR/Cordova.framework"
 
-          if [ ! -d "$CAP_FW" ]; then
-            echo "❌ Capacitor.framework not found in archive Frameworks"
-            exit 1
-          fi
-          if [ ! -d "$COR_FW" ]; then
-            echo "❌ Cordova.framework not found in archive Frameworks"
-            exit 1
-          fi
+          test -d "$CAP_FW"
+          test -d "$COR_FW"
 
           cp -f "$SRC" "$CAP_FW/PrivacyInfo.xcprivacy"
           cp -f "$SRC" "$COR_FW/PrivacyInfo.xcprivacy"
-
-          echo "✅ Injected privacy manifests into archive:"
-          ls -la "$CAP_FW/PrivacyInfo.xcprivacy"
-          ls -la "$COR_FW/PrivacyInfo.xcprivacy"
 
           SIGN_ID="Apple Distribution: Jaime Randle (R8W6XUCMDD)"
           /usr/bin/codesign --force --sign "$SIGN_ID" --timestamp=none "$CAP_FW"
@@ -126,10 +107,9 @@ workflows:
           /usr/bin/codesign -vv "$CAP_FW"
           /usr/bin/codesign -vv "$COR_FW"
 
-      - name: Export IPA
+      - name: "Export IPA"
         script: |
           set -euo pipefail
-
           mkdir -p build/ipa
 
           cat > build/export_options.json <<'EOF'
@@ -157,12 +137,13 @@ workflows:
 
           find build -name "*.ipa" -print || true
 
-      - name: Verify IPA (Info.plist + privacy manifests)
+      - name: "Verify IPA (Info.plist + privacy manifests)"
         script: |
           set -euo pipefail
 
           IPA_PATH="$(ls -1 build/ipa/*.ipa | head -n 1)"
           echo "IPA: $IPA_PATH"
+
           TMPDIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMPDIR"
 
@@ -171,11 +152,10 @@ workflows:
 
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy"
           ls -la "$TMPDIR/Payload/App.app/Frameworks/Cordova.framework/PrivacyInfo.xcprivacy"
-          echo "✅ OK"
 
     artifacts:
-      - build/ipa/*.ipa
-      - build/*.log
+      - "build/ipa/*.ipa"
+      - "build/*.log"
 
     publishing:
       app_store_connect:
