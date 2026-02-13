@@ -1,3 +1,5 @@
+import AnchorWithLoader from "@/components/AnchorWithLoader";
+
 export default async function Page({ params }: { params: Promise<{ fueroId: string }> }) {
     const { fueroId } = await params;
   
@@ -22,36 +24,31 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   
         {/* GRID */}
         <div className="grid gap-6 sm:grid-cols-2">
-          {juzgadosOnly.map((j: any) => (
-            <a
-              key={j.id}
-              href={`/dependencia/${j.id}`}
-              className="
-                block p-6 rounded-2xl bg-white/70 backdrop-blur-lg
-                border border-gray-200 shadow-md hover:shadow-xl
-                hover:-translate-y-1 transition-all cursor-pointer group
-              "
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
-                {j.nombre}
-              </h3>
-  
-              {/* ⭐ PROMEDIO + CANTIDAD */}
-              <StarRating promedio={j.promedio} cantidad={j.cantidad_votos} />
-  
-              {j.domicilio && (
-                <p className="mt-3 text-gray-700">{j.domicilio}</p>
-              )}
-  
-              {j.localidad && (
-                <p className="text-gray-700">{j.localidad}</p>
-              )}
-  
-              <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
-                Ver detalle →
-              </p>
-            </a>
-          ))}
+        {juzgadosOnly.map((j: any) => (
+  <AnchorWithLoader
+    key={j.id}
+    href={`/dependencia/${j.id}`}
+    loadingMessage="Cargando detalle..."
+    className="
+      block p-6 rounded-2xl bg-white/70 backdrop-blur-lg
+      border border-gray-200 shadow-md hover:shadow-xl
+      hover:-translate-y-1 transition-all cursor-pointer group
+    "
+  >
+    <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
+      {j.nombre}
+    </h3>
+
+    <StarRating promedio={j.promedio} cantidad={j.cantidad_votos} />
+
+    {j.domicilio && <p className="mt-3 text-gray-700">{j.domicilio}</p>}
+    {j.localidad && <p className="text-gray-700">{j.localidad}</p>}
+
+    <p className="mt-4 text-sm font-medium text-blue-600 group-hover:underline">
+      Ver detalle →
+    </p>
+  </AnchorWithLoader>
+))}
         </div>
       </main>
     );
