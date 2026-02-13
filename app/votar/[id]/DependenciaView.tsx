@@ -2,7 +2,7 @@
 
 import { showLoader } from "@/components/globalLoader";
 import { motion } from "framer-motion";
-
+import { Mail, Phone, MapPin } from "lucide-react";
 // ======================
 // ⭐ ESTRELLAS
 // ======================
@@ -91,39 +91,80 @@ function InfoCard({ dep }: { dep: any }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 backdrop-blur-lg border border-gray-200 
-      shadow-lg rounded-2xl p-6 mb-10"
+      className="
+        bg-white/70 backdrop-blur-lg border border-gray-200 
+        shadow-lg rounded-2xl p-6 mb-10
+      "
     >
-      <p className="text-gray-700 text-lg font-medium capitalize mb-2">
+      {/* TIPO */}
+      <p className="text-gray-700 text-lg font-medium capitalize mb-4">
         Tipo:{" "}
         <span className="font-semibold text-blue-600">
-          {dep.nombre.includes("Tribunal")?"Tribunal":dep.nombre.includes("Camara")? "Camara" :dep.nombre.includes("Salas")? "Sala":dep.nombre.includes("Juzgados")?"Juzgado": dep.tipo_funcional }
+          {dep.nombre.includes("Tribunal")
+            ? "Tribunal"
+            : dep.nombre.includes("Camara")
+            ? "Camara"
+            : dep.nombre.includes("Salas")
+            ? "Sala"
+            : dep.nombre.includes("Juzgados")
+            ? "Juzgado"
+            : dep.tipo_funcional}
         </span>
       </p>
 
-      {dep.domicilio && (
-        <p className="text-gray-700 mb-1">
-          <span className="font-semibold">Domicilio:</span> {dep.domicilio}
-        </p>
-      )}
+      <div className="flex flex-col gap-3">
 
-      {dep.localidad && (
-        <p className="text-gray-700 mb-1">
-          <span className="font-semibold">Localidad:</span> {dep.localidad}
-        </p>
-      )}
+        {/* 📍 DOMICILIO */}
+        {dep.domicilio && (
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              flex items-center gap-3 
+              text-gray-800 hover:text-blue-600 
+              transition active:scale-[0.98]
+            "
+          >
+            <MapPin className="w-5 h-5 text-blue-500" />
+            <span className="font-medium">{dep.domicilio}</span>
+          </a>
+        )}
 
-      {dep.telefono && (
-        <p className="text-gray-700 mb-1">
-          <span className="font-semibold">Teléfono:</span> {dep.telefono}
-        </p>
-      )}
+        {/* 📞 TELÉFONO */}
+        {dep.telefono && (
+          <a
+            href={`tel:${String(dep.telefono).replace(/[^\d+]/g, "")}`}
+            className="
+              flex items-center gap-3 
+              text-gray-800 hover:text-blue-600 
+              transition active:scale-[0.98]
+            "
+          >
+            <Phone className="w-5 h-5 text-green-500" />
+            <span className="font-medium">{dep.telefono}</span>
+          </a>
+        )}
 
-      {dep.email && (
-        <p className="text-gray-700 mb-1">
-          <span className="font-semibold">Email:</span> {dep.email}
-        </p>
-      )}
+        {/* ✉️ EMAIL */}
+        {dep.email && (
+          <a
+            href={`mailto:${dep.email}`}
+            className="
+              flex items-center gap-3 
+              text-gray-800 hover:text-blue-600 
+              transition active:scale-[0.98]
+              break-all
+            "
+          >
+            <Mail className="w-5 h-5 text-purple-500" />
+            <span className="font-medium">{dep.email}</span>
+          </a>
+        )}
+
+      </div>
     </motion.div>
   );
 }
