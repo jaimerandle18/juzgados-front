@@ -42,24 +42,15 @@ export default function BottomNavNative() {
 
   // 🔥 BACK FIX DEFINITIVO
   const goBack = () => {
-    if (window.history.length <= 1) {
-      window.location.replace("/");
+    // 🔥 lógica simple que pediste
+    if (window.history.length <= 2) {
+      goHome();
       return;
     }
-
-    const before = window.location.href;
-
+  
     window.history.back();
-
-    // 🔥 evita loading infinito cuando termina en "/"
-    setTimeout(() => {
-      const after = window.location.href;
-
-      if (after === before || window.location.pathname === "/") {
-        window.location.replace("/");
-      }
-    }, 220);
   };
+  
 
   const goHome = () => {
     window.location.replace("/");
