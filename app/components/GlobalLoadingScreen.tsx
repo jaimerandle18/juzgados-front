@@ -19,7 +19,7 @@ export default function GlobalLoadingScreen() {
   useEffect(() => {
     forceHideLoader(); // cada vez que cambia la ruta, cerrá loader
   }, [pathname]);
-
+  
   useEffect(() => {
     const isIOSApp = Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios";
 
@@ -37,24 +37,9 @@ export default function GlobalLoadingScreen() {
         setTimeout(() => setMessage(undefined), 150);
       }
     );
-   const close = () => forceHideLoader();
-
-  // back/forward
-  window.addEventListener("popstate", close);
-
-  // 🔥 iOS BFCache: al volver atrás, se dispara pageshow y NO corren effects normales
-  window.addEventListener("pageshow", close);
-
-  // opcional: si vuelve de background
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") close();
-  });
-
-  return () => {
-    window.removeEventListener("popstate", close);
-    window.removeEventListener("pageshow", close);
-    document.removeEventListener("visibilitychange", () => {});
-  };
+    const close = () => forceHideLoader();
+    window.addEventListener("popstate", close);
+    return () => window.removeEventListener("popstate", close);
   }, []);
 
   // 🔑 En vez de return null, dejamos el nodo y lo ocultamos con display

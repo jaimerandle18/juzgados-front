@@ -13,13 +13,10 @@ export function registerLoader(show: (message?: string) => void, hide: () => voi
 
 export function showLoader(message?: string) {
   showTime = Date.now();
-
-  // 🔑 si había un hide pendiente, lo cancelamos
   if (hideTimer) {
     clearTimeout(hideTimer);
     hideTimer = null;
   }
-
   showLoaderFn?.(message);
 }
 
@@ -42,7 +39,7 @@ export function hideLoader() {
   }
 }
 
-// ✅ para back/forward/bfcache: NO esperar 1.5s
+// ✅ NUEVO: para back/home/popstate (no espera 1.5s)
 export function forceHideLoader() {
   if (hideTimer) {
     clearTimeout(hideTimer);
