@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 
@@ -27,68 +27,68 @@ export default function BottomNavNative() {
 
     const update = () => setCanGoBack(window.history.length > 1);
 
-    // inicial + cambios de navegación
     update();
     window.addEventListener("popstate", update);
-
     return () => window.removeEventListener("popstate", update);
-  }, [pathname, isNativeApp]);
+  }, [isNativeApp, pathname]);
 
   if (!isNativeApp) return null;
   if (shouldHide(pathname)) return null;
 
-  const goBack = () => router.back();
+  const goBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+  
+    // ✅ evita que el loader SPA quede colgado
+    window.location.assign("/");
+  };
+  
   const goHome = () => router.push("/");
-  const goForward = () => window.history.forward();
+
+  const goForward = () => {
+    // no siempre hay “forward”, pero no rompe
+    window.history.forward();
+  };
 
   return (
     <nav
-      aria-label="Navegación"
-      className="fixed left-0 right-0 z-[99999]"
+      className="fixed left-0 right-0 bottom-0 z-[99999] border-t border-white/40 bg-white/45 backdrop-blur-xl"
       style={{
-        bottom: "max(10px, env(safe-area-inset-bottom, 0px))", // 👈 más abajo, pegada al safe-area
-        pointerEvents: "none", // el wrapper no captura; solo la barra
+        paddingBottom: "env(safe-area-inset-bottom, 0px)", // ✅ pegada al borde del celu
+        WebkitBackdropFilter: "blur(18px)",
+        transform: "translate3d(0,0,0)",
+        WebkitTransform: "translate3d(0,0,0)",
       }}
+      aria-label="Navegación"
     >
-      <div className="mx-auto max-w-xl px-4" style={{ pointerEvents: "none" }}>
-        <div
-          className="mx-auto w-full rounded-2xl border border-white/50 bg-white/35 shadow-xl backdrop-blur-xl"
-          style={{
-            pointerEvents: "auto",
-            WebkitBackdropFilter: "blur(18px)",
-            transform: "translate3d(0,0,0)",
-            WebkitTransform: "translate3d(0,0,0)",
-          }}
-        >
-          <div className="grid grid-cols-3 items-center px-3 py-2">
-            {/* Back */}
-            <button
-              onClick={goBack}
-              disabled={!canGoBack}
-              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold disabled:opacity-35 active:scale-[0.98]"
-              aria-label="Volver atrás"
-            >
-              ‹
-            </button>
+      <div className="mx-auto max-w-xl px-4 py-2">
+        <div className="grid grid-cols-3 items-center">
+          <button
+            onClick={goBack}
+            disabled={!canGoBack}
+            className="flex items-center justify-center rounded-xl py-3 text-2xl font-semibold disabled:opacity-35 active:scale-[0.98]"
+            aria-label="Volver atrás"
+          >
+            ‹
+          </button>
 
-            {/* Home */}
-            <button
-              onClick={goHome}
-              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold active:scale-[0.98]"
-              aria-label="Ir al inicio"
-            >
-              ⌂
-            </button>
+          <button
+            onClick={goHome}
+            className="flex items-center justify-center rounded-xl py-3 text-2xl font-semibold active:scale-[0.98]"
+            aria-label="Inicio"
+          >
+            ⌂
+          </button>
 
-            {/* Forward */}
-            <button
-              onClick={goForward}
-              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold active:scale-[0.98]"
-              aria-label="Ir hacia adelante"
-            >
-              ›
-            </button>
-          </div>
+          <button
+            onClick={goForward}
+            className="flex items-center justify-center rounded-xl py-3 text-2xl font-semibold active:scale-[0.98]"
+            aria-label="Ir hacia adelante"
+          >
+            ›
+          </button>
         </div>
       </div>
     </nav>
