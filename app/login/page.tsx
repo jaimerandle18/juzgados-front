@@ -73,7 +73,7 @@ export default function LoginPage() {
 
       {/* TÍTULO */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight">Iniciar Sesión</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
         <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
