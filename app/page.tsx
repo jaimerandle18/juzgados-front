@@ -1,10 +1,64 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
+import { Scale, Gavel, Globe2 } from "lucide-react";
+import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { App } from "@capacitor/app";
+import { showLoader } from "./components/globalLoader";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { showLoader, forceHideLoader } from "./components/globalLoader"; // 👈 forceHide si lo tenés
-import { Capacitor } from "@capacitor/core";
+import { forceHideLoader } from "./components/globalLoader"; // 👈 forceHide si lo tenés
+
+export default function Home() {
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let handle: PluginListenerHandle | null = null;
+
+    const setup = async () => {
+      await StatusBar.setOverlaysWebView({ overlay: false });
+      await StatusBar.setStyle({ style: Style.Light });
+
+      handle = await App.addListener("backButton", ({ canGoBack }) => {
+        if (canGoBack) window.history.back();
+        else App.exitApp();
+      });
+    };
+
+    setup();
+
+    return () => {
+      handle?.remove();
+      handle = null;
+    };
+  }, []);
+
+  return (
+    <main className="min-h-screen px-6 pt-20">
+      <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
+        <MenuCard
+          href="/fueros/categorias/nacionales"
+          title="Fueros Nacionales"
+          icon={<Scale className="w-8 h-8 text-blue-700" />}
+        />
+
+        <MenuCard
+          href="/fueros/categorias/federales"
+          title="Fueros Federales"
+          icon={<Gavel className="w-8 h-8 text-blue-700" />}
+        />
+
+        <MenuCard
+          href="/fueros/categorias/competencia-pais"
+          title="Competencia en todo el país"
+          icon={<Globe2 className="w-8 h-8 text-blue-700" />}
+        />
+      </div>
+    </main>
+  );
+}
 
 function MenuCard({
   href,
