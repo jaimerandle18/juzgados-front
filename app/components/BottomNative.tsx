@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
+import { forceHideLoader } from "./globalLoader";
 
 const HIDE_ON: (string | RegExp)[] = [
   "/login",
@@ -41,19 +42,15 @@ export default function BottomNavNative() {
   if (shouldHide(pathname)) return null;
 
   // 🔥 BACK FIX DEFINITIVO
-  const goBack = () => {
-    // 🔥 lógica simple que pediste
-    if (window.history.length <= 2) {
-      goHome();
-      return;
-    }
-  
-    window.history.back();
+  const goHome = () => {
+    forceHideLoader();
+    window.location.replace("/");
   };
   
-
-  const goHome = () => {
-    window.location.replace("/");
+  const goBack = () => {
+    forceHideLoader();
+    if (window.history.length <= 2) goHome();
+    else window.history.back();
   };
 
   const goForward = () => {

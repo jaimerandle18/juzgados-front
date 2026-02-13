@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./LoadingScreen";
 import { registerLoader } from "./globalLoader";
 import { Capacitor } from "@capacitor/core";
+import { forceHideLoader } from "./globalLoader";
+
 
 export default function GlobalLoadingScreen() {
   const [visible, setVisible] = useState(false);
@@ -26,6 +28,9 @@ export default function GlobalLoadingScreen() {
         setTimeout(() => setMessage(undefined), 150);
       }
     );
+    const close = () => forceHideLoader();
+    window.addEventListener("popstate", close);
+    return () => window.removeEventListener("popstate", close);
   }, []);
 
   // 🔑 En vez de return null, dejamos el nodo y lo ocultamos con display
