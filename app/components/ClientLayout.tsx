@@ -11,6 +11,7 @@ import logo from "../../public/dataJury1.png";
 import GlobalLoadingScreen from "./GlobalLoadingScreen";
 import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
+import BottomNavNative from "./BottomNative";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -169,6 +170,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <GlobalLoadingScreen />
         <NativeGestures edgeOnlyPx={24} />
         {children}
+        <BottomNavNative />
       </main>
     </div>
   );
