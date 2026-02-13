@@ -5,12 +5,21 @@ import LoadingScreen from "./LoadingScreen";
 import { registerLoader } from "./globalLoader";
 import { Capacitor } from "@capacitor/core";
 import { forceHideLoader } from "./globalLoader";
+import { usePathname } from "next/navigation";
+
+
 
 
 export default function GlobalLoadingScreen() {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState<string | undefined>();
 
+  const pathname = usePathname();
+
+  useEffect(() => {
+    forceHideLoader(); // cada vez que cambia la ruta, cerrá loader
+  }, [pathname]);
+  
   useEffect(() => {
     const isIOSApp = Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios";
 

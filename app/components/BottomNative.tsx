@@ -7,7 +7,7 @@ import { forceHideLoader } from "./globalLoader";
 
 const HIDE_ON: (string | RegExp)[] = [
   "/login",
-  "/registry",
+  "/register",
   /^\/login\/?/,
   /^\/registry\/?/,
 ];
