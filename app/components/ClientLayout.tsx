@@ -12,6 +12,7 @@ import GlobalLoadingScreen from "./GlobalLoadingScreen";
 import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
 import BottomNavNative from "./BottomNative";
+import { Capacitor } from "@capacitor/core";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,6 +24,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const ua = navigator.userAgent.toLowerCase();
     const isSafari = ua.includes("safari") && !ua.includes("chrome") && !ua.includes("chromium");
     document.documentElement.classList.toggle("is-safari", isSafari);
+    if (Capacitor.isNativePlatform()) {
+      document.documentElement.classList.add("is-native-app");
+    }
   }, []);
 
   useEffect(() => {

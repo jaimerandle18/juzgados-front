@@ -4,80 +4,91 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 
+const HIDE_ON: (string | RegExp)[] = [
+  "/login",
+  "/registry",
+  /^\/login\/?/,
+  /^\/registry\/?/,
+];
+
+function shouldHide(pathname: string) {
+  return HIDE_ON.some((r) => (typeof r === "string" ? pathname === r : r.test(pathname)));
+}
+
 export default function BottomNavNative() {
   const router = useRouter();
   const pathname = usePathname();
-  const [canGoBack, setCanGoBack] = useState(false);
-  const [canGoForward, setCanGoForward] = useState(false);
 
-  const isNative = useMemo(() => Capacitor.isNativePlatform(), []);
-  const isIOSApp = useMemo(() => isNative && Capacitor.getPlatform() === "ios", [isNative]);
+  const isNativeApp = useMemo(() => Capacitor.isNativePlatform(), []);
+  const [canGoBack, setCanGoBack] = useState(false);
 
   useEffect(() => {
-    if (!isNative) return;
+    if (!isNativeApp) return;
 
-    // Estimación simple usando history length + popstate.
-    // Back: si history length > 1 casi seguro se puede.
-    const update = () => {
-      setCanGoBack(window.history.length > 1);
-      // Forward: no hay API directa; lo dejamos "optimista"
-      // y lo deshabilitamos si no querés confusion.
-      setCanGoForward(true);
-    };
+    const update = () => setCanGoBack(window.history.length > 1);
 
+    // inicial + cambios de navegación
     update();
     window.addEventListener("popstate", update);
-    return () => window.removeEventListener("popstate", update);
-  }, [pathname, isNative]);
 
-  // Mostrala solo en iOS app (cambiá a isNative si la querés en Android también)
-  if (!isIOSApp) return null;
+    return () => window.removeEventListener("popstate", update);
+  }, [pathname, isNativeApp]);
+
+  if (!isNativeApp) return null;
+  if (shouldHide(pathname)) return null;
 
   const goBack = () => router.back();
-  const goForward = () => window.history.forward();
   const goHome = () => router.push("/");
-  const refresh = () => window.location.reload();
+  const goForward = () => window.history.forward();
 
   return (
     <nav
-      className="fixed left-0 right-0 bottom-0 z-[99999] border-t border-white/60 bg-white/85 backdrop-blur-md"
+      aria-label="Navegación"
+      className="fixed left-0 right-0 z-[99999]"
       style={{
-        paddingBottom: "env(safe-area-inset-bottom)",
-        transform: "translate3d(0,0,0)",
-        WebkitTransform: "translate3d(0,0,0)",
+        bottom: "max(10px, env(safe-area-inset-bottom, 0px))", // 👈 más abajo, pegada al safe-area
+        pointerEvents: "none", // el wrapper no captura; solo la barra
       }}
     >
-      <div className="mx-auto max-w-xl px-4 py-2">
-        <div className="grid grid-cols-4 gap-2">
-          <button
-            onClick={goBack}
-            disabled={!canGoBack}
-            className="rounded-xl py-2 text-sm font-semibold disabled:opacity-40"
-          >
-            ◀︎ Atrás
-          </button>
+      <div className="mx-auto max-w-xl px-4" style={{ pointerEvents: "none" }}>
+        <div
+          className="mx-auto w-full rounded-2xl border border-white/50 bg-white/35 shadow-xl backdrop-blur-xl"
+          style={{
+            pointerEvents: "auto",
+            WebkitBackdropFilter: "blur(18px)",
+            transform: "translate3d(0,0,0)",
+            WebkitTransform: "translate3d(0,0,0)",
+          }}
+        >
+          <div className="grid grid-cols-3 items-center px-3 py-2">
+            {/* Back */}
+            <button
+              onClick={goBack}
+              disabled={!canGoBack}
+              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold disabled:opacity-35 active:scale-[0.98]"
+              aria-label="Volver atrás"
+            >
+              ‹
+            </button>
 
-          <button
-            onClick={goForward}
-            disabled={!canGoForward}
-            className="rounded-xl py-2 text-sm font-semibold disabled:opacity-40"
-          >
-            Adelante ▶︎
-          </button>
+            {/* Home */}
+            <button
+              onClick={goHome}
+              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold active:scale-[0.98]"
+              aria-label="Ir al inicio"
+            >
+              ⌂
+            </button>
 
-          <button
-            onClick={goHome}
-            className="rounded-xl py-2 text-sm font-semibold"
-          >
-            ⌂ Inicio
-          </button>
-
-          <button
-            onClick={refresh}
-            className="rounded-xl py-2 text-sm font-semibold"
-          >
-            ↻ Recargar
-          </button>
+            {/* Forward */}
+            <button
+              onClick={goForward}
+              className="flex items-center justify-center rounded-xl py-3 text-xl font-semibold active:scale-[0.98]"
+              aria-label="Ir hacia adelante"
+            >
+              ›
+            </button>
+          </div>
         </div>
       </div>
     </nav>
