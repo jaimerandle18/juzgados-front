@@ -1,32 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 import { forceHideLoader } from "./globalLoader";
 
-const HIDE_ON: (string | RegExp)[] = [
-  "/login",
-  "/register",
-  /^\/login\/?/,
-  /^\/registry\/?/,
-];
+const HIDE_ON: (string | RegExp)[] = ["/login", "/register", /^\/login\/?/, /^\/registry\/?/];
 
 function shouldHide(pathname: string) {
-  return HIDE_ON.some((r) =>
-    typeof r === "string" ? pathname === r : r.test(pathname)
-  );
+  return HIDE_ON.some((r) => (typeof r === "string" ? pathname === r : r.test(pathname)));
 }
 
 export default function BottomNavNative() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const isNativeApp = useMemo(
-    () => Capacitor.isNativePlatform(),
-    []
-  );
-
+  const isNativeApp = useMemo(() => Capacitor.isNativePlatform(), []);
   const [canGoBack, setCanGoBack] = useState(false);
+
+  // lock para evitar doble tap / race -> loader colgado
+  const navLock = useRef(false);
+  const runNav = (fn: () => void) => {
+    if (navLock.current) return;
+    navLock.current = true;
+    forceHideLoader();
+    fn();
+    // liberamos lock luego de un ratito; lo importante es evitar doble click rápido en iOS
+    setTimeout(() => (navLock.current = false), 350);
+  };
 
   useEffect(() => {
     if (!isNativeApp) return;
@@ -35,27 +36,38 @@ export default function BottomNavNative() {
     update();
 
     window.addEventListener("popstate", update);
-    return () => window.removeEventListener("popstate", update);
-  }, [pathname, isNativeApp]);
+
+    // iOS bfcache: cuando vuelve desde cache, popstate a veces no alcanza
+    const onPageShow = () => {
+      forceHideLoader();
+      update();
+    };
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      window.removeEventListener("popstate", update);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [isNativeApp]);
+
+  // MUY importante: cada cambio de ruta, apagá loader sí o sí
+  useEffect(() => {
+    forceHideLoader();
+  }, [pathname]);
 
   if (!isNativeApp) return null;
   if (shouldHide(pathname)) return null;
 
-  // 🔥 BACK FIX DEFINITIVO
-  const goHome = () => {
-    forceHideLoader();
-    window.location.replace("/");
-  };
-  
-  const goBack = () => {
-    forceHideLoader();
-    if (window.history.length <= 2) goHome();
-    else window.history.back();
-  };
+  const goHome = () => runNav(() => router.replace("/"));
 
-  const goForward = () => {
-    window.history.forward();
-  };
+  const goBack = () =>
+    runNav(() => {
+      // si no hay back real, volvemos a home sin reload
+      if (window.history.length <= 2) router.replace("/");
+      else router.back();
+    });
+
+  const goForward = () => runNav(() => window.history.forward());
 
   return (
     <nav
@@ -68,10 +80,8 @@ export default function BottomNavNative() {
       }}
       aria-label="Navegación"
     >
-      {/* 👇 ALTURA REDUCIDA ~40% */}
       <div className="mx-auto max-w-xl px-3 py-1">
         <div className="grid grid-cols-3 items-center">
-          {/* BACK */}
           <button
             onClick={goBack}
             disabled={!canGoBack}
@@ -80,7 +90,6 @@ export default function BottomNavNative() {
             ‹
           </button>
 
-          {/* HOME */}
           <button
             onClick={goHome}
             className="flex items-center justify-center rounded-xl py-1 text-lg font-semibold active:scale-[0.96]"
@@ -88,7 +97,6 @@ export default function BottomNavNative() {
             ⌂
           </button>
 
-          {/* FORWARD */}
           <button
             onClick={goForward}
             className="flex items-center justify-center rounded-xl py-1 text-lg font-semibold active:scale-[0.96]"
