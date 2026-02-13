@@ -10,6 +10,7 @@ import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import GlobalLoadingScreen from "./GlobalLoadingScreen";
 import { hideLoader, showLoader } from "./globalLoader";
+import NativeGestures from "./NativeGestures";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -166,6 +167,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <main className="px-6 max-w-6xl mx-auto relative z-10" style={{ paddingTop: "calc(7rem + env(safe-area-inset-top, 0px))" }}>
         <GlobalLoadingScreen />
+        <NativeGestures edgeOnlyPx={24} />
         {children}
       </main>
     </div>

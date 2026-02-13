@@ -158,7 +158,6 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
     { cache: "no-store" }
   );
   const juzgados = await juzgadosRes.json();
-  console.log(juzgados,"juzgados")
 
   const list = Array.isArray(juzgados) ? juzgados : [];
 

@@ -28,8 +28,7 @@ export default function LoginPage() {
   
       const res = await api.post("/auth/login", { email, contrasenia: password });
       const token = res?.data?.token;
-  
-      console.log("login response token:", token);
+
   
       if (!token || typeof token !== "string") {
         setError("No llegó token del backend");
@@ -59,11 +58,6 @@ export default function LoginPage() {
         console.error("sessionStorage error:", e);
       }
   
-      // Verificación inmediata
-      console.log("document.cookie now:", document.cookie);
-      console.log("localStorage now:", localStorage.getItem("auth_token"));
-      console.log("sessionStorage now:", sessionStorage.getItem("auth_token"));
-  
       // navegación
       router.push("/");
       router.refresh();
@@ -79,7 +73,7 @@ export default function LoginPage() {
 
       {/* TÍTULO */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight">Iniciar Sesión</h1>
         <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 

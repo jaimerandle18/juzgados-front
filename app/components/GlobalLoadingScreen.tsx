@@ -9,19 +9,39 @@ export default function GlobalLoadingScreen() {
   const [message, setMessage] = useState<string | undefined>();
 
   useEffect(() => {
-    registerLoader(
+    return registerLoader(
       (msg?: string) => {
         setMessage(msg);
         setVisible(true);
       },
       () => {
         setVisible(false);
-        setMessage(undefined);
+        // no borres el message inmediatamente (evita 1 frame raro)
+        setTimeout(() => setMessage(undefined), 150);
       }
     );
   }, []);
 
-  if (!visible) return null;
-
-  return <LoadingScreen message={message} />;
+  return (
+    <div
+      aria-hidden={!visible}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 999999,
+        // 🔑 fondo sólido desde el frame 0
+        background: "#f3f4f6",
+        // 🔑 no “desaparece” del DOM -> evita flash negro
+        opacity: visible ? 1 : 0,
+        visibility: visible ? "visible" : "hidden",
+        pointerEvents: visible ? "auto" : "none",
+        transition: "opacity 120ms ease",
+        transform: "translate3d(0,0,0)",
+        WebkitTransform: "translate3d(0,0,0)",
+        willChange: "opacity",
+      }}
+    >
+      <LoadingScreen message={message} />
+    </div>
+  );
 }

@@ -87,7 +87,6 @@ function Header({ dep }: { dep: any }) {
 }
 
 function InfoCard({ dep }: { dep: any }) {
-  console.log(dep,"dep")
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
