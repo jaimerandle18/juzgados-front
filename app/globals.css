@@ -200,4 +200,8 @@
 .is-native-app .dj-page{
   padding-bottom: calc(var(--bottom-nav-space) + env(safe-area-inset-bottom, 0px));
 }
+html, body {
+  background: #f3f4f6 !important;
+}
+
 
