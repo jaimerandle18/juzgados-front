@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
+import DeleteAccountButton from "@/components/DeleteAccountButton";
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -106,6 +107,7 @@ export default async function Page() {
         >
           Cerrar sesión
         </AnchorWithLoader>
+        <DeleteAccountButton />
       </div>
     </main>
   );
