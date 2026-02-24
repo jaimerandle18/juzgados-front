@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { cookies } from "next/headers";
 
-export default async function DeleteAccountButton () {
+export default function DeleteAccountButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value ?? "";
 
   const handleDelete = async () => {
     const ok = window.confirm(
@@ -18,26 +15,26 @@ export default async function DeleteAccountButton () {
 
     setLoading(true);
     try {
-      // Llamamos a un endpoint interno para poder leer cookies httpOnly desde server
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/me`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token ?? ""}` },
-        cache: "no-store",
-      });
-      if (!res.ok) throw new Error(await res.text());
+      const res = await fetch("/api/account/delete", { method: "DELETE" });
 
-      // Si salió bien, limpiamos sesión y mandamos al login
-      router.push("/login");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Error");
+      }
+
+      // Te llevo a logout (o a /login). Ideal: /logout borra cookie.
+      router.push("/logout");
       router.refresh();
     } catch (e) {
-      alert("No se pudo eliminar la cuenta. Intentá nuevamente.");
       console.error(e);
+      alert("No se pudo eliminar la cuenta. Intentá nuevamente.");
       setLoading(false);
     }
   };
 
   return (
     <button
+      type="button"
       onClick={handleDelete}
       disabled={loading}
       className="
