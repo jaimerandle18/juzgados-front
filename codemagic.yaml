@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
 
     environment:
-      node: 20
+      node: 22
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.datajury.app
@@ -45,12 +45,6 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
-      - name: "Pod install"
-        script: |
-          set -euo pipefail
-          cd ios/App
-          pod install --repo-update
-
       - name: "Install Codemagic CLI tools"
         script: |
           set -euo pipefail
@@ -68,11 +62,11 @@ workflows:
           # 1) Create/unlock a dedicated keychain
           keychain initialize
 
-          # 2) Import certificates stored in Codemagic
+          # 2) ✅ IMPORTANT: import the certificates you have stored in Codemagic
+          # Without this, `security find-identity` will show 0 and export will fail.
           keychain add-certificates
 
           # 3) Install / apply provisioning profiles to the Xcode project targets
-          # (keep .xcodeproj here; archive uses workspace)
           xcode-project use-profiles --project ios/App/App.xcodeproj
 
           echo "=== Codesigning identities (must NOT be 0) ==="
@@ -81,41 +75,17 @@ workflows:
           echo "=== Provisioning profiles installed ==="
           ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
-      - name: "Force numeric CFBundleVersion (App Info.plist only)"
+      - name: "Force numeric CFBundleVersion (all Info.plist)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
-          PLIST="ios/App/App/Info.plist"
-          test -f "$PLIST"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
-            || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
-            
-      - name: "Fix AppIcon 1024 (remove alpha channel)"
-        script: |
-          set -euo pipefail
 
-          ICONSET="ios/App/App/Assets.xcassets/AppIcon.appiconset"
-          test -d "$ICONSET"
+          while IFS= read -r PLIST; do
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
+              || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
+          done < <(find ios -name "Info.plist")
 
-          # Buscar el PNG 1024x1024 (suele llamarse 1024.png o similar)
-          ICON_1024="$(find "$ICONSET" -maxdepth 1 -type f -iname "*.png" | xargs -I{} sh -c 'sips -g pixelWidth -g pixelHeight "{}" 2>/dev/null | awk "NR==2{w=\$2} NR==3{h=\$2} END{if(w==1024 && h==1024) print \"{}\"}"' | head -n 1)"
-
-          if [ -z "$ICON_1024" ]; then
-            echo "❌ No encontré un PNG 1024x1024 en $ICONSET"
-            echo "Archivos:"
-            ls -ლა "$ICONSET"
-            exit 1
-          fi
-
-          echo "✅ Found 1024 icon: $ICON_1024"
-
-          # Flatten: convertir a JPEG y volver a PNG para eliminar alpha
-          TMPJPG="$(mktemp /tmp/iconXXXX).jpg"
-          sips -s format jpeg "$ICON_1024" --out "$TMPJPG"
-          sips -s format png  "$TMPJPG" --out "$ICON_1024"
-
-          echo "✅ Alpha removed from 1024 icon"
-      - name: "Archive (CocoaPods: workspace)"
+      - name: "Archive (SPM: project)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
@@ -124,7 +94,7 @@ workflows:
           mkdir -p build
 
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
