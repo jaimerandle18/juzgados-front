@@ -2,50 +2,52 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { deleteMyAccount } from "src/lib/auth"; // ajustá el path real
 
 export default function DeleteAccountButton() {
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
     const ok = window.confirm(
-      "¿Seguro que querés eliminar tu cuenta? Esta acción es permanente."
+      "⚠️ Esta acción es irreversible.\n\nSe eliminará tu cuenta y tus votos.\n\n¿Querés continuar?"
     );
     if (!ok) return;
 
-    setLoading(true);
     try {
-      const res = await fetch("/api/account/delete", { method: "DELETE" });
+      setLoading(true);
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Error");
-      }
+      await deleteMyAccount();
 
-      // Te llevo a logout (o a /login). Ideal: /logout borra cookie.
-      router.push("/logout");
+      // Después de borrar, mandalo a logout para limpiar cookie/token
+      router.push("/login");
       router.refresh();
-    } catch (e) {
-      console.error(e);
-      alert("No se pudo eliminar la cuenta. Intentá nuevamente.");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.message ||
+        "No se pudo eliminar la cuenta";
+      alert(msg);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <button
-      type="button"
       onClick={handleDelete}
       disabled={loading}
       className="
-        mt-4 inline-block w-full text-center
-        px-6 py-3 font-semibold rounded-xl
+        mt-4 w-full
+        px-6 py-3
+        font-semibold rounded-xl
         text-white bg-red-600
-        hover:bg-red-700 hover:shadow-md transition-all
+        hover:bg-red-700 hover:shadow-md
+        transition-all
         disabled:opacity-60 disabled:cursor-not-allowed
       "
     >
-      {loading ? "Eliminando..." : "Eliminar cuenta"}
+      {loading ? "Eliminando cuenta..." : "Eliminar mi cuenta"}
     </button>
   );
 }

@@ -12,3 +12,4 @@ export const getMe = () =>
 export const getMyVotes = () =>
   api.get("/usuarios/votes");
 
+export const deleteMyAccount = () => api.delete("/usuarios/me");
