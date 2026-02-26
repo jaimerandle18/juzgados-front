@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
 
     environment:
-      node: 22
+      node: 20
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.datajury.app
@@ -45,6 +45,12 @@ workflows:
           set -euo pipefail
           npx cap sync ios
 
+      - name: "Pod install"
+        script: |
+          set -euo pipefail
+          cd ios/App
+          pod install --repo-update
+
       - name: "Install Codemagic CLI tools"
         script: |
           set -euo pipefail
@@ -62,11 +68,11 @@ workflows:
           # 1) Create/unlock a dedicated keychain
           keychain initialize
 
-          # 2) ✅ IMPORTANT: import the certificates you have stored in Codemagic
-          # Without this, `security find-identity` will show 0 and export will fail.
+          # 2) Import certificates stored in Codemagic
           keychain add-certificates
 
           # 3) Install / apply provisioning profiles to the Xcode project targets
+          # (keep .xcodeproj here; archive uses workspace)
           xcode-project use-profiles --project ios/App/App.xcodeproj
 
           echo "=== Codesigning identities (must NOT be 0) ==="
@@ -75,17 +81,16 @@ workflows:
           echo "=== Provisioning profiles installed ==="
           ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
-      - name: "Force numeric CFBundleVersion (all Info.plist)"
+      - name: "Force numeric CFBundleVersion (App Info.plist only)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
+          PLIST="ios/App/App/Info.plist"
+          test -f "$PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
+            || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
 
-          while IFS= read -r PLIST; do
-            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" "$PLIST" 2>/dev/null \
-              || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUM" "$PLIST"
-          done < <(find ios -name "Info.plist")
-
-      - name: "Archive (SPM: project)"
+      - name: "Archive (CocoaPods: workspace)"
         script: |
           set -euo pipefail
           : "${BUILD_NUM:?BUILD_NUM not set}"
@@ -94,7 +99,7 @@ workflows:
           mkdir -p build
 
           xcodebuild \
-            -project ios/App/App.xcodeproj \
+            -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
