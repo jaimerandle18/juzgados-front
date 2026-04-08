@@ -19,7 +19,7 @@ export default async function Page() {
   const user = await res.json();
 
   return (
-    <main className="pt-24 pb-20 px-6 max-w-xl mx-auto text-gray-900">
+    <main className="pt-10 pb-20 px-6 max-w-xl mx-auto text-gray-900">
       {/* TÍTULO */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight">Mi Perfil</h1>

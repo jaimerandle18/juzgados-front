@@ -90,12 +90,12 @@ export default function MisEvaluacionesPage() {
             </div>
 
             {/* Botones */}
-            <div className="flex gap-3 w-full md:w-auto">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <AnchorWithLoader
                 href={`/votar/${v.dependencia_id}/editar`}
                 className="
-                  flex-1 md:flex-none px-4 py-2 rounded-xl border 
-                  border-blue-600 text-blue-700 font-semibold text-center 
+                  flex-1 min-w-[80px] px-3 py-2 rounded-xl border
+                  border-blue-600 text-blue-700 font-semibold text-center text-sm
                   hover:bg-blue-50 transition
                 "
               >
@@ -105,8 +105,8 @@ export default function MisEvaluacionesPage() {
               <button
                 onClick={() => setDeleteTarget(v)}
                 className="
-                  flex-1 md:flex-none px-4 py-2 rounded-xl border
-                  border-red-600 text-red-700 font-semibold text-center
+                  flex-1 min-w-[80px] px-3 py-2 rounded-xl border
+                  border-red-600 text-red-700 font-semibold text-center text-sm
                   hover:bg-red-50 transition
                 "
               >
@@ -116,8 +116,8 @@ export default function MisEvaluacionesPage() {
               <AnchorWithLoader
                 href={`/dependencia/${v.dependencia_id}/evaluaciones`}
                 className="
-                  flex-1 md:flex-none px-4 py-2 rounded-xl border
-                  border-gray-400 text-gray-700 font-semibold text-center
+                  w-full md:w-auto px-3 py-2 rounded-xl border
+                  border-gray-400 text-gray-700 font-semibold text-center text-sm
                   hover:bg-gray-100 transition
                 "
               >
