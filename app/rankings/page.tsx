@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AnchorWithLoader from "@/components/AnchorWithLoader";
 
 interface RankedDep {
