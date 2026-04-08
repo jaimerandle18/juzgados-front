@@ -9,7 +9,8 @@ import { App } from "@capacitor/app";
 import { showLoader } from "./components/globalLoader";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { forceHideLoader } from "./components/globalLoader"; // 👈 forceHide si lo tenés
+import { forceHideLoader } from "./components/globalLoader";
+import SearchBar from "./components/SearchBar";
 
 export default function Home() {
   useEffect(() => {
@@ -38,6 +39,8 @@ export default function Home() {
   return (
     <main className="min-h-screen px-6 pt-20">
       <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
+        <SearchBar />
+
         <MenuCard
           href="/fueros/categorias/nacionales"
           title="Fueros Nacionales"
