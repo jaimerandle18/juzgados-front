@@ -6,7 +6,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   // 1) Traigo el fuero (nombre, tipo, etc.)
   const fueroRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}`,
-    { cache: "no-store" }
+    { next: { revalidate: 300 } }
   );
   const fuero = await fueroRes.json();
 
@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   if (esJNCC) {
     const depsRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/dependencias`,
-      { cache: "no-store" }
+      { next: { revalidate: 300 } }
     );
 
     if (!depsRes.ok) {
@@ -147,16 +147,11 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
   // ==========================
   // RESTO DE LOS FUEROS (COMO ANTES)
   // ==========================
-  const camaraRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/camara`,
-    { cache: "no-store" }
-  );
+  const [camaraRes, juzgadosRes] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/camara`, { next: { revalidate: 300 } }),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/juzgados`, { next: { revalidate: 300 } }),
+  ]);
   const camara = await camaraRes.json();
-
-  const juzgadosRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/juzgados`,
-    { cache: "no-store" }
-  );
   const juzgados = await juzgadosRes.json();
 
   const list = Array.isArray(juzgados) ? juzgados : [];

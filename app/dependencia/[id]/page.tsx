@@ -11,7 +11,7 @@ export default async function Page({ params }: any) {
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/dependencias/${id}`,
     {
       method: "GET",
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
       },

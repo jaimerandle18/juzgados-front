@@ -8,7 +8,7 @@ interface Fuero {
   
   export default async function Home() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros`, {
-        cache: "no-store",
+        next: { revalidate: 300 },
       });
       const fueros: Fuero[] = await res.json();
       

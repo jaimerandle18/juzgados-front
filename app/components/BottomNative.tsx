@@ -17,6 +17,7 @@ export default function BottomNavNative() {
 
   const isNativeApp = useMemo(() => Capacitor.isNativePlatform(), []);
   const [canGoBack, setCanGoBack] = useState(false);
+  const navStack = useRef<string[]>([]);
 
   // lock para evitar doble tap / race -> loader colgado
   const navLock = useRef(false);
@@ -29,26 +30,24 @@ export default function BottomNavNative() {
     setTimeout(() => (navLock.current = false), 350);
   };
 
+  // Trackear navegación propia en vez de confiar en history.length
   useEffect(() => {
     if (!isNativeApp) return;
 
-    const update = () => setCanGoBack(window.history.length > 1);
-    update();
+    // Solo agregar si es distinto al último (evitar duplicados por re-render)
+    const stack = navStack.current;
+    if (stack[stack.length - 1] !== pathname) {
+      stack.push(pathname);
+    }
+    setCanGoBack(stack.length > 1);
 
-    window.addEventListener("popstate", update);
-
-    // iOS bfcache: cuando vuelve desde cache, popstate a veces no alcanza
-    const onPageShow = () => {
-      forceHideLoader();
-      update();
-    };
+    const onPageShow = () => forceHideLoader();
     window.addEventListener("pageshow", onPageShow);
 
     return () => {
-      window.removeEventListener("popstate", update);
       window.removeEventListener("pageshow", onPageShow);
     };
-  }, [isNativeApp]);
+  }, [isNativeApp, pathname]);
 
   // MUY importante: cada cambio de ruta, apagá loader sí o sí
   useEffect(() => {
@@ -62,9 +61,14 @@ export default function BottomNavNative() {
 
   const goBack = () =>
     runNav(() => {
-      // si no hay back real, volvemos a home sin reload
-      if (window.history.length <= 2) router.replace("/");
-      else router.back();
+      const stack = navStack.current;
+      if (stack.length > 1) {
+        stack.pop(); // sacamos la actual
+        router.back();
+        setCanGoBack(stack.length > 1);
+      } else {
+        router.replace("/");
+      }
     });
 
   const goForward = () => runNav(() => window.history.forward());

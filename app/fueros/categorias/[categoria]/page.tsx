@@ -16,7 +16,7 @@ export default async function Page({ params }: PageProps) {
   const tipo = mapCategoriaToTipo[categoria];
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros?tipo=${tipo}`, {
-    cache: "no-store",
+    next: { revalidate: 300 },
   });
 
   const fueros = await res.json();

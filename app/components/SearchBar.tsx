@@ -20,7 +20,8 @@ export default function SearchBar() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const cacheRef = useRef<Map<string, Resultado[]>>(new Map());
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -43,12 +44,22 @@ export default function SearchBar() {
       return;
     }
 
+    const key = value.trim().toLowerCase();
+
+    if (cacheRef.current.has(key)) {
+      const cached = cacheRef.current.get(key)!;
+      setResultados(cached);
+      setOpen(cached.length > 0);
+      return;
+    }
+
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
         const { data } = await api.get("/pjn/dependencias/buscar", {
           params: { q: value.trim() },
         });
+        cacheRef.current.set(key, data);
         setResultados(data);
         setOpen(data.length > 0);
       } catch {
