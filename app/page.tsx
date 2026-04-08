@@ -37,7 +37,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen px-6 pt-20">
+    <main className="min-h-screen px-6 pt-10">
       <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
         <SearchBar />
 
@@ -58,6 +58,7 @@ export default function Home() {
           title="Competencia en todo el país"
           icon={<Globe2 className="w-8 h-8 text-blue-700" />}
         />
+
       </div>
     </main>
   );

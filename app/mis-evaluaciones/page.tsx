@@ -105,24 +105,23 @@ export default function MisEvaluacionesPage() {
               <button
                 onClick={() => setDeleteTarget(v)}
                 className="
-                  flex-1 md:flex-none px-4 py-2 rounded-xl border 
-                  border-red-600 text-red-700 font-semibold text-center 
+                  flex-1 md:flex-none px-4 py-2 rounded-xl border
+                  border-red-600 text-red-700 font-semibold text-center
                   hover:bg-red-50 transition
                 "
               >
                 Borrar
               </button>
 
-              {/* Solo Desktop */}
               <AnchorWithLoader
-                href={`/dependencia/${v.dependencia_id}`}
+                href={`/dependencia/${v.dependencia_id}/evaluaciones`}
                 className="
-                  hidden md:inline-flex px-4 py-2 rounded-xl border 
-                  border-gray-400 text-gray-700 font-semibold 
+                  flex-1 md:flex-none px-4 py-2 rounded-xl border
+                  border-gray-400 text-gray-700 font-semibold text-center
                   hover:bg-gray-100 transition
                 "
               >
-                Ver
+                Ver evaluaciones
               </AnchorWithLoader>
             </div>
           </div>

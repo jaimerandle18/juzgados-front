@@ -40,6 +40,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   const navItems = [
     { label: "Inicio", href: "/" },
+    { label: "Rankings", href: "/rankings" },
     { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
     { label: "Mi perfil", href: "/perfil" },
   ];
