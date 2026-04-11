@@ -112,7 +112,7 @@ export default function VotarForm({
               "w-10 h-10 cursor-pointer transition",
               n <= puntuacion
                 ? "text-yellow-400 fill-yellow-400 drop-shadow"
-                : "text-gray-300"
+                : "text-gray-900"
             )}
           />
         ))}
@@ -164,7 +164,11 @@ export default function VotarForm({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed top-6 left-4 right-4 z-50 mx-auto max-w-md px-5 py-4 rounded-2xl bg-green-500 text-white shadow-xl flex items-center gap-3"
+          className="fixed left-4 right-4 mx-auto max-w-md px-5 py-4 rounded-2xl bg-green-500 text-white shadow-xl flex items-center gap-3"
+          style={{
+            zIndex: 99999,
+            top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+          }}
         >
           <span className="text-2xl shrink-0">✓</span>
           <p className="font-semibold text-sm leading-tight">
