@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { showLoader } from "@/components/globalLoader";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
@@ -246,6 +247,7 @@ export default function DependenciaView({ data }: { data: any }) {
   const integrantes = data.integrantes || [];
   const children = data.children || [];
   const guest = typeof window !== "undefined" && isGuestMode();
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   const tieneHijos = children.length > 0;
 // 👉 detectar Cámara Nacional de Apelaciones en lo Criminal y Correccional
@@ -295,14 +297,21 @@ if (esCamaraApelacionesCriminal) {
       {/* BOTONES SOLO SI NO TIENE HIJOS */}
       {!tieneHijos && (
      <div className="mb-12 flex flex-col md:flex-row gap-6 justify-center">
-     {!guest && (
-       <a
-         href={`/votar/${dep.id}`}
-         className="dj-btn dj-btn-blue"
-       >
-         <span className="dj-btn-content">Evaluar →</span>
-       </a>
-     )}
+       {guest ? (
+         <button
+           onClick={() => setShowGuestModal(true)}
+           className="dj-btn dj-btn-blue"
+         >
+           <span className="dj-btn-content">Evaluar →</span>
+         </button>
+       ) : (
+         <a
+           href={`/votar/${dep.id}`}
+           className="dj-btn dj-btn-blue"
+         >
+           <span className="dj-btn-content">Evaluar →</span>
+         </a>
+       )}
 
      <a
        href={`/dependencia/${dep.id}/evaluaciones`}
@@ -312,6 +321,42 @@ if (esCamaraApelacionesCriminal) {
      </a>
    </div>
 
+      )}
+
+      {/* MODAL INVITADO */}
+      {showGuestModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl border border-gray-200"
+          >
+            <h2 className="text-xl font-bold text-gray-800 mb-3 text-center">
+              Debes iniciar sesión
+            </h2>
+
+            <p className="text-gray-600 text-center mb-6">
+              Para evaluar necesitás tener una cuenta. Iniciá sesión o registrate para poder votar.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <a
+                href="/login"
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-center shadow transition-all"
+              >
+                Iniciar sesión
+              </a>
+
+              <button
+                onClick={() => setShowGuestModal(false)}
+                className="w-full py-3 rounded-xl border border-gray-300 font-semibold text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* 👥 INTEGRANTES (SIEMPRE IGUAL) */}

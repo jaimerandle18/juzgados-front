@@ -4,8 +4,8 @@ import { useState } from "react";
 import { api } from "../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { navigateWithLoader } from "@/components/NavigateWithLoader";
 
 export default function VotarForm({
   id,
@@ -87,10 +87,9 @@ export default function VotarForm({
 
     setSuccess(true);
 
-    // Mostrar toast y redirigir después de 2s
     setTimeout(() => {
-     navigateWithLoader(router,"/mis-evaluaciones");
-    }, 2000);
+      router.push("/mis-evaluaciones");
+    }, 2500);
   };
 
   return (
@@ -161,16 +160,17 @@ export default function VotarForm({
 
       {/* TOAST */}
       {success && (
-        <div
-          className="
-            fixed top-6 right-6 z-50 px-5 py-4 rounded-2xl
-            bg-green-100/80 backdrop-blur-md border border-green-300
-            shadow-lg animate-slideIn flex items-center gap-2 text-green-800
-          "
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-6 left-4 right-4 z-50 mx-auto max-w-md px-5 py-4 rounded-2xl bg-green-500 text-white shadow-xl flex items-center gap-3"
         >
-          <span className="text-xl">✓</span>
-          <p className="font-semibold">¡Evaluación enviada con éxito!</p>
-        </div>
+          <span className="text-2xl shrink-0">✓</span>
+          <p className="font-semibold text-sm leading-tight">
+            {dependenciaNombre} votado correctamente
+          </p>
+        </motion.div>
       )}
     </main>
   );
