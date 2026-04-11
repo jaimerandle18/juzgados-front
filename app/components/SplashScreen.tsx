@@ -8,67 +8,80 @@ import djLogo from "../../public/dataJury1.png";
 function playStartupSound() {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const now = ctx.currentTime;
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.7, t);
+    master.connect(ctx.destination);
 
-    // Capa 1: tono grave de fondo (pad)
-    const pad = ctx.createOscillator();
-    const padGain = ctx.createGain();
-    pad.type = "sine";
-    pad.frequency.setValueAtTime(180, now);
-    pad.frequency.linearRampToValueAtTime(220, now + 1.2);
-    padGain.gain.setValueAtTime(0, now);
-    padGain.gain.linearRampToValueAtTime(0.08, now + 0.3);
-    padGain.gain.setValueAtTime(0.08, now + 0.8);
-    padGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-    pad.connect(padGain);
-    padGain.connect(ctx.destination);
-    pad.start(now);
-    pad.stop(now + 1.5);
+    // Reverb simulado con delay
+    const delay = ctx.createDelay();
+    delay.delayTime.value = 0.12;
+    const fbGain = ctx.createGain();
+    fbGain.gain.value = 0.25;
+    delay.connect(fbGain);
+    fbGain.connect(delay);
+    delay.connect(master);
 
-    // Capa 2: sweep ascendente (el "fiiuum" principal)
-    const sweep = ctx.createOscillator();
-    const sweepGain = ctx.createGain();
-    sweep.type = "sine";
-    sweep.frequency.setValueAtTime(250, now + 0.05);
-    sweep.frequency.exponentialRampToValueAtTime(900, now + 0.5);
-    sweep.frequency.exponentialRampToValueAtTime(1100, now + 0.9);
-    sweep.frequency.exponentialRampToValueAtTime(700, now + 1.3);
-    sweepGain.gain.setValueAtTime(0, now);
-    sweepGain.gain.linearRampToValueAtTime(0.13, now + 0.15);
-    sweepGain.gain.setValueAtTime(0.13, now + 0.6);
-    sweepGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-    sweep.connect(sweepGain);
-    sweepGain.connect(ctx.destination);
-    sweep.start(now + 0.05);
-    sweep.stop(now + 1.4);
+    // Helper para crear oscilador con envelope
+    const voice = (
+      type: OscillatorType, freq: number, start: number, end: number,
+      vol: number, attack: number, freqEnd?: number, useFb?: boolean
+    ) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t + start);
+      if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t + end - 0.1);
+      g.gain.setValueAtTime(0, t + start);
+      g.gain.linearRampToValueAtTime(vol, t + start + attack);
+      g.gain.setValueAtTime(vol, t + end - (end - start) * 0.4);
+      g.gain.exponentialRampToValueAtTime(0.001, t + end);
+      o.connect(g);
+      g.connect(master);
+      if (useFb) g.connect(delay);
+      o.start(t + start);
+      o.stop(t + end + 0.5);
+    };
 
-    // Capa 3: brillo agudo (shimmer)
-    const shimmer = ctx.createOscillator();
-    const shimmerGain = ctx.createGain();
-    shimmer.type = "triangle";
-    shimmer.frequency.setValueAtTime(600, now + 0.2);
-    shimmer.frequency.exponentialRampToValueAtTime(1400, now + 0.7);
-    shimmer.frequency.exponentialRampToValueAtTime(1000, now + 1.2);
-    shimmerGain.gain.setValueAtTime(0, now + 0.2);
-    shimmerGain.gain.linearRampToValueAtTime(0.06, now + 0.4);
-    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
-    shimmer.connect(shimmerGain);
-    shimmerGain.connect(ctx.destination);
-    shimmer.start(now + 0.2);
-    shimmer.stop(now + 1.3);
+    // --- CAPA 1: Sub bass profundo (que se siente, no se escucha tanto) ---
+    voice("sine", 55, 0, 3.0, 0.12, 0.8, 75);
 
-    // Capa 4: "ding" final de confirmación
-    const ding = ctx.createOscillator();
-    const dingGain = ctx.createGain();
-    ding.type = "sine";
-    ding.frequency.setValueAtTime(880, now + 0.8);
-    dingGain.gain.setValueAtTime(0, now + 0.8);
-    dingGain.gain.linearRampToValueAtTime(0.1, now + 0.85);
-    dingGain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
-    ding.connect(dingGain);
-    dingGain.connect(ctx.destination);
-    ding.start(now + 0.8);
-    ding.stop(now + 1.6);
+    // --- CAPA 2: Pad cálido - acorde mayor abierto (Do-Sol-Mi) ---
+    // Fundamental Do3
+    voice("sine", 130.8, 0.1, 3.2, 0.07, 0.6, 138);
+    // Quinta Sol3
+    voice("sine", 196, 0.2, 3.3, 0.06, 0.7, 207);
+    // Tercera Mi4 (arriba, etéreo)
+    voice("sine", 329.6, 0.3, 3.4, 0.04, 0.8, 349);
+    // Octava Do4
+    voice("sine", 261.6, 0.15, 3.1, 0.05, 0.7, 277);
+
+    // --- CAPA 3: Shimmer cristalino (como campanitas PS5) ---
+    voice("sine", 1318, 0.5, 2.8, 0.03, 0.1, 1400, true);
+    voice("sine", 1568, 0.7, 2.6, 0.025, 0.1, 1660, true);
+    voice("sine", 2093, 0.9, 2.4, 0.02, 0.08, 2200, true);
+    voice("triangle", 987, 0.6, 2.9, 0.02, 0.15, 1050, true);
+
+    // --- CAPA 4: Sweep ascendente etéreo ---
+    const sw = ctx.createOscillator();
+    const swG = ctx.createGain();
+    sw.type = "sine";
+    sw.frequency.setValueAtTime(200, t + 0.1);
+    sw.frequency.exponentialRampToValueAtTime(800, t + 1.5);
+    sw.frequency.exponentialRampToValueAtTime(600, t + 3.0);
+    swG.gain.setValueAtTime(0, t);
+    swG.gain.linearRampToValueAtTime(0.04, t + 0.5);
+    swG.gain.setValueAtTime(0.04, t + 1.5);
+    swG.gain.exponentialRampToValueAtTime(0.001, t + 3.2);
+    sw.connect(swG);
+    swG.connect(master);
+    swG.connect(delay);
+    sw.start(t + 0.1);
+    sw.stop(t + 3.5);
+
+    // --- CAPA 5: Nota final de resolución (ding suave) ---
+    voice("sine", 523.2, 2.0, 3.8, 0.035, 0.15);
+    voice("sine", 659.2, 2.1, 3.7, 0.025, 0.15, undefined, true);
   } catch {}
 }
 
