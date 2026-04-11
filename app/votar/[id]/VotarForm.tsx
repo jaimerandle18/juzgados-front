@@ -167,7 +167,7 @@ export default function VotarForm({
           className="fixed left-4 right-4 mx-auto max-w-md px-5 py-4 rounded-2xl bg-green-500 text-white shadow-xl flex items-center gap-3"
           style={{
             zIndex: 99999,
-            top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+            top: "calc(env(safe-area-inset-top, 0px) + 5.5rem)",
           }}
         >
           <span className="text-2xl shrink-0">✓</span>
