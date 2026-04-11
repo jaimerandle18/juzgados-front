@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
+import SplashScreen from "../components/SplashScreen";
+import { AnimatePresence } from "framer-motion";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
   const router = useRouter();
+
+  const onSplashDone = useCallback(() => {
+    router.replace("/");
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +54,9 @@ export default function LoginPage() {
       try { localStorage.setItem("auth_token", token); } catch {}
       try { sessionStorage.setItem("auth_token", token); } catch {}
 
-      clearGuestMode(); // limpiar modo invitado si existía
-      router.replace("/");
+      clearGuestMode();
+      setLoading(false);
+      setShowSplash(true);
       // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);
@@ -60,6 +68,9 @@ export default function LoginPage() {
 
   return (
     <>
+      <AnimatePresence>
+        {showSplash && <SplashScreen onDone={onSplashDone} />}
+      </AnimatePresence>
       {loading && <LoadingScreen message="Iniciando sesión..." />}
 
       <main className="min-h-screen flex flex-col items-center pt-14 px-4">
@@ -109,7 +120,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => {
               setGuestMode();
-              router.replace("/");
+              setShowSplash(true);
             }}
             className="
               w-full py-4 rounded-2xl font-semibold text-lg
