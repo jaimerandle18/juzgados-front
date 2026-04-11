@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import djLogo from "../../public/dataJury1.png";
 
 function playStartupSound() {
   try {
@@ -70,7 +72,7 @@ function playStartupSound() {
   } catch {}
 }
 
-const SPONSOR_LOGO = "https://asocgobiernoabierto.org/wp-content/uploads/2026/03/Logotipo-AGA.png";
+const SPONSOR_URL = "https://www.asocgobiernoabierto.org/wp-content/uploads/2026/03/Logotipo-AGA.png";
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
   const doneRef = useRef(false);
@@ -100,12 +102,12 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/dataJury1.png"
+        <Image
+          src={djLogo}
           alt="Data Jury"
           width={200}
           height={90}
+          priority
           style={{ objectFit: "contain" }}
         />
       </motion.div>
@@ -132,7 +134,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         </p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={SPONSOR_LOGO}
+          src={SPONSOR_URL}
           alt="Gobierno Abierto"
           width={170}
           height={55}
