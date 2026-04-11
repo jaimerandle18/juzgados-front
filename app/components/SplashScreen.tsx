@@ -70,6 +70,8 @@ function playStartupSound() {
   } catch {}
 }
 
+const SPONSOR_LOGO = "https://asocgobiernoabierto.org/wp-content/uploads/2026/03/Logotipo-AGA.png";
+
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
   const doneRef = useRef(false);
 
@@ -130,7 +132,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         </p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/gobiernoabierto.png"
+          src={SPONSOR_LOGO}
           alt="Gobierno Abierto"
           width={170}
           height={55}
