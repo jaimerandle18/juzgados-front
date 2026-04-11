@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import logo from "../../public/dataJury1.png";
-import sponsor from "../../public/gobiernoabierto.png";
 
 function playSwoosh() {
   try {
@@ -58,7 +56,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Image
-          src={logo}
+          src="/dataJury1.png"
           alt="Data Jury"
           width={180}
           height={80}
@@ -88,7 +86,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
           Sponsored by
         </p>
         <Image
-          src={sponsor}
+          src="/gobiernoabierto.png"
           alt="Gobierno Abierto"
           width={160}
           height={50}
