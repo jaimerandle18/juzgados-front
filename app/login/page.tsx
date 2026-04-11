@@ -111,9 +111,10 @@ export default function LoginPage() {
               router.replace("/");
             }}
             className="
-              w-full py-4 rounded-2xl font-semibold
-              border-2 border-gray-300 text-gray-700
-              hover:bg-gray-50 hover:border-gray-400
+              w-full py-4 rounded-2xl font-semibold text-lg
+              bg-gray-800 text-white
+              hover:bg-gray-900
+              shadow-lg hover:-translate-y-0.5
               transition-all
             "
           >

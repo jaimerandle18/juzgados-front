@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { api } from "../../src/lib/api";
-import { Search, MapPin, X, Navigation, AlertCircle } from "lucide-react";
+import { Search, X, Navigation, AlertCircle, Locate } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Resultado {
@@ -22,10 +22,30 @@ export default function RecorridoPage() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Resultado[]>([]);
+  const [ubicacionOk, setUbicacionOk] = useState(false);
+  const [ubicacionError, setUbicacionError] = useState("");
+  const coordsRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const cacheRef = useRef<Map<string, Resultado[]>>(new Map());
+
+  // Pedir ubicación al montar
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setUbicacionError("Tu navegador no soporta geolocalización");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        coordsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUbicacionOk(true);
+      },
+      () => {
+        setUbicacionError("No se pudo obtener tu ubicación. El recorrido partirá desde el primer destino.");
+      }
+    );
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -96,19 +116,31 @@ export default function RecorridoPage() {
   };
 
   const armarRecorrido = () => {
-    if (seleccionados.length < 2) return;
+    if (seleccionados.length < 1) return;
 
-    const direcciones = seleccionados
-      .map((s) => {
-        const dir = s.domicilio || s.nombre;
-        return s.localidad ? `${dir}, ${s.localidad}` : dir;
-      });
+    const direcciones = seleccionados.map((s) => {
+      const dir = s.domicilio || s.nombre;
+      return s.localidad ? `${dir}, ${s.localidad}` : dir;
+    });
 
-    // Primer punto = origen, ultimo = destino, intermedios = waypoints
-    const origin = encodeURIComponent(direcciones[0]);
-    const destination = encodeURIComponent(direcciones[direcciones.length - 1]);
-    const waypoints = direcciones
-      .slice(1, -1)
+    // Si tenemos ubicación GPS, esa es el origen
+    // Si no, el primer destino seleccionado es el origen
+    const origin = coordsRef.current
+      ? encodeURIComponent(`${coordsRef.current.lat},${coordsRef.current.lng}`)
+      : encodeURIComponent(direcciones[0]);
+
+    const destinos = coordsRef.current ? direcciones : direcciones.slice(1);
+
+    if (destinos.length === 0) {
+      // Solo 1 seleccionado + GPS -> destino directo
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(direcciones[0])}&travelmode=driving`;
+      window.open(url, "_blank");
+      return;
+    }
+
+    const destination = encodeURIComponent(destinos[destinos.length - 1]);
+    const waypoints = destinos
+      .slice(0, -1)
       .map((d) => encodeURIComponent(d))
       .join("|");
 
@@ -119,6 +151,8 @@ export default function RecorridoPage() {
 
     window.open(url, "_blank");
   };
+
+  const minParaRecorrido = coordsRef.current ? 1 : 2;
 
   return (
     <main className="min-h-screen px-6 pt-10 pb-20">
@@ -131,10 +165,26 @@ export default function RecorridoPage() {
         {/* Aviso */}
         <div className="flex items-start gap-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-2xl p-4">
           <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-blue-900 font-medium">
             Selecciona hasta <strong>{MAX_UBICACIONES} ubicaciones</strong> y te armamos el recorrido
             en Google Maps con la mejor ruta.
           </p>
+        </div>
+
+        {/* Estado de ubicación */}
+        <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium ${
+          ubicacionOk
+            ? "bg-green-50/80 border border-green-200 text-green-800"
+            : ubicacionError
+            ? "bg-yellow-50/80 border border-yellow-200 text-yellow-800"
+            : "bg-gray-50/80 border border-gray-200 text-gray-700"
+        }`}>
+          <Locate className="w-4 h-4 shrink-0" />
+          {ubicacionOk
+            ? "Tu ubicación actual sera el punto de partida"
+            : ubicacionError
+            ? ubicacionError
+            : "Obteniendo tu ubicación..."}
         </div>
 
         {/* Buscador */}
@@ -188,7 +238,7 @@ export default function RecorridoPage() {
                     <span className="font-semibold text-gray-900 text-sm leading-tight">
                       {r.nombre}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-600">
                       {tipoLabel(r.tipo_funcional)}
                       {r.fuero?.nombre ? ` · ${r.fuero.nombre}` : ""}
                       {yaAgregado ? " · Ya agregado" : ""}
@@ -200,7 +250,7 @@ export default function RecorridoPage() {
           )}
 
           {open && resultados.length === 0 && !loading && query.length >= 2 && (
-            <div className="absolute z-50 mt-2 w-full rounded-2xl bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl px-5 py-4 text-sm text-gray-500">
+            <div className="absolute z-50 mt-2 w-full rounded-2xl bg-white/95 backdrop-blur-lg border border-gray-200 shadow-xl px-5 py-4 text-sm text-gray-700">
               No se encontraron resultados
             </div>
           )}
@@ -208,7 +258,7 @@ export default function RecorridoPage() {
 
         {/* Contador */}
         {seleccionados.length > 0 && (
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-gray-700 text-center font-medium">
             {seleccionados.length} de {MAX_UBICACIONES} ubicaciones
           </p>
         )}
@@ -238,7 +288,7 @@ export default function RecorridoPage() {
                   <p className="font-semibold text-gray-900 text-sm truncate">
                     {item.nombre}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-700 truncate">
                     {item.domicilio || "Sin domicilio"}
                     {item.localidad ? `, ${item.localidad}` : ""}
                   </p>
@@ -246,7 +296,7 @@ export default function RecorridoPage() {
 
                 <button
                   onClick={() => quitar(item.id)}
-                  className="shrink-0 p-1.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition"
+                  className="shrink-0 p-1.5 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -256,7 +306,7 @@ export default function RecorridoPage() {
         </div>
 
         {/* Boton de armar recorrido */}
-        {seleccionados.length >= 2 && (
+        {seleccionados.length >= minParaRecorrido && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -275,9 +325,9 @@ export default function RecorridoPage() {
           </motion.button>
         )}
 
-        {seleccionados.length === 1 && (
-          <p className="text-sm text-gray-400 text-center">
-            Agrega al menos 2 ubicaciones para armar el recorrido
+        {seleccionados.length > 0 && seleccionados.length < minParaRecorrido && (
+          <p className="text-sm text-gray-700 text-center font-medium">
+            Agrega al menos {minParaRecorrido} ubicacion{minParaRecorrido > 1 ? "es" : ""} para armar el recorrido
           </p>
         )}
       </div>
