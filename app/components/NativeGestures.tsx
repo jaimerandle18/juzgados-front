@@ -3,28 +3,34 @@
 import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
+import { forceHideLoader } from "./globalLoader";
 
 type Options = {
-  swipeThresholdPx?: number; // mínimo desplazamiento horizontal
-  verticalTolerancePx?: number; // cuánto toleramos en vertical
-  edgeOnlyPx?: number; // si querés que el gesto sea sólo desde el borde (0 = en cualquier lado)
+  swipeThresholdPx?: number;
+  verticalTolerancePx?: number;
+  edgeZonePx?: number; // ancho de la zona del borde para iniciar swipe
 };
 
 export default function NativeGestures({
-  swipeThresholdPx = 60,
-  verticalTolerancePx = 40,
-  edgeOnlyPx = 0, // poné 24 si querés solo desde el borde izquierdo/derecho
+  swipeThresholdPx = 50,
+  verticalTolerancePx = 60,
+  edgeZonePx = 30,
 }: Options) {
   const startX = useRef<number | null>(null);
   const startY = useRef<number | null>(null);
+  const startedFromLeftEdge = useRef(false);
+  const startedFromRightEdge = useRef(false);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    // Android back button (ya lo tenías) — OJO: iOS no dispara esto.
     const backSub = App.addListener("backButton", ({ canGoBack }) => {
-      if (canGoBack) window.history.back();
-      else App.exitApp();
+      if (canGoBack) {
+        forceHideLoader();
+        window.history.back();
+      } else {
+        App.exitApp();
+      }
     });
 
     const onTouchStart = (e: TouchEvent) => {
@@ -32,6 +38,9 @@ export default function NativeGestures({
       const t = e.touches[0];
       startX.current = t.clientX;
       startY.current = t.clientY;
+      // Guardamos si el touch empezó desde un borde
+      startedFromLeftEdge.current = t.clientX <= edgeZonePx;
+      startedFromRightEdge.current = window.innerWidth - t.clientX <= edgeZonePx;
     };
 
     const onTouchEnd = (e: TouchEvent) => {
@@ -41,32 +50,29 @@ export default function NativeGestures({
       const t = e.changedTouches[0];
       const dx = t.clientX - startX.current;
       const dy = t.clientY - startY.current;
+      const fromLeft = startedFromLeftEdge.current;
+      const fromRight = startedFromRightEdge.current;
 
       startX.current = null;
       startY.current = null;
+      startedFromLeftEdge.current = false;
+      startedFromRightEdge.current = false;
 
       // Evitar que un scroll vertical dispare navegación
       if (Math.abs(dy) > verticalTolerancePx) return;
 
-      // Si querés gesto solo desde bordes:
-      if (edgeOnlyPx > 0) {
-        const fromLeftEdge = (t.clientX <= edgeOnlyPx);
-        const fromRightEdge = (window.innerWidth - t.clientX <= edgeOnlyPx);
-        // Swipe derecha = back, swipe izquierda = forward
-        if (dx > 0 && !fromLeftEdge) return;
-        if (dx < 0 && !fromRightEdge) return;
-      }
-
-      if (dx > swipeThresholdPx) {
-        // Swipe → (derecha): volver
+      // Swipe → (derecha) desde borde izquierdo: volver
+      if (dx > swipeThresholdPx && fromLeft) {
+        forceHideLoader();
         window.history.back();
-      } else if (dx < -swipeThresholdPx) {
-        // Swipe ← (izquierda): adelante
+      }
+      // Swipe ← (izquierda) desde borde derecho: adelante
+      else if (dx < -swipeThresholdPx && fromRight) {
+        forceHideLoader();
         window.history.forward();
       }
     };
 
-    // passive true para no bloquear scroll
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
 
@@ -75,7 +81,7 @@ export default function NativeGestures({
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [swipeThresholdPx, verticalTolerancePx, edgeOnlyPx]);
+  }, [swipeThresholdPx, verticalTolerancePx, edgeZonePx]);
 
   return null;
 }

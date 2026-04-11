@@ -11,16 +11,16 @@ import logo from "../../public/dataJury1.png";
 import GlobalLoadingScreen from "./GlobalLoadingScreen";
 import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
-import BottomNavNative from "./BottomNative";
 import { Capacitor } from "@capacitor/core";
+import { isGuestMode, clearGuestMode } from "../utils/AuthGuard";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
-    // ✅ Detectar Safari (desktop + iOS)
     const ua = navigator.userAgent.toLowerCase();
     const isSafari = ua.includes("safari") && !ua.includes("chrome") && !ua.includes("chromium");
     document.documentElement.classList.toggle("is-safari", isSafari);
@@ -31,27 +31,42 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const token = getCookie("auth_token");
-    setIsLogged(typeof token === "string" && token.length > 0);
+    const logged = typeof token === "string" && token.length > 0;
+    setIsLogged(logged);
+    setIsGuest(!logged && isGuestMode());
   }, [pathname]);
 
   useEffect(() => {
     hideLoader();
   }, [pathname]);
 
-  const navItems = [
-    { label: "Inicio", href: "/" },
-    { label: "Rankings", href: "/rankings" },
-    { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
-    { label: "Mi perfil", href: "/perfil" },
+  const allNavItems = [
+    { label: "Inicio", href: "/", guestVisible: true },
+    { label: "Rankings", href: "/rankings", guestVisible: true },
+    { label: "Recorrido", href: "/recorrido", guestVisible: true },
+    { label: "Mis evaluaciones", href: "/mis-evaluaciones", guestVisible: false },
+    { label: "Mi perfil", href: "/perfil", guestVisible: false },
   ];
+
+  const navItems = isGuest
+    ? allNavItems.filter((item) => item.guestVisible)
+    : allNavItems;
+
+  const showNav = isLogged || isGuest;
 
   const logoutWithLoader = () => {
     showLoader("Cerrando sesión…");
+    clearGuestMode();
     requestAnimationFrame(() => {
       setTimeout(() => {
         window.location.href = "/logout";
       }, 50);
     });
+  };
+
+  const exitGuest = () => {
+    clearGuestMode();
+    window.location.href = "/login";
   };
 
   return (
@@ -96,7 +111,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               />
             </Link>
 
-            {isLogged && (
+            {showNav && (
               <nav className="hidden md:flex space-x-6 text-sm font-medium items-center">
                 {navItems.map((item) => {
                   const active = pathname === item.href;
@@ -113,24 +128,34 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   );
                 })}
 
-                <button
-                  onClick={logoutWithLoader}
-                  className="px-3 py-1 rounded-md border font-semibold text-red-600 border-red-500 hover:bg-red-50 transition flex items-center gap-1"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Salir
-                </button>
+                {isGuest ? (
+                  <button
+                    onClick={exitGuest}
+                    className="px-3 py-1 rounded-md border font-semibold text-blue-600 border-blue-500 hover:bg-blue-50 transition flex items-center gap-1"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Iniciar sesión
+                  </button>
+                ) : (
+                  <button
+                    onClick={logoutWithLoader}
+                    className="px-3 py-1 rounded-md border font-semibold text-red-600 border-red-500 hover:bg-red-50 transition flex items-center gap-1"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Salir
+                  </button>
+                )}
               </nav>
             )}
 
-            {isLogged && (
+            {showNav && (
               <button className="md:hidden text-gray-700" onClick={() => setOpen(!open)}>
                 {open ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
               </button>
             )}
           </div>
 
-          {isLogged && open && (
+          {showNav && open && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -156,16 +181,29 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 );
               })}
 
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  logoutWithLoader();
-                }}
-                className="px-3 py-1 rounded-md border font-semibold text-red-600 border-red-500 hover:bg-red-50 transition flex items-center gap-1"
-              >
-                <LogOut className="w-4 h-4" />
-                Cerrar sesión
-              </button>
+              {isGuest ? (
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    exitGuest();
+                  }}
+                  className="px-3 py-1 rounded-md border font-semibold text-blue-600 border-blue-500 hover:bg-blue-50 transition flex items-center gap-1"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Iniciar sesión
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    logoutWithLoader();
+                  }}
+                  className="px-3 py-1 rounded-md border font-semibold text-red-600 border-red-500 hover:bg-red-50 transition flex items-center gap-1"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Cerrar sesión
+                </button>
+              )}
             </motion.div>
           )}
         </div>
@@ -173,9 +211,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <main className="px-6 max-w-6xl mx-auto relative z-10" style={{ paddingTop: "calc(7rem + env(safe-area-inset-top, 0px))" }}>
         <GlobalLoadingScreen />
-        <NativeGestures edgeOnlyPx={24} />
+        <NativeGestures edgeZonePx={30} />
         {children}
-        <BottomNavNative />
       </main>
     </div>
   );

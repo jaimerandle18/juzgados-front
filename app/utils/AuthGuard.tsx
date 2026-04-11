@@ -4,21 +4,46 @@ import { usePathname, useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
 import { useEffect } from "react";
 
+// Rutas que requieren sesión real (no invitado)
+const AUTH_ONLY_ROUTES = ["/mis-evaluaciones", "/perfil"];
+
+// Rutas que NO requieren ni login ni invitado
+const PUBLIC_ROUTES = ["/login", "/register", "/verify-token", "/privacyPolicy"];
+
+export function isGuestMode(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.includes("guest_mode=1");
+}
+
+export function setGuestMode() {
+  document.cookie = "guest_mode=1; Path=/; Max-Age=86400; SameSite=Lax";
+}
+
+export function clearGuestMode() {
+  document.cookie = "guest_mode=; Path=/; Max-Age=0";
+}
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Rutas que NO requieren login
-  const publicRoutes = ["/login", "/register", "/verify-token", "/privacyPolicy"];
-
   useEffect(() => {
     const token = getCookie("auth_token");
+    const guest = isGuestMode();
 
-    // Si estoy en una ruta pública → siempre permitir
-    if (publicRoutes.includes(pathname)) return;
+    // Rutas públicas siempre permitidas
+    if (PUBLIC_ROUTES.includes(pathname)) return;
 
-    // Si estoy en ruta protegida y NO tengo token → ir a login
-    if (!token) {
+    // Rutas que requieren login real (no invitado)
+    if (AUTH_ONLY_ROUTES.includes(pathname) || pathname.startsWith("/votar")) {
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+    }
+
+    // Resto de rutas: permitir si tiene token O es invitado
+    if (!token && !guest) {
       router.replace("/login");
     }
   }, [pathname]);

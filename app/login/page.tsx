@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
+import { setGuestMode } from "../utils/AuthGuard";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -96,6 +97,28 @@ export default function LoginPage() {
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
+
+          <div className="relative flex items-center my-2">
+            <div className="flex-1 border-t border-gray-300" />
+            <span className="px-3 text-sm text-gray-400">o</span>
+            <div className="flex-1 border-t border-gray-300" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setGuestMode();
+              router.replace("/");
+            }}
+            className="
+              w-full py-4 rounded-2xl font-semibold
+              border-2 border-gray-300 text-gray-700
+              hover:bg-gray-50 hover:border-gray-400
+              transition-all
+            "
+          >
+            Ingresar como invitado
+          </button>
 
           <p className="text-sm text-gray-700 text-center">
             ¿No tenés cuenta?

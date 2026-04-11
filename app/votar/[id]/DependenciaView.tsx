@@ -3,6 +3,7 @@
 import { showLoader } from "@/components/globalLoader";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { isGuestMode } from "@/utils/AuthGuard";
 // ======================
 // ⭐ ESTRELLAS
 // ======================
@@ -244,6 +245,7 @@ export default function DependenciaView({ data }: { data: any }) {
   const dep = data.dependencia;
   const integrantes = data.integrantes || [];
   const children = data.children || [];
+  const guest = typeof window !== "undefined" && isGuestMode();
 
   const tieneHijos = children.length > 0;
 // 👉 detectar Cámara Nacional de Apelaciones en lo Criminal y Correccional
@@ -293,13 +295,15 @@ if (esCamaraApelacionesCriminal) {
       {/* BOTONES SOLO SI NO TIENE HIJOS */}
       {!tieneHijos && (
      <div className="mb-12 flex flex-col md:flex-row gap-6 justify-center">
-     <a
-       href={`/votar/${dep.id}`}
-       className="dj-btn dj-btn-blue"
-     >
-       <span className="dj-btn-content">Evaluar →</span>
-     </a>
-   
+     {!guest && (
+       <a
+         href={`/votar/${dep.id}`}
+         className="dj-btn dj-btn-blue"
+       >
+         <span className="dj-btn-content">Evaluar →</span>
+       </a>
+     )}
+
      <a
        href={`/dependencia/${dep.id}/evaluaciones`}
        className="dj-btn dj-btn-green"
@@ -307,7 +311,7 @@ if (esCamaraApelacionesCriminal) {
        <span className="dj-btn-content">Ver evaluaciones →</span>
      </a>
    </div>
-   
+
       )}
 
       {/* 👥 INTEGRANTES (SIEMPRE IGUAL) */}
