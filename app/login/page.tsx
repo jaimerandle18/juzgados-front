@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
-import { setGuestMode } from "../utils/AuthGuard";
+import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,7 +47,8 @@ export default function LoginPage() {
       try { localStorage.setItem("auth_token", token); } catch {}
       try { sessionStorage.setItem("auth_token", token); } catch {}
 
-      router.replace("/"); // mejor que push para login
+      clearGuestMode(); // limpiar modo invitado si existía
+      router.replace("/");
       // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);

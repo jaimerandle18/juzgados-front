@@ -12,7 +12,8 @@ const PUBLIC_ROUTES = ["/login", "/register", "/verify-token", "/privacyPolicy"]
 
 export function isGuestMode(): boolean {
   if (typeof document === "undefined") return false;
-  return document.cookie.includes("guest_mode=1");
+  // Solo es invitado si tiene guest_mode Y NO tiene auth_token
+  return document.cookie.includes("guest_mode=1") && !document.cookie.includes("auth_token=");
 }
 
 export function setGuestMode() {
