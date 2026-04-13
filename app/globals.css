@@ -13,6 +13,34 @@
   -webkit-touch-callout: none;
 }
 
+/* En mobile (sobre todo iOS WKWebView) al tocar cualquier elemento con
+   texto, el sistema lo selecciona y lo pinta de azul un instante. Lo
+   desactivamos por defecto y lo re-habilitamos solo donde tiene sentido
+   (inputs, textareas, contenido marcado como seleccionable). */
+html.is-native-app, html.is-native-app *{
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html.is-native-app input,
+html.is-native-app textarea,
+html.is-native-app [contenteditable="true"],
+html.is-native-app .dj-selectable,
+html.is-native-app .dj-selectable *{
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Quitar el outline azul de focus en mobile (queda raro al tocar cards
+   y botones). En desktop lo dejamos visible para accesibilidad por teclado. */
+html.is-native-app button:focus,
+html.is-native-app a:focus,
+html.is-native-app [role="button"]:focus{
+  outline: none;
+}
+
 @layer base{
   html,body{
     min-height:100vh;
