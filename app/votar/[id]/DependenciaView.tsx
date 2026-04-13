@@ -117,19 +117,21 @@ function InfoCard({ dep }: { dep: any }) {
 
       <div className="flex flex-col gap-3">
 
-        {/* 📍 DOMICILIO (+ piso / depto / localidad si vienen) */}
+        {/* 📍 DOMICILIO (+ piso / localidad / provincia / CP si vienen) */}
         {dep.domicilio && (() => {
-          const pisoDepto = [
-            dep.piso ? `Piso ${dep.piso}` : null,
-            dep.departamento || dep.depto
-              ? `Dpto ${dep.departamento || dep.depto}`
-              : null,
+          // Línea ciudad: "Ciudad Autónoma de Buenos Aires, Buenos Aires (C1042)"
+          const ciudad = [
+            dep.localidad,
+            dep.provincia,
           ].filter(Boolean).join(", ");
+          const ciudadConCp = dep.codigo_postal
+            ? `${ciudad} (${dep.codigo_postal})`
+            : ciudad;
 
           return (
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}`
+                `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}${dep.provincia ? `, ${dep.provincia}` : ""}`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -141,11 +143,11 @@ function InfoCard({ dep }: { dep: any }) {
               <MapPin className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
               <div className="flex flex-col leading-tight">
                 <span className="font-medium">{dep.domicilio}</span>
-                {pisoDepto && (
-                  <span className="text-sm text-gray-600">{pisoDepto}</span>
+                {dep.piso && (
+                  <span className="text-sm text-gray-600">Piso {dep.piso}</span>
                 )}
-                {dep.localidad && (
-                  <span className="text-sm text-gray-600">{dep.localidad}</span>
+                {ciudadConCp && (
+                  <span className="text-sm text-gray-600">{ciudadConCp}</span>
                 )}
               </div>
             </a>
