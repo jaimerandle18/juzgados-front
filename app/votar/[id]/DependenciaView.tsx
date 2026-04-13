@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { showLoader } from "@/components/globalLoader";
+import AnchorWithLoader from "@/components/AnchorWithLoader";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { isGuestMode } from "@/utils/AuthGuard";
@@ -302,20 +303,20 @@ if (esCamaraApelacionesCriminal) {
            <span className="dj-btn-content">Evaluar →</span>
          </button>
        ) : (
-         <a
+         <AnchorWithLoader
            href={`/votar/${dep.id}`}
            className="dj-btn dj-btn-blue"
          >
            <span className="dj-btn-content">Evaluar →</span>
-         </a>
+         </AnchorWithLoader>
        )}
 
-     <a
+     <AnchorWithLoader
        href={`/dependencia/${dep.id}/evaluaciones`}
        className="dj-btn dj-btn-green"
      >
        <span className="dj-btn-content">Ver evaluaciones →</span>
-     </a>
+     </AnchorWithLoader>
    </div>
 
       )}
