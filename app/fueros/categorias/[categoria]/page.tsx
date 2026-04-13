@@ -45,10 +45,9 @@ export default async function Page({ params }: PageProps) {
               block p-6 rounded-2xl 
               bg-white/70 backdrop-blur-lg 
               border border-gray-200 
-              shadow-md hover:shadow-xl 
+              shadow-md 
               transition-all 
-              hover:-translate-y-1 
-              group
+                            group
             "
           >
             {/* Nombre del fuero */}

@@ -58,7 +58,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           {datos.camara_casacion && (
             <AnchorWithLoader
               href={`/dependencia/${datos.camara_casacion.id}`}
-              className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+              className="block p-6 rounded-2xl bg-white shadow border border-gray-200 transition-all"
             >
               <h2 className="text-2xl font-semibold text-gray-900">
                 Cámara Nacional de Casación en lo Criminal y Correccional
@@ -76,7 +76,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           {datos.camara_apelaciones && (
             <AnchorWithLoader
               href={`/dependencia/${datos.camara_apelaciones.id}`}
-              className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+              className="block p-6 rounded-2xl bg-white shadow border border-gray-200 transition-all"
             >
               <h2 className="text-2xl font-semibold text-gray-900">
                 Cámara Nacional de Apelaciones en lo Criminal y Correccional
@@ -93,7 +93,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           {/* C) Tribunales Orales de Menores */}
           <AnchorWithLoader
             href={`/fueros/${fueroId}/tribunales-menores`}
-            className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+            className="block p-6 rounded-2xl bg-white shadow border border-gray-200 transition-all"
           >
             <h2 className="text-2xl font-semibold text-gray-900">
               Tribunales Orales de Menores
@@ -109,7 +109,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           {/* D) Tribunales Orales en lo Criminal y Correccional */}
           <AnchorWithLoader
             href={`/fueros/${fueroId}/tribunales-criminal`}
-            className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+            className="block p-6 rounded-2xl bg-white shadow border border-gray-200 transition-all"
           >
             <h2 className="text-2xl font-semibold text-gray-900">
               Tribunales Orales en lo Criminal y Correccional
@@ -124,7 +124,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
           {/* E) Juzgados Nacionales de Ejecución Penal */}
 <AnchorWithLoader
   href={`/dependencia/2224`}
-  className="block p-6 rounded-2xl bg-white shadow border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all"
+  className="block p-6 rounded-2xl bg-white shadow border border-gray-200 transition-all"
 >
   <h2 className="text-2xl font-semibold text-gray-900">
     Juzgados Nacionales de Ejecución Penal
@@ -186,7 +186,7 @@ const otros = list.filter((d) => {
         {camara && (
           <AnchorWithLoader
             href={`/dependencia/${camara.id}`}
-            className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
+            className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md transition-all group"
           >
             <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
               Cámara
@@ -205,7 +205,7 @@ const otros = list.filter((d) => {
        {juzgadosSolo.length>0 && (
 <AnchorWithLoader
   href={`/fueros/${fueroId}/juzgados?tipo=juzgado`}
-  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
+  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md transition-all group"
 >
   <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
     Juzgados
@@ -223,7 +223,7 @@ const otros = list.filter((d) => {
 {tribunalesOrales.length>0 && (
 <AnchorWithLoader
   href={`/fueros/${fueroId}/tribunales-orales`}
-  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
+  className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md transition-all group"
 >
   <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
     Tribunales Orales

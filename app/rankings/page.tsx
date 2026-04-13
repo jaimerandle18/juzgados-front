@@ -106,8 +106,7 @@ function Section({
             href={`/dependencia/${d.id}`}
             className="
               block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-              border border-gray-200 shadow-md hover:shadow-xl
-              hover:-translate-y-1 transition-all group
+              border border-gray-200 shadow-md              transition-all group
             "
           >
             <div className="flex items-start gap-4">

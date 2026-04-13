@@ -32,7 +32,6 @@ export default async function Page() {
           bg-white/70 backdrop-blur-lg
           border border-gray-200
           shadow-xl rounded-2xl p-8
-          transition-all hover:shadow-2xl
         "
       >
         {/* BADGE ABOGADO ACTIVO */}

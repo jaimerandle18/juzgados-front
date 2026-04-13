@@ -172,7 +172,6 @@ function renderAnalisis(votos: any[]) {
           bg-white/70 backdrop-blur-lg 
           border border-gray-200 shadow-xl 
           rounded-2xl p-6 transition-all 
-          hover:shadow-2xl hover:-translate-y-1
         "
       >
         <h3 className="text-xl font-bold text-gray-900 mb-4">{p.texto}</h3>
