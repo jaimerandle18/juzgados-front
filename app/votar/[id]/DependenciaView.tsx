@@ -4,31 +4,11 @@ import { useState } from "react";
 import { showLoader } from "@/components/globalLoader";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Building2, Map } from "lucide-react";
+import { Mail, Phone, MapPin, Building2, Map, Copy } from "lucide-react";
 import { isGuestMode } from "@/utils/AuthGuard";
-// ======================
-// ⭐ ESTRELLAS
-// ======================
-function StarRating({ promedio = 0, cantidad = 0 }) {
-  const filled = Math.round(Number(promedio) || 0);
-
-  return (
-    <div className="flex items-center gap-1 mt-2">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span
-          key={n}
-          className={`text-yellow-400 text-lg ${n <= filled ? "" : "opacity-30"}`}
-        >
-          ★
-        </span>
-      ))}
-      <span className="text-sm font-semibold text-gray-800 ml-1">
-        {(Number(promedio) || 0).toFixed(1)}
-      </span>
-      <span className="text-xs text-gray-500 ml-1">({cantidad})</span>
-    </div>
-  );
-}
+import StarRating from "@/components/StarRating";
+import { useToast } from "@/components/Toast";
+import { hapticLight } from "@/utils/haptics";
 
 // ======================
 // 👥 INTEGRANTES
@@ -86,6 +66,36 @@ function Header({ dep }: { dep: any }) {
       <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
 
     </div>
+  );
+}
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const { toastSuccess, toastError } = useToast();
+
+  const copiar = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hapticLight();
+    try {
+      await navigator.clipboard.writeText(value);
+      toastSuccess(`${label} copiado`);
+    } catch {
+      toastError("No se pudo copiar");
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copiar}
+      aria-label={`Copiar ${label.toLowerCase()}`}
+      className="
+        shrink-0 p-2 rounded-full text-gray-400
+        hover:text-blue-600 hover:bg-blue-50 transition active:scale-95
+      "
+    >
+      <Copy className="w-4 h-4" />
+    </button>
   );
 }
 
@@ -169,31 +179,36 @@ function InfoCard({ dep }: { dep: any }) {
 
         {/* 📞 TELÉFONO */}
         {dep.telefono && (
-          <a
-            href={`tel:${String(dep.telefono).replace(/[^\d+]/g, "")}`}
-            className="
-              flex items-center gap-3 
-              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
-            "
-          >
-            <Phone className="w-5 h-5 text-green-500" />
-            <span className="font-medium">{dep.telefono}</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href={`tel:${String(dep.telefono).replace(/[^\d+]/g, "")}`}
+              className="
+                flex-1 flex items-center gap-3
+                text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
+              "
+            >
+              <Phone className="w-5 h-5 text-green-500" />
+              <span className="font-medium">{dep.telefono}</span>
+            </a>
+            <CopyButton value={String(dep.telefono)} label="Teléfono" />
+          </div>
         )}
 
         {/* ✉️ EMAIL */}
         {dep.email && (
-          <a
-            href={`mailto:${dep.email}`}
-            className="
-              flex items-center gap-3 
-              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
-              break-all
-            "
-          >
-            <Mail className="w-5 h-5 text-purple-500" />
-            <span className="font-medium">{dep.email}</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href={`mailto:${dep.email}`}
+              className="
+                flex-1 flex items-center gap-3 min-w-0
+                text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
+              "
+            >
+              <Mail className="w-5 h-5 text-purple-500 shrink-0" />
+              <span className="font-medium break-all">{dep.email}</span>
+            </a>
+            <CopyButton value={String(dep.email)} label="Email" />
+          </div>
         )}
 
       </div>
@@ -251,8 +266,10 @@ function ChildrenGrid({
               {/* ⭐ solo dependencias reales */}
               {!esGrupo && (
                 <StarRating
-                  promedio={c.promedio}
+                  value={c.promedio}
                   cantidad={c.cantidad_votos}
+                  size="sm"
+                  tintedByValue
                 />
               )}
 

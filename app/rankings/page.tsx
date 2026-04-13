@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import AnchorWithLoader from "@/components/AnchorWithLoader";
+import StarRating from "@/components/StarRating";
 
 interface RankedDep {
   id: number;
@@ -120,11 +121,13 @@ function Section({
                   {d.nombre}
                 </h3>
 
-                <div className="flex items-center gap-2 mt-1">
-                  <StarRating value={d.promedio} />
-                  <span className="text-xs text-gray-500">
-                    ({d.cantidad_votos} {d.cantidad_votos === 1 ? "voto" : "votos"})
-                  </span>
+                <div className="mt-1">
+                  <StarRating
+                    value={d.promedio}
+                    cantidad={d.cantidad_votos}
+                    size="sm"
+                    tintedByValue
+                  />
                 </div>
 
                 <p className="text-xs text-gray-500 mt-1">
@@ -137,25 +140,6 @@ function Section({
         ))}
       </div>
     </section>
-  );
-}
-
-function StarRating({ value }: { value: number }) {
-  const filled = Math.round(value);
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span
-          key={n}
-          className={`text-lg ${n <= filled ? "text-yellow-400" : "text-gray-300"}`}
-        >
-          ★
-        </span>
-      ))}
-      <span className="text-sm font-semibold text-gray-800 ml-1">
-        {value.toFixed(1)}
-      </span>
-    </div>
   );
 }
 

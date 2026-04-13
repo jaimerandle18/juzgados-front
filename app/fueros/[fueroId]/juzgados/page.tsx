@@ -1,4 +1,5 @@
 import AnchorWithLoader from "@/components/AnchorWithLoader";
+import StarRating from "@/components/StarRating";
 
 export default async function Page({ params }: { params: Promise<{ fueroId: string }> }) {
     const { fueroId } = await params;
@@ -39,7 +40,13 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
       {j.nombre}
     </h3>
 
-    <StarRating promedio={j.promedio} cantidad={j.cantidad_votos} />
+    <div className="mt-2">
+      <StarRating
+        value={j.promedio}
+        cantidad={j.cantidad_votos}
+        tintedByValue
+      />
+    </div>
 
     {j.domicilio && <p className="mt-3 text-gray-700">{j.domicilio}</p>}
     {j.localidad && <p className="text-gray-700">{j.localidad}</p>}
@@ -53,35 +60,3 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
       </main>
     );
   }
-  
-  // STAR RATING
-  function StarRating({ promedio = 0, cantidad = 0 }) {
-    const safePromedio = Number(promedio) || 0;  // evita undefined, null o NaN
-  
-    const filled = Math.round(safePromedio);
-  
-    return (
-      <div className="flex items-center gap-1">
-        {/* ESTRELLAS */}
-        {[1, 2, 3, 4, 5].map((n) => (
-          <span
-            key={n}
-            className={`text-lg ${n <= filled ? "text-yellow-400" : "text-gray-300"}`}
-          >
-            ★
-          </span>
-        ))}
-  
-        {/* PROMEDIO NUMÉRICO */}
-        <span className="text-sm font-semibold text-gray-800">
-          {safePromedio.toFixed(1)}
-        </span>
-  
-        {/* CANTIDAD */}
-        <span className="text-xs text-gray-500">
-          ({cantidad})
-        </span>
-      </div>
-    );
-  }
-  

@@ -13,6 +13,7 @@
     "@capacitor/app": "^4.1.1",
     "@capacitor/browser": "^4.1.1",
     "@capacitor/core": "^4.8.2",
+    "@capacitor/haptics": "^4.1.0",
     "@capacitor/ios": "^4.8.2",
     "@capacitor/status-bar": "^4.1.1",
     "@headlessui/react": "^2.2.9",

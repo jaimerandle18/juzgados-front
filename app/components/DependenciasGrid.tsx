@@ -2,27 +2,7 @@
 
 import { motion } from "framer-motion";
 import { showLoader } from "./globalLoader";
-
-function StarRating({ promedio = 0, cantidad = 0 }) {
-  const filled = Math.round(Number(promedio) || 0);
-
-  return (
-    <div className="flex items-center gap-1 mt-2">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span
-          key={n}
-          className={`text-yellow-400 text-lg ${n <= filled ? "" : "opacity-30"}`}
-        >
-          ★
-        </span>
-      ))}
-      <span className="text-sm font-semibold text-gray-800 ml-1">
-        {(Number(promedio) || 0).toFixed(1)}
-      </span>
-      <span className="text-xs text-gray-500 ml-1">({cantidad})</span>
-    </div>
-  );
-}
+import StarRating from "./StarRating";
 
 export default function DependenciasGrid({
   items,
@@ -54,10 +34,13 @@ export default function DependenciasGrid({
               {d.nombre}
             </h3>
 
-            <StarRating
-              promedio={d.promedio}
-              cantidad={d.cantidad_votos}
-            />
+            <div className="mt-2">
+              <StarRating
+                value={d.promedio}
+                cantidad={d.cantidad_votos}
+                tintedByValue
+              />
+            </div>
 
             {d.domicilio && (
               <p className="mt-2 text-gray-700">{d.domicilio}</p>

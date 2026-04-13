@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 import { showLoader, forceHideLoader } from "./globalLoader";
+import { hapticLight } from "../utils/haptics";
 
 type Props = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   loadingMessage?: string;
@@ -27,6 +28,7 @@ export default function AnchorWithLoader({
       target={target}
       rel={rel}
       onClick={(e) => {
+        hapticLight();
         showLoader(loadingMessage);
 
         // Si el usuario quiere abrir en nueva pestaña/ventana, no interceptamos

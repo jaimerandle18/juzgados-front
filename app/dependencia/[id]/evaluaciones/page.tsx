@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import StarRating from "@/components/StarRating";
 
 /* ===========================================================
    📄 PAGE — Evaluaciones por Dependencia
@@ -51,7 +52,7 @@ export default async function Page({ params }: any) {
 
         {/* PROMEDIO ESTRELLAS */}
         <div className="mt-4">
-          <StarRating value={promedioPuntuacion} />
+          <StarRating value={promedioPuntuacion} size="lg" cantidad={totalVotos} tintedByValue />
         </div>
 
         {/* REVIEW BARS */}
@@ -67,27 +68,6 @@ export default async function Page({ params }: any) {
         {renderAnalisis(votos)}
       </div>
     </main>
-  );
-}
-
-/* ===========================================================
-   ⭐ COMPONENTE — Promedio de Estrellas
-=========================================================== */
-function StarRating({ value }: { value: number }) {
-  const rounded = Math.round(value);
-
-  return (
-    <div className="flex items-center gap-1 justify-center sm:justify-start">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={n <= rounded ? "text-yellow-400" : "text-gray-300"} style={{ fontSize: "28px" }}>
-          ★
-        </span>
-      ))}
-
-      <span className="ml-2 text-gray-700 font-semibold text-lg">
-        {value.toFixed(1)}
-      </span>
-    </div>
   );
 }
 

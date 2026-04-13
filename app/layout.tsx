@@ -3,6 +3,7 @@ import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
 import type { ReactNode } from "react";
 import AuthGuard from "./utils/AuthGuard";
+import { ToastProvider } from "@/components/Toast";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
@@ -36,9 +37,11 @@ if (Capacitor.isNativePlatform()) {
     <html lang="es">
    <body className="min-h-screen">
   <div className="dj-bg" aria-hidden />
-  <ClientLayout>
-    <AuthGuard>{children}</AuthGuard>
-  </ClientLayout>
+  <ToastProvider>
+    <ClientLayout>
+      <AuthGuard>{children}</AuthGuard>
+    </ClientLayout>
+  </ToastProvider>
 </body>
 
 

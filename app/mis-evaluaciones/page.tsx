@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { api } from "../../src/lib/api";
-import clsx from "clsx";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
+import { SkeletonMiEvaluacion } from "@/components/Skeleton";
+import { useToast } from "@/components/Toast";
+import { relativeTime, fullDate } from "@/utils/time";
 
 export default function MisEvaluacionesPage() {
   const [evaluaciones, setEvaluaciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const { toastSuccess, toastError } = useToast();
 
   useEffect(() => {
     const cargar = async () => {
@@ -30,18 +33,12 @@ export default function MisEvaluacionesPage() {
       await api.delete(`/votos/${id}`);
       setDeleteTarget(null);
       setEvaluaciones((prev) => prev.filter((v) => v.id !== id));
+      toastSuccess("Evaluación eliminada");
     } catch (err) {
       console.error("Error borrando evaluación", err);
+      toastError("No se pudo eliminar la evaluación");
     }
   };
-
-  if (loading) {
-    return (
-      <main className="pt-20 text-center text-gray-700 animate-pulse">
-        Cargando tus evaluaciones...
-      </main>
-    );
-  }
 
   return (
     <main className="pt-10 pb-20 px-6 max-w-4xl mx-auto">
@@ -53,7 +50,17 @@ export default function MisEvaluacionesPage() {
         <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
       </div>
 
-      {evaluaciones.length === 0 && (
+      {loading && (
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonMiEvaluacion key={i} />
+          ))}
+        </div>
+      )}
+
+      {!loading && null}
+
+      {!loading && evaluaciones.length === 0 && (
         <p className="text-gray-600 text-center mt-10">
           Todavía no realizaste ninguna evaluación.
         </p>
@@ -84,8 +91,11 @@ export default function MisEvaluacionesPage() {
                 </span>
               </p>
 
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date(v.fecha_creacion).toLocaleDateString("es-AR")}
+              <p
+                className="text-sm text-gray-500 mt-1 capitalize"
+                title={fullDate(v.fecha_creacion)}
+              >
+                {relativeTime(v.fecha_creacion)}
               </p>
             </div>
 

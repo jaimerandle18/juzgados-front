@@ -4,9 +4,10 @@ import { useState } from "react";
 import { api } from "../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { showLoader } from "@/components/globalLoader";
+import { useToast } from "@/components/Toast";
+import { hapticLight, hapticSelection } from "@/utils/haptics";
 
 export default function VotarForm({
   id,
@@ -17,9 +18,9 @@ export default function VotarForm({
 }) {
   const [puntuacion, setPuntuacion] = useState(0);
   const [form, setForm] = useState<Record<string, string>>({});
-  const [success, setSuccess] = useState(false);
 
   const router = useRouter();
+  const { toastSuccess, toastError } = useToast();
 
   const preguntas = [
     {
@@ -70,23 +71,29 @@ export default function VotarForm({
   ];
 
   const handleSelect = (key: string, value: string) => {
+    hapticLight();
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const enviar = async () => {
     if (!puntuacion) {
-      alert("Seleccioná una puntuación con estrellas.");
+      toastError("Seleccioná una puntuación con estrellas");
       return;
     }
 
-    await api.post("/votos", {
-      dependencia_id: Number(id),
-      puntuacion,
-      comentario: JSON.stringify(form),
-      ...form,
-    });
+    try {
+      await api.post("/votos", {
+        dependencia_id: Number(id),
+        puntuacion,
+        comentario: JSON.stringify(form),
+        ...form,
+      });
+    } catch (e) {
+      toastError("No se pudo enviar la evaluación, probá de nuevo");
+      throw e;
+    }
 
-    setSuccess(true);
+    toastSuccess(`${dependenciaNombre} evaluado correctamente`);
 
     setTimeout(() => {
       showLoader();
@@ -109,7 +116,10 @@ export default function VotarForm({
         {[1, 2, 3, 4, 5].map((n) => (
           <Star
             key={n}
-            onClick={() => setPuntuacion(n)}
+            onClick={() => {
+              hapticSelection();
+              setPuntuacion(n);
+            }}
             className={clsx(
               "w-10 h-10 cursor-pointer transition",
               n <= puntuacion
@@ -159,25 +169,6 @@ export default function VotarForm({
       >
         Enviar evaluación
       </button>
-
-      {/* TOAST */}
-      {success && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed left-4 right-4 mx-auto max-w-md px-5 py-4 rounded-2xl bg-green-500 text-white shadow-xl flex items-center gap-3"
-          style={{
-            zIndex: 99999,
-            top: "calc(env(safe-area-inset-top, 0px) + 5.5rem)",
-          }}
-        >
-          <span className="text-2xl shrink-0">✓</span>
-          <p className="font-semibold text-sm leading-tight">
-            {dependenciaNombre} votado correctamente
-          </p>
-        </motion.div>
-      )}
     </main>
   );
 }

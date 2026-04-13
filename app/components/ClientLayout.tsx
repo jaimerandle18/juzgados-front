@@ -9,6 +9,7 @@ import Image from "next/image";
 import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import GlobalLoadingScreen from "./GlobalLoadingScreen";
+import UserAvatarMenu from "./UserAvatarMenu";
 import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
 import { Capacitor } from "@capacitor/core";
@@ -53,12 +54,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     hideLoader();
   }, [pathname]);
 
+  // Items principales del nav. "Mi perfil" y "Mis evaluaciones" viven
+  // en el dropdown del avatar, no en la nav principal.
   const allNavItems = [
     { label: "Inicio", href: "/", guestVisible: true },
     { label: "Rankings", href: "/rankings", guestVisible: true },
     { label: "Recorrido", href: "/recorrido", guestVisible: true },
-    { label: "Mis evaluaciones", href: "/mis-evaluaciones", guestVisible: false },
-    { label: "Mi perfil", href: "/perfil", guestVisible: false },
+  ];
+
+  // Los mismos items que están en el dropdown, también los mostramos
+  // en el menú mobile (porque ahí no hay avatar).
+  const mobileExtraItems = [
+    { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
+    { label: "Mi perfil", href: "/perfil" },
   ];
 
   const navItems = isGuest
@@ -160,13 +168,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     Iniciar sesión
                   </button>
                 ) : (
-                  <button
-                    onClick={logoutWithLoader}
-                    className="px-3 py-1 rounded-md border font-semibold text-red-600 border-red-500 hover:bg-red-50 transition flex items-center gap-1"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Salir
-                  </button>
+                  <UserAvatarMenu />
                 )}
               </nav>
             )}
@@ -188,7 +190,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 backdropFilter: "blur(20px)",
               }}
             >
-              {navItems.map((item) => {
+              {[...navItems, ...(!isGuest ? mobileExtraItems : [])].map((item) => {
                 const active = pathname === item.href;
                 return (
                   <Link
