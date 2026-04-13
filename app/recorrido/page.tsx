@@ -22,65 +22,10 @@ export default function RecorridoPage() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Resultado[]>([]);
-  const [ubicacionOk, setUbicacionOk] = useState(false);
-  const [ubicacionError, setUbicacionError] = useState("");
-  const [ubicacionLoading, setUbicacionLoading] = useState(true);
-  const coordsRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const cacheRef = useRef<Map<string, Resultado[]>>(new Map());
-
-  // Pedir ubicación: estrategia rápida (low accuracy) + reintento high accuracy.
-  // Importante: SIEMPRE pasar `timeout`, sino en iOS Capacitor queda colgado para siempre.
-  const obtenerUbicacion = () => {
-    if (!navigator.geolocation) {
-      setUbicacionLoading(false);
-      setUbicacionError("Tu navegador no soporta geolocalización");
-      return;
-    }
-
-    setUbicacionLoading(true);
-    setUbicacionError("");
-
-    const onOk = (pos: GeolocationPosition) => {
-      coordsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      setUbicacionOk(true);
-      setUbicacionError("");
-      setUbicacionLoading(false);
-    };
-
-    const onFail = (err: GeolocationPositionError) => {
-      setUbicacionLoading(false);
-      setUbicacionOk(false);
-      coordsRef.current = null;
-      if (err.code === err.PERMISSION_DENIED) {
-        setUbicacionError("Permiso de ubicación denegado. Activalo en Ajustes > Data Jury para usar tu posición como origen.");
-      } else if (err.code === err.TIMEOUT) {
-        setUbicacionError("Se demoró demasiado en obtener tu ubicación. Tocá 'Reintentar'.");
-      } else {
-        setUbicacionError("No se pudo obtener tu ubicación. Tocá 'Reintentar' o el recorrido partirá desde el primer destino.");
-      }
-    };
-
-    // Primer intento rápido (red/celda, sin GPS)
-    navigator.geolocation.getCurrentPosition(
-      onOk,
-      () => {
-        // Segundo intento con GPS de alta precisión
-        navigator.geolocation.getCurrentPosition(onOk, onFail, {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 60000,
-        });
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
-    );
-  };
-
-  useEffect(() => {
-    obtenerUbicacion();
-  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -158,28 +103,19 @@ export default function RecorridoPage() {
       return s.localidad ? `${dir}, ${s.localidad}` : dir;
     });
 
-    // Origen: GPS si esta disponible, sino el primer seleccionado
-    const origen = coordsRef.current
-      ? `${coordsRef.current.lat},${coordsRef.current.lng}`
-      : direcciones[0];
-
-    const puntos = coordsRef.current ? direcciones : direcciones.slice(1);
-
-    // Formato path-based: /maps/dir/origen/p1/p2/.../destino
-    // Es el unico formato que respeta multiples paradas tanto en la web
-    // como en la app nativa de Google Maps (iOS/Android via Capacitor).
-    // El formato ?api=1&waypoints=... es ignorado por la app movil y solo
-    // muestra el destino final.
-    const segmentos = [origen, ...puntos]
+    // Truco: en el formato path-based de Google Maps, dejar el origen
+    // VACÍO (doble slash al inicio) hace que Maps use automáticamente
+    // "Tu ubicación" como punto de partida — tanto en web como en la
+    // app nativa. Así no necesitamos pedir GPS desde la webview.
+    //   https://www.google.com/maps/dir//destino1/destino2/...
+    const segmentos = direcciones
       .map((d) => encodeURIComponent(d).replace(/%20/g, "+"))
       .join("/");
 
-    const url = `https://www.google.com/maps/dir/${segmentos}/`;
+    const url = `https://www.google.com/maps/dir//${segmentos}/`;
 
     window.open(url, "_blank");
   };
-
-  const minParaRecorrido = coordsRef.current ? 1 : 2;
 
   return (
     <main className="min-h-screen px-6 pt-10 pb-20">
@@ -198,37 +134,10 @@ export default function RecorridoPage() {
           </p>
         </div>
 
-        {/* Estado de ubicación */}
-        <div className={`flex items-start gap-2 px-4 py-3 rounded-2xl text-sm font-medium ${
-          ubicacionOk
-            ? "bg-green-50/80 border border-green-200 text-green-800"
-            : ubicacionError
-            ? "bg-yellow-50/80 border border-yellow-200 text-yellow-800"
-            : "bg-gray-50/80 border border-gray-200 text-gray-700"
-        }`}>
-          {ubicacionLoading ? (
-            <div className="w-4 h-4 mt-0.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin shrink-0" />
-          ) : (
-            <Locate className="w-4 h-4 mt-0.5 shrink-0" />
-          )}
-          <div className="flex-1 flex flex-col gap-1">
-            <span>
-              {ubicacionOk
-                ? "Tu ubicación actual será el punto de partida"
-                : ubicacionError
-                ? ubicacionError
-                : "Obteniendo tu ubicación..."}
-            </span>
-            {!ubicacionOk && !ubicacionLoading && (
-              <button
-                type="button"
-                onClick={obtenerUbicacion}
-                className="self-start mt-1 px-3 py-1.5 rounded-full bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold transition"
-              >
-                Reintentar ubicación
-              </button>
-            )}
-          </div>
+        {/* Punto de partida = ubicación del usuario (lo resuelve Maps) */}
+        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium bg-green-50/80 border border-green-200 text-green-800">
+          <Locate className="w-4 h-4 shrink-0" />
+          <span>Google Maps partirá desde tu ubicación actual</span>
         </div>
 
         {/* Buscador */}
@@ -350,7 +259,7 @@ export default function RecorridoPage() {
         </div>
 
         {/* Boton de armar recorrido */}
-        {seleccionados.length >= minParaRecorrido && (
+        {seleccionados.length >= 1 && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -367,12 +276,6 @@ export default function RecorridoPage() {
             <Navigation className="w-5 h-5" />
             Abrir recorrido en Google Maps
           </motion.button>
-        )}
-
-        {seleccionados.length > 0 && seleccionados.length < minParaRecorrido && (
-          <p className="text-sm text-gray-700 text-center font-medium">
-            Agrega al menos {minParaRecorrido} ubicacion{minParaRecorrido > 1 ? "es" : ""} para armar el recorrido
-          </p>
         )}
       </div>
     </main>
