@@ -5,83 +5,109 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import djLogo from "../../public/dataJury1.png";
 
+// Sonido estilo "Portal" (tono de SMS de iOS): corto, brillante, etéreo.
+// Whoosh ascendente rápido + chime cristalino con shimmer + cola de reverb.
 function playStartupSound() {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const t = ctx.currentTime;
+
     const master = ctx.createGain();
-    master.gain.setValueAtTime(0.7, t);
+    master.gain.setValueAtTime(0.75, t);
     master.connect(ctx.destination);
 
-    // Reverb simulado con delay
+    // Reverb simulado (delay con feedback corto, como sala pequeña etérea)
     const delay = ctx.createDelay();
-    delay.delayTime.value = 0.12;
-    const fbGain = ctx.createGain();
-    fbGain.gain.value = 0.25;
-    delay.connect(fbGain);
-    fbGain.connect(delay);
-    delay.connect(master);
+    delay.delayTime.value = 0.09;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.32;
+    delay.connect(fb);
+    fb.connect(delay);
+    const wet = ctx.createGain();
+    wet.gain.value = 0.5;
+    delay.connect(wet);
+    wet.connect(master);
 
-    // Helper para crear oscilador con envelope
-    const voice = (
-      type: OscillatorType, freq: number, start: number, end: number,
-      vol: number, attack: number, freqEnd?: number, useFb?: boolean
-    ) => {
+    // --- 1) WHOOSH ascendente (portal abriéndose) ---
+    // sine que sube de 350Hz a 1800Hz en ~220ms
+    const whoosh = ctx.createOscillator();
+    const whooshG = ctx.createGain();
+    whoosh.type = "sine";
+    whoosh.frequency.setValueAtTime(350, t);
+    whoosh.frequency.exponentialRampToValueAtTime(1800, t + 0.22);
+    whooshG.gain.setValueAtTime(0, t);
+    whooshG.gain.linearRampToValueAtTime(0.18, t + 0.06);
+    whooshG.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+    whoosh.connect(whooshG);
+    whooshG.connect(master);
+    whooshG.connect(delay);
+    whoosh.start(t);
+    whoosh.stop(t + 0.4);
+
+    // Capa de aire/noise filtrado para el whoosh (le da textura)
+    const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+    const nd = noiseBuf.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * 0.4;
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+    const noiseFilt = ctx.createBiquadFilter();
+    noiseFilt.type = "bandpass";
+    noiseFilt.frequency.setValueAtTime(800, t);
+    noiseFilt.frequency.exponentialRampToValueAtTime(3500, t + 0.22);
+    noiseFilt.Q.value = 3;
+    const noiseG = ctx.createGain();
+    noiseG.gain.setValueAtTime(0, t);
+    noiseG.gain.linearRampToValueAtTime(0.06, t + 0.05);
+    noiseG.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    noise.connect(noiseFilt);
+    noiseFilt.connect(noiseG);
+    noiseG.connect(master);
+    noiseG.connect(delay);
+    noise.start(t);
+    noise.stop(t + 0.3);
+
+    // Helper para las notas de campana
+    const bell = (freq: number, start: number, dur: number, vol: number) => {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
-      o.type = type;
-      o.frequency.setValueAtTime(freq, t + start);
-      if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t + end - 0.1);
+      o.type = "sine";
+      o.frequency.value = freq;
       g.gain.setValueAtTime(0, t + start);
-      g.gain.linearRampToValueAtTime(vol, t + start + attack);
-      g.gain.setValueAtTime(vol, t + end - (end - start) * 0.4);
-      g.gain.exponentialRampToValueAtTime(0.001, t + end);
+      g.gain.linearRampToValueAtTime(vol, t + start + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
       o.connect(g);
       g.connect(master);
-      if (useFb) g.connect(delay);
+      g.connect(delay);
       o.start(t + start);
-      o.stop(t + end + 0.5);
+      o.stop(t + start + dur + 0.05);
     };
 
-    // --- CAPA 1: Sub bass profundo (que se siente, no se escucha tanto) ---
-    voice("sine", 55, 0, 3.0, 0.12, 0.8, 75);
+    // --- 2) CHIME cristalino (el "ping" del portal) ---
+    // Acorde brillante: E6 + B6 + E7 (Mi mayor agudo, muy limpio)
+    bell(1318.5, 0.20, 0.9, 0.18); // E6
+    bell(1975.5, 0.22, 0.8, 0.14); // B6
+    bell(2637.0, 0.24, 0.7, 0.10); // E7
 
-    // --- CAPA 2: Pad cálido - acorde mayor abierto (Do-Sol-Mi) ---
-    // Fundamental Do3
-    voice("sine", 130.8, 0.1, 3.2, 0.07, 0.6, 138);
-    // Quinta Sol3
-    voice("sine", 196, 0.2, 3.3, 0.06, 0.7, 207);
-    // Tercera Mi4 (arriba, etéreo)
-    voice("sine", 329.6, 0.3, 3.4, 0.04, 0.8, 349);
-    // Octava Do4
-    voice("sine", 261.6, 0.15, 3.1, 0.05, 0.7, 277);
+    // Armónicos extra para brillo (campanillas)
+    bell(3136.0, 0.26, 0.6, 0.06); // G7
+    bell(3951.0, 0.28, 0.5, 0.045); // B7
 
-    // --- CAPA 3: Shimmer cristalino (como campanitas PS5) ---
-    voice("sine", 1318, 0.5, 2.8, 0.03, 0.1, 1400, true);
-    voice("sine", 1568, 0.7, 2.6, 0.025, 0.1, 1660, true);
-    voice("sine", 2093, 0.9, 2.4, 0.02, 0.08, 2200, true);
-    voice("triangle", 987, 0.6, 2.9, 0.02, 0.15, 1050, true);
+    // --- 3) SHIMMER / cola mágica ---
+    bell(5274.0, 0.35, 0.35, 0.03);
+    bell(6272.0, 0.42, 0.28, 0.025);
 
-    // --- CAPA 4: Sweep ascendente etéreo ---
-    const sw = ctx.createOscillator();
-    const swG = ctx.createGain();
-    sw.type = "sine";
-    sw.frequency.setValueAtTime(200, t + 0.1);
-    sw.frequency.exponentialRampToValueAtTime(800, t + 1.5);
-    sw.frequency.exponentialRampToValueAtTime(600, t + 3.0);
-    swG.gain.setValueAtTime(0, t);
-    swG.gain.linearRampToValueAtTime(0.04, t + 0.5);
-    swG.gain.setValueAtTime(0.04, t + 1.5);
-    swG.gain.exponentialRampToValueAtTime(0.001, t + 3.2);
-    sw.connect(swG);
-    swG.connect(master);
-    swG.connect(delay);
-    sw.start(t + 0.1);
-    sw.stop(t + 3.5);
-
-    // --- CAPA 5: Nota final de resolución (ding suave) ---
-    voice("sine", 523.2, 2.0, 3.8, 0.035, 0.15);
-    voice("sine", 659.2, 2.1, 3.7, 0.025, 0.15, undefined, true);
+    // --- 4) Sub suave que da cuerpo sin opacar el agudo ---
+    const sub = ctx.createOscillator();
+    const subG = ctx.createGain();
+    sub.type = "sine";
+    sub.frequency.value = 164.8; // E3
+    subG.gain.setValueAtTime(0, t + 0.2);
+    subG.gain.linearRampToValueAtTime(0.08, t + 0.25);
+    subG.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+    sub.connect(subG);
+    subG.connect(master);
+    sub.start(t + 0.2);
+    sub.stop(t + 1.0);
   } catch {}
 }
 

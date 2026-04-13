@@ -57,6 +57,7 @@ const [folio, setFolio] = useState("");
      {loading && (
   <LoadingScreen
     message="Estamos validando tu matrícula con el Colegio Público de Abogados. Esto puede tardar unos segundos, por favor no cierres la página."
+    showSponsor
   />
 )}
 
