@@ -188,7 +188,7 @@ const otros = list.filter((d) => {
             href={`/dependencia/${camara.id}`}
             className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
           >
-            <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
               Cámara
             </h2>
             <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">
@@ -207,7 +207,7 @@ const otros = list.filter((d) => {
   href={`/fueros/${fueroId}/juzgados?tipo=juzgado`}
   className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
 >
-  <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+  <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
     Juzgados
   </h2>
   <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">
@@ -225,7 +225,7 @@ const otros = list.filter((d) => {
   href={`/fueros/${fueroId}/tribunales-orales`}
   className="block p-6 rounded-2xl bg-white/70 backdrop-blur-lg border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group"
 >
-  <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+  <h2 className="text-2xl font-semibold text-gray-900 transition-colors">
     Tribunales Orales
   </h2>
   <p className="mt-2 text-gray-700 group-hover:text-gray-900 transition">

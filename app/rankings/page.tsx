@@ -116,7 +116,7 @@ function Section({
               </span>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition truncate">
+                <h3 className="text-lg font-semibold text-gray-900 transition truncate">
                   {d.nombre}
                 </h3>
 

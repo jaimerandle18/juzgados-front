@@ -35,7 +35,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
       hover:-translate-y-1 transition-all cursor-pointer group
     "
   >
-    <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
+    <h3 className="text-2xl font-semibold text-gray-900 transition">
       {j.nombre}
     </h3>
 

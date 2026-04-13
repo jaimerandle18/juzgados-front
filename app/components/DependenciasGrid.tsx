@@ -50,7 +50,7 @@ export default function DependenciasGrid({
             border border-gray-200 shadow-md hover:shadow-xl
             hover:-translate-y-1 transition-all group"
           >
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
+            <h3 className="text-xl font-semibold text-gray-900 transition">
               {d.nombre}
             </h3>
 

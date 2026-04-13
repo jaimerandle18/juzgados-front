@@ -52,7 +52,7 @@ export default async function Page({ params }: PageProps) {
             "
           >
             {/* Nombre del fuero */}
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-xl font-semibold text-gray-900 transition-colors">
               {f.nombre}
             </h3>
 
