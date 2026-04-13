@@ -127,7 +127,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 priority
                 width={110}
                 height={50}
-                className="dj-logo"
                 style={{ objectFit: "contain", display: "block" }}
               />
             </Link>

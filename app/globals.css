@@ -13,14 +13,6 @@
   -webkit-touch-callout: none;
 }
 
-/* El PNG del logo tiene un fondo gris clarísimo en vez de transparencia,
-   entonces se ve el cuadrado de la imagen sobre cualquier fondo.
-   mix-blend-mode: multiply funde ese gris con lo que esté detrás
-   (blanco, gris del body, etc.) y lo vuelve invisible, mientras deja
-   intacto el texto oscuro y el azul del logo. */
-.dj-logo{
-  mix-blend-mode: multiply;
-}
 
 /* Sólo en dispositivos sin puntero preciso (touch: mobile / tablet):
    deshabilitamos selección para que al tocar textos no se pinten de azul.
