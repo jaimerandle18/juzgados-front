@@ -6,6 +6,13 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}", // si tenés carpeta components
     "./src/**/*.{js,ts,jsx,tsx}",        // lo que ya tenías
   ],
+  future: {
+    // Envuelve todos los `hover:*` de Tailwind en @media (hover: hover).
+    // Efecto: los estilos de hover sólo se aplican en dispositivos con
+    // puntero preciso (mouse/trackpad). En mobile (touch) no se aplican,
+    // así no quedan pegados después de un tap.
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {

@@ -126,7 +126,7 @@ function InfoCard({ dep }: { dep: any }) {
             rel="noopener noreferrer"
             className="
               flex items-center gap-3 
-              text-gray-800               transition active:scale-[0.98]
+              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
             "
           >
             <MapPin className="w-5 h-5 text-blue-500" />
@@ -140,7 +140,7 @@ function InfoCard({ dep }: { dep: any }) {
             href={`tel:${String(dep.telefono).replace(/[^\d+]/g, "")}`}
             className="
               flex items-center gap-3 
-              text-gray-800               transition active:scale-[0.98]
+              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
             "
           >
             <Phone className="w-5 h-5 text-green-500" />
@@ -154,7 +154,7 @@ function InfoCard({ dep }: { dep: any }) {
             href={`mailto:${dep.email}`}
             className="
               flex items-center gap-3 
-              text-gray-800               transition active:scale-[0.98]
+              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
               break-all
             "
           >
@@ -208,9 +208,10 @@ function ChildrenGrid({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: i * 0.05 }}
               className="block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-              border border-gray-200 shadow-md              transition-all group"
+              border border-gray-200 shadow-md hover:shadow-xl
+              hover:-translate-y-1 transition-all group"
             >
-              <h3 className="text-xl font-semibold text-gray-900 transition">
+              <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
                 {c.nombre}
               </h3>
 

@@ -31,10 +31,11 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
     loadingMessage="Cargando detalle..."
     className="
       block p-6 rounded-2xl bg-white/70 backdrop-blur-lg
-      border border-gray-200 shadow-md      transition-all cursor-pointer group
+      border border-gray-200 shadow-md hover:shadow-xl
+      hover:-translate-y-1 transition-all cursor-pointer group
     "
   >
-    <h3 className="text-2xl font-semibold text-gray-900 transition">
+    <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
       {j.nombre}
     </h3>
 

@@ -47,9 +47,10 @@ export default function DependenciasGrid({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: i * 0.05 }}
             className="block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-            border border-gray-200 shadow-md            transition-all group"
+            border border-gray-200 shadow-md hover:shadow-xl
+            hover:-translate-y-1 transition-all group"
           >
-            <h3 className="text-xl font-semibold text-gray-900 transition">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
               {d.nombre}
             </h3>
 

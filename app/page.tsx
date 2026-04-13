@@ -75,6 +75,14 @@ function MenuCard({
 }) {
   const router = useRouter();
   const isNative = useMemo(() => Capacitor.isNativePlatform(), []);
+  // Sólo aplicamos hover/tap de Framer Motion en dispositivos con
+  // puntero preciso (desktop). En touch queda estático.
+  const hasHover = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+    []
+  );
 
   const go = () => {
     // 🔑 En app: usamos navegación SPA, así el loader puede cerrarse bien
@@ -90,6 +98,8 @@ function MenuCard({
     <motion.button
       type="button"
       onClick={go}
+      whileHover={hasHover ? { scale: 1.03 } : undefined}
+      whileTap={hasHover ? { scale: 0.98 } : undefined}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}

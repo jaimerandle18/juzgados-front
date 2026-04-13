@@ -106,7 +106,8 @@ function Section({
             href={`/dependencia/${d.id}`}
             className="
               block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-              border border-gray-200 shadow-md              transition-all group
+              border border-gray-200 shadow-md hover:shadow-xl
+              hover:-translate-y-1 transition-all group
             "
           >
             <div className="flex items-start gap-4">
@@ -115,7 +116,7 @@ function Section({
               </span>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 transition truncate">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition truncate">
                   {d.nombre}
                 </h3>
 

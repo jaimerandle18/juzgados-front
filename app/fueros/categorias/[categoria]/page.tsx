@@ -42,16 +42,16 @@ export default async function Page({ params }: PageProps) {
             key={f.id}
             href={`/fueros/${f.id}`}
             className="
-              block p-6 rounded-2xl 
-              bg-white/70 backdrop-blur-lg 
-              border border-gray-200 
-              shadow-md 
-              transition-all 
-                            group
+              block p-6 rounded-2xl
+              bg-white/70 backdrop-blur-lg
+              border border-gray-200
+              shadow-md hover:shadow-xl
+              transition-all
+              hover:-translate-y-1 group
             "
           >
             {/* Nombre del fuero */}
-            <h3 className="text-xl font-semibold text-gray-900 transition-colors">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
               {f.nombre}
             </h3>
 

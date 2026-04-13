@@ -13,40 +13,31 @@
   -webkit-touch-callout: none;
 }
 
-/* Quitar el "azul" que aparece al tocar / hacer hover / focusear textos
-   en cualquier plataforma: deshabilitar selección por defecto, sin
-   outline azul y sin highlight de selección. Inputs y .dj-selectable
-   recuperan la selección normal (para copiar texto cuando hace falta). */
-*, *::before, *::after{
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
+/* Sólo en dispositivos sin puntero preciso (touch: mobile / tablet):
+   deshabilitamos selección para que al tocar textos no se pinten de azul.
+   En desktop la selección sigue funcionando normalmente. */
+@media (hover: none), (pointer: coarse) {
+  *, *::before, *::after{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 
-input, textarea, select, [contenteditable="true"],
-.dj-selectable, .dj-selectable *{
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-  -webkit-touch-callout: default;
-}
+  input, textarea, select, [contenteditable="true"],
+  .dj-selectable, .dj-selectable *{
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
 
-/* Color de selección neutro (para inputs y .dj-selectable) en vez de azul */
-::selection{
-  background: rgba(17, 24, 39, 0.15);
-  color: inherit;
-}
-::-moz-selection{
-  background: rgba(17, 24, 39, 0.15);
-  color: inherit;
-}
-
-/* Sin outline azul al hacer focus con click / tap.
-   :focus-visible (sólo cuando navegás con teclado) sí se mantiene. */
-button:focus, a:focus, [role="button"]:focus, summary:focus{
-  outline: none;
+  /* Sin outline azul al tocar botones/links en mobile.
+     En desktop :focus-visible sigue funcionando con teclado. */
+  button:focus, a:focus, [role="button"]:focus, summary:focus{
+    outline: none;
+  }
 }
 
 @layer base{
