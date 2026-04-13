@@ -4,7 +4,7 @@ import { useState } from "react";
 import { showLoader } from "@/components/globalLoader";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Building2, Map } from "lucide-react";
 import { isGuestMode } from "@/utils/AuthGuard";
 // ======================
 // ⭐ ESTRELLAS
@@ -117,43 +117,44 @@ function InfoCard({ dep }: { dep: any }) {
 
       <div className="flex flex-col gap-3">
 
-        {/* 📍 DOMICILIO (+ piso / localidad si vienen) */}
-        {dep.domicilio && (() => {
-          // El backend guarda cosas como "3º piso", "Piso Once", "PB",
-          // "Planta Baja", "7º Of. 7308". Normalizamos:
-          //   - si hay al menos un número → "{N} piso"   (ej: "3 piso")
-          //   - si no hay números (solo letras) → mostrar tal cual
-          //     (ej: "PB", "Planta Baja", "Piso Quinto")
-          const formatPiso = (raw: string) => {
-            const m = raw.match(/\d+/);
-            return m ? `${m[0]} piso` : raw.trim();
-          };
+        {/* 📍 DOMICILIO */}
+        {dep.domicilio && (
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}${dep.provincia ? `, ${dep.provincia}` : ""}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              flex items-center gap-3
+              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
+            "
+          >
+            <MapPin className="w-5 h-5 text-blue-500" />
+            <span className="font-medium">{dep.domicilio}</span>
+          </a>
+        )}
 
+        {/* 🏢 PISO */}
+        {dep.piso && (() => {
+          // "3º piso" → "3 piso" · "PB"/"Planta Baja" → se muestran tal cual
+          const m = String(dep.piso).match(/\d+/);
+          const texto = m ? `${m[0]} piso` : String(dep.piso).trim();
           return (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}${dep.provincia ? `, ${dep.provincia}` : ""}`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="
-                flex items-start gap-3
-                text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
-              "
-            >
-              <MapPin className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-medium">{dep.domicilio}</span>
-                {dep.piso && (
-                  <span className="text-sm text-gray-600">{formatPiso(dep.piso)}</span>
-                )}
-                {dep.localidad && (
-                  <span className="text-sm text-gray-600">{dep.localidad}</span>
-                )}
-              </div>
-            </a>
+            <div className="flex items-center gap-3 text-gray-800">
+              <Building2 className="w-5 h-5 text-amber-500" />
+              <span className="font-medium">{texto}</span>
+            </div>
           );
         })()}
+
+        {/* 🌆 LOCALIDAD */}
+        {dep.localidad && (
+          <div className="flex items-center gap-3 text-gray-800">
+            <Map className="w-5 h-5 text-cyan-500" />
+            <span className="font-medium">{dep.localidad}</span>
+          </div>
+        )}
 
         {/* 📞 TELÉFONO */}
         {dep.telefono && (
