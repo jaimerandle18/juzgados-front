@@ -123,31 +123,23 @@ export default function RecorridoPage() {
       return s.localidad ? `${dir}, ${s.localidad}` : dir;
     });
 
-    // Si tenemos ubicación GPS, esa es el origen
-    // Si no, el primer destino seleccionado es el origen
-    const origin = coordsRef.current
-      ? encodeURIComponent(`${coordsRef.current.lat},${coordsRef.current.lng}`)
-      : encodeURIComponent(direcciones[0]);
+    // Origen: GPS si esta disponible, sino el primer seleccionado
+    const origen = coordsRef.current
+      ? `${coordsRef.current.lat},${coordsRef.current.lng}`
+      : direcciones[0];
 
-    const destinos = coordsRef.current ? direcciones : direcciones.slice(1);
+    const puntos = coordsRef.current ? direcciones : direcciones.slice(1);
 
-    if (destinos.length === 0) {
-      // Solo 1 seleccionado + GPS -> destino directo
-      const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(direcciones[0])}&travelmode=driving`;
-      window.open(url, "_blank");
-      return;
-    }
+    // Formato path-based: /maps/dir/origen/p1/p2/.../destino
+    // Es el unico formato que respeta multiples paradas tanto en la web
+    // como en la app nativa de Google Maps (iOS/Android via Capacitor).
+    // El formato ?api=1&waypoints=... es ignorado por la app movil y solo
+    // muestra el destino final.
+    const segmentos = [origen, ...puntos]
+      .map((d) => encodeURIComponent(d).replace(/%20/g, "+"))
+      .join("/");
 
-    const destination = encodeURIComponent(destinos[destinos.length - 1]);
-    const waypoints = destinos
-      .slice(0, -1)
-      .map((d) => encodeURIComponent(d))
-      .join("|");
-
-    let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
-    if (waypoints) {
-      url += `&waypoints=${waypoints}`;
-    }
+    const url = `https://www.google.com/maps/dir/${segmentos}/`;
 
     window.open(url, "_blank");
   };
