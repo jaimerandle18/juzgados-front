@@ -137,9 +137,20 @@ function InfoCard({ dep }: { dep: any }) {
 
         {/* 🏢 PISO */}
         {dep.piso && (() => {
-          // "3º piso" → "3 piso" · "PB"/"Planta Baja" → se muestran tal cual
-          const m = String(dep.piso).match(/\d+/);
-          const texto = m ? `${m[0]} piso` : String(dep.piso).trim();
+          // Formato español rioplatense: 1er, 2do, 3er, 4to, 5to, 6to,
+          // 7mo, 8vo, 9no, 10mo, y para 11+ usamos el símbolo "°".
+          const ordinal = (n: number) => {
+            const s: Record<number, string> = {
+              1: "er", 2: "do", 3: "er", 4: "to", 5: "to",
+              6: "to", 7: "mo", 8: "vo", 9: "no", 10: "mo",
+            };
+            return s[n] ? `${n}${s[n]}` : `${n}°`;
+          };
+
+          const raw = String(dep.piso).trim();
+          const m = raw.match(/\d+/);
+          const texto = m ? `${ordinal(parseInt(m[0], 10))} piso` : raw;
+
           return (
             <div className="flex items-center gap-3 text-gray-800">
               <Building2 className="w-5 h-5 text-amber-500" />
