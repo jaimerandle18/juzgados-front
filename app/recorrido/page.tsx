@@ -24,27 +24,62 @@ export default function RecorridoPage() {
   const [seleccionados, setSeleccionados] = useState<Resultado[]>([]);
   const [ubicacionOk, setUbicacionOk] = useState(false);
   const [ubicacionError, setUbicacionError] = useState("");
+  const [ubicacionLoading, setUbicacionLoading] = useState(true);
   const coordsRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const cacheRef = useRef<Map<string, Resultado[]>>(new Map());
 
-  // Pedir ubicación al montar
-  useEffect(() => {
+  // Pedir ubicación: estrategia rápida (low accuracy) + reintento high accuracy.
+  // Importante: SIEMPRE pasar `timeout`, sino en iOS Capacitor queda colgado para siempre.
+  const obtenerUbicacion = () => {
     if (!navigator.geolocation) {
+      setUbicacionLoading(false);
       setUbicacionError("Tu navegador no soporta geolocalización");
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        coordsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUbicacionOk(true);
-      },
-      () => {
-        setUbicacionError("No se pudo obtener tu ubicación. El recorrido partirá desde el primer destino.");
+
+    setUbicacionLoading(true);
+    setUbicacionError("");
+
+    const onOk = (pos: GeolocationPosition) => {
+      coordsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setUbicacionOk(true);
+      setUbicacionError("");
+      setUbicacionLoading(false);
+    };
+
+    const onFail = (err: GeolocationPositionError) => {
+      setUbicacionLoading(false);
+      setUbicacionOk(false);
+      coordsRef.current = null;
+      if (err.code === err.PERMISSION_DENIED) {
+        setUbicacionError("Permiso de ubicación denegado. Activalo en Ajustes > Data Jury para usar tu posición como origen.");
+      } else if (err.code === err.TIMEOUT) {
+        setUbicacionError("Se demoró demasiado en obtener tu ubicación. Tocá 'Reintentar'.");
+      } else {
+        setUbicacionError("No se pudo obtener tu ubicación. Tocá 'Reintentar' o el recorrido partirá desde el primer destino.");
       }
+    };
+
+    // Primer intento rápido (red/celda, sin GPS)
+    navigator.geolocation.getCurrentPosition(
+      onOk,
+      () => {
+        // Segundo intento con GPS de alta precisión
+        navigator.geolocation.getCurrentPosition(onOk, onFail, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        });
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
+  };
+
+  useEffect(() => {
+    obtenerUbicacion();
   }, []);
 
   useEffect(() => {
@@ -164,19 +199,36 @@ export default function RecorridoPage() {
         </div>
 
         {/* Estado de ubicación */}
-        <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium ${
+        <div className={`flex items-start gap-2 px-4 py-3 rounded-2xl text-sm font-medium ${
           ubicacionOk
             ? "bg-green-50/80 border border-green-200 text-green-800"
             : ubicacionError
             ? "bg-yellow-50/80 border border-yellow-200 text-yellow-800"
             : "bg-gray-50/80 border border-gray-200 text-gray-700"
         }`}>
-          <Locate className="w-4 h-4 shrink-0" />
-          {ubicacionOk
-            ? "Tu ubicación actual sera el punto de partida"
-            : ubicacionError
-            ? ubicacionError
-            : "Obteniendo tu ubicación..."}
+          {ubicacionLoading ? (
+            <div className="w-4 h-4 mt-0.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin shrink-0" />
+          ) : (
+            <Locate className="w-4 h-4 mt-0.5 shrink-0" />
+          )}
+          <div className="flex-1 flex flex-col gap-1">
+            <span>
+              {ubicacionOk
+                ? "Tu ubicación actual será el punto de partida"
+                : ubicacionError
+                ? ubicacionError
+                : "Obteniendo tu ubicación..."}
+            </span>
+            {!ubicacionOk && !ubicacionLoading && (
+              <button
+                type="button"
+                onClick={obtenerUbicacion}
+                className="self-start mt-1 px-3 py-1.5 rounded-full bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold transition"
+              >
+                Reintentar ubicación
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Buscador */}

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import AnchorWithLoader from "@/components/AnchorWithLoader";
 import VotarForm from "./VotarForm";
 import { api } from "src/lib/api";
 import { useState } from "react";
@@ -38,15 +38,15 @@ export default function VotarWrapper({ id, miVoto, dependenciaNombre }: any) {
         <div className="flex flex-col gap-4">
 
           {/* MODIFICAR */}
-          <Link
+          <AnchorWithLoader
             href={`/votar/${id}/editar`}
             className="
-              px-6 py-3 rounded-xl font-semibold border-2 border-blue-600 
+              px-6 py-3 rounded-xl font-semibold border-2 border-blue-600
               text-black hover:bg-blue-50 transition
             "
           >
             ✏️ Modificar evaluación
-          </Link>
+          </AnchorWithLoader>
 
           {/* ELIMINAR → abre el modal */}
           <button
@@ -60,12 +60,12 @@ export default function VotarWrapper({ id, miVoto, dependenciaNombre }: any) {
           </button>
 
           {/* VOLVER */}
-          <Link
+          <AnchorWithLoader
             href={`/dependencia/${id}`}
             className="mt-4 text-blue-600 underline"
           >
             ← Volver al detalle
-          </Link>
+          </AnchorWithLoader>
         </div>
 
         {/* ------------------------ */}

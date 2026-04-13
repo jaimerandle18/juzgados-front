@@ -6,6 +6,7 @@ import { Star } from "lucide-react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { showLoader } from "@/components/globalLoader";
 
 export default function VotarForm({
   id,
@@ -88,6 +89,7 @@ export default function VotarForm({
     setSuccess(true);
 
     setTimeout(() => {
+      showLoader();
       router.push("/mis-evaluaciones");
     }, 2500);
   };

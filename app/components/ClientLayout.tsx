@@ -100,7 +100,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div className="absolute bottom-[-20px] left-0 w-full h-[20px] bg-gradient-to-b from-white/60 to-transparent pointer-events-none" />
 
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <Link href="/" className="hover:opacity-80 transition block">
+            <Link
+              href="/"
+              onClick={() => {
+                if (pathname !== "/") showLoader();
+              }}
+              className="hover:opacity-80 transition block"
+            >
               <Image
                 src={logo}
                 alt="Data Jury"
@@ -119,6 +125,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => {
+                        if (!active) showLoader();
+                      }}
                       className={`px-3 py-1 rounded-md transition ${
                         active ? "text-blue-600 bg-blue-100 shadow-sm" : "text-gray-700 hover:bg-gray-100"
                       }`}
@@ -171,7 +180,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      if (!active) showLoader();
+                    }}
                     className={`block py-2 text-lg font-semibold rounded-md px-3 transition ${
                       active ? "bg-blue-100 text-blue-700" : "text-gray-800 hover:bg-gray-100"
                     }`}

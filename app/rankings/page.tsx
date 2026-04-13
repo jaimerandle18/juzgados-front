@@ -11,14 +11,53 @@ interface RankedDep {
   cantidad_votos: number;
 }
 
+// Promedio bayesiano (estilo IMDb) para que un solo voto de 5★ no
+// le gane a 100 votos de 4.5★. Tira el promedio del juzgado hacia el
+// promedio global cuando tiene pocos votos.
+//   score = (v/(v+m)) * R + (m/(v+m)) * C
+//     R = promedio del juzgado · v = cantidad de votos
+//     C = promedio global (ponderado por votos)
+//     m = "votos mínimos de confianza" (cuanto más alto, más penaliza pocos votos)
+const MIN_VOTOS_CONFIANZA = 5;
+// Para "peores", exigimos al menos esto para que un juzgado con 1 voto malo
+// no aparezca como peor del país.
+const MIN_VOTOS_PARA_PEORES = 3;
+
+function rankearBayesiano(items: RankedDep[], orden: "mejores" | "peores"): RankedDep[] {
+  if (items.length === 0) return items;
+
+  const totalVotos = items.reduce((acc, d) => acc + d.cantidad_votos, 0);
+  const sumaPonderada = items.reduce(
+    (acc, d) => acc + d.promedio * d.cantidad_votos,
+    0
+  );
+  const C = totalVotos > 0 ? sumaPonderada / totalVotos : 0;
+
+  const scoreDe = (d: RankedDep) => {
+    const v = d.cantidad_votos;
+    const R = d.promedio;
+    return (v / (v + MIN_VOTOS_CONFIANZA)) * R +
+           (MIN_VOTOS_CONFIANZA / (v + MIN_VOTOS_CONFIANZA)) * C;
+  };
+
+  const filtrados = orden === "peores"
+    ? items.filter((d) => d.cantidad_votos >= MIN_VOTOS_PARA_PEORES)
+    : items;
+
+  return [...filtrados].sort((a, b) =>
+    orden === "mejores" ? scoreDe(b) - scoreDe(a) : scoreDe(a) - scoreDe(b)
+  );
+}
+
 export default async function RankingsPage() {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/rankings`,
     { next: { revalidate: 120 } }
   );
 
-  const { mejores, peores }: { mejores: RankedDep[]; peores: RankedDep[] } =
-    await res.json();
+  const raw: { mejores: RankedDep[]; peores: RankedDep[] } = await res.json();
+  const mejores = rankearBayesiano(raw.mejores, "mejores");
+  const peores = rankearBayesiano(raw.peores, "peores");
 
   return (
     <main className="pt-10 pb-20 px-6 max-w-3xl mx-auto text-gray-900">

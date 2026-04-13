@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
+import AnchorWithLoader from "../components/AnchorWithLoader";
 import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
 import SplashScreen from "../components/SplashScreen";
 import { AnimatePresence } from "framer-motion";
@@ -135,9 +135,9 @@ export default function LoginPage() {
 
           <p className="text-sm text-gray-700 text-center">
             ¿No tenés cuenta?
-            <Link href="/register" className="text-blue-600 font-semibold ml-1 hover:underline">
+            <AnchorWithLoader href="/register" className="text-blue-600 font-semibold ml-1 hover:underline">
               Registrate
-            </Link>
+            </AnchorWithLoader>
           </p>
         </div>
       </main>
