@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Menu, X, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
@@ -19,6 +19,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [open, setOpen] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Cerrar menú mobile al tocar fuera del header
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: PointerEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, [open]);
 
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase();
@@ -75,6 +88,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <div className="pointer-events-none absolute inset-0 z-[-1] bg-[radial-gradient(circle_at_30%_20%,rgba(0,140,255,0.18),transparent_60%)]" />
 
       <header
+        ref={headerRef}
         className="fixed top-0 left-0 w-full z-[9999]"
         style={{
           transform: "translate3d(0,0,0)",
