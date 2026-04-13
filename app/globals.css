@@ -13,31 +13,39 @@
   -webkit-touch-callout: none;
 }
 
-/* En mobile (sobre todo iOS WKWebView) al tocar cualquier elemento con
-   texto, el sistema lo selecciona y lo pinta de azul un instante. Lo
-   desactivamos por defecto y lo re-habilitamos solo donde tiene sentido
-   (inputs, textareas, contenido marcado como seleccionable). */
-html.is-native-app, html.is-native-app *{
+/* Quitar el "azul" que aparece al tocar / hacer hover / focusear textos
+   en cualquier plataforma: deshabilitar selección por defecto, sin
+   outline azul y sin highlight de selección. Inputs y .dj-selectable
+   recuperan la selección normal (para copiar texto cuando hace falta). */
+*, *::before, *::after{
   -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
-  -webkit-touch-callout: none;
 }
 
-html.is-native-app input,
-html.is-native-app textarea,
-html.is-native-app [contenteditable="true"],
-html.is-native-app .dj-selectable,
-html.is-native-app .dj-selectable *{
+input, textarea, select, [contenteditable="true"],
+.dj-selectable, .dj-selectable *{
   -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
   user-select: text;
   -webkit-touch-callout: default;
 }
 
-/* Quitar el outline azul de focus en mobile (queda raro al tocar cards
-   y botones). En desktop lo dejamos visible para accesibilidad por teclado. */
-html.is-native-app button:focus,
-html.is-native-app a:focus,
-html.is-native-app [role="button"]:focus{
+/* Color de selección neutro (para inputs y .dj-selectable) en vez de azul */
+::selection{
+  background: rgba(17, 24, 39, 0.15);
+  color: inherit;
+}
+::-moz-selection{
+  background: rgba(17, 24, 39, 0.15);
+  color: inherit;
+}
+
+/* Sin outline azul al hacer focus con click / tap.
+   :focus-visible (sólo cuando navegás con teclado) sí se mantiene. */
+button:focus, a:focus, [role="button"]:focus, summary:focus{
   outline: none;
 }
 
