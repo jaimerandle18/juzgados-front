@@ -117,23 +117,40 @@ function InfoCard({ dep }: { dep: any }) {
 
       <div className="flex flex-col gap-3">
 
-        {/* 📍 DOMICILIO */}
-        {dep.domicilio && (
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              flex items-center gap-3 
-              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
-            "
-          >
-            <MapPin className="w-5 h-5 text-blue-500" />
-            <span className="font-medium">{dep.domicilio}</span>
-          </a>
-        )}
+        {/* 📍 DOMICILIO (+ piso / depto / localidad si vienen) */}
+        {dep.domicilio && (() => {
+          const pisoDepto = [
+            dep.piso ? `Piso ${dep.piso}` : null,
+            dep.departamento || dep.depto
+              ? `Dpto ${dep.departamento || dep.depto}`
+              : null,
+          ].filter(Boolean).join(", ");
+
+          return (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                flex items-start gap-3
+                text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
+              "
+            >
+              <MapPin className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-medium">{dep.domicilio}</span>
+                {pisoDepto && (
+                  <span className="text-sm text-gray-600">{pisoDepto}</span>
+                )}
+                {dep.localidad && (
+                  <span className="text-sm text-gray-600">{dep.localidad}</span>
+                )}
+              </div>
+            </a>
+          );
+        })()}
 
         {/* 📞 TELÉFONO */}
         {dep.telefono && (
