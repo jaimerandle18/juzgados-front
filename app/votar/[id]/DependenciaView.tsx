@@ -118,30 +118,42 @@ function InfoCard({ dep }: { dep: any }) {
       <div className="flex flex-col gap-3">
 
         {/* 📍 DOMICILIO (+ piso / localidad si vienen) */}
-        {dep.domicilio && (
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}${dep.provincia ? `, ${dep.provincia}` : ""}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              flex items-start gap-3
-              text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
-            "
-          >
-            <MapPin className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-            <div className="flex flex-col leading-tight">
-              <span className="font-medium">{dep.domicilio}</span>
-              {dep.piso && (
-                <span className="text-sm text-gray-600">{dep.piso}</span>
-              )}
-              {dep.localidad && (
-                <span className="text-sm text-gray-600">{dep.localidad}</span>
-              )}
-            </div>
-          </a>
-        )}
+        {dep.domicilio && (() => {
+          // El backend guarda cosas como "3º piso", "Piso Once", "PB",
+          // "Planta Baja", "7º Of. 7308". Normalizamos:
+          //   - si hay al menos un número → "{N} piso"   (ej: "3 piso")
+          //   - si no hay números (solo letras) → mostrar tal cual
+          //     (ej: "PB", "Planta Baja", "Piso Quinto")
+          const formatPiso = (raw: string) => {
+            const m = raw.match(/\d+/);
+            return m ? `${m[0]} piso` : raw.trim();
+          };
+
+          return (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                `${dep.domicilio}${dep.localidad ? `, ${dep.localidad}` : ""}${dep.provincia ? `, ${dep.provincia}` : ""}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                flex items-start gap-3
+                text-gray-800 hover:text-blue-600 transition active:scale-[0.98]
+              "
+            >
+              <MapPin className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-medium">{dep.domicilio}</span>
+                {dep.piso && (
+                  <span className="text-sm text-gray-600">{formatPiso(dep.piso)}</span>
+                )}
+                {dep.localidad && (
+                  <span className="text-sm text-gray-600">{dep.localidad}</span>
+                )}
+              </div>
+            </a>
+          );
+        })()}
 
         {/* 📞 TELÉFONO */}
         {dep.telefono && (
