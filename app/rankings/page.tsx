@@ -19,9 +19,6 @@ interface RankedDep {
 //     C = promedio global (ponderado por votos)
 //     m = "votos mínimos de confianza" (cuanto más alto, más penaliza pocos votos)
 const MIN_VOTOS_CONFIANZA = 5;
-// Para "peores", exigimos al menos esto para que un juzgado con 1 voto malo
-// no aparezca como peor del país.
-const MIN_VOTOS_PARA_PEORES = 3;
 
 function rankearBayesiano(items: RankedDep[], orden: "mejores" | "peores"): RankedDep[] {
   if (items.length === 0) return items;
@@ -40,11 +37,10 @@ function rankearBayesiano(items: RankedDep[], orden: "mejores" | "peores"): Rank
            (MIN_VOTOS_CONFIANZA / (v + MIN_VOTOS_CONFIANZA)) * C;
   };
 
-  const filtrados = orden === "peores"
-    ? items.filter((d) => d.cantidad_votos >= MIN_VOTOS_PARA_PEORES)
-    : items;
-
-  return [...filtrados].sort((a, b) =>
+  // No filtramos por cantidad mínima: la fórmula bayesiana ya empuja
+  // los items con pocos votos hacia el promedio global, así que un
+  // juzgado con 1 voto malo no se hunde al fondo del ranking igual.
+  return [...items].sort((a, b) =>
     orden === "mejores" ? scoreDe(b) - scoreDe(a) : scoreDe(a) - scoreDe(b)
   );
 }
