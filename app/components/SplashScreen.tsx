@@ -54,6 +54,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
           width={200}
           height={90}
           priority
+          className="dj-logo"
           style={{ objectFit: "contain" }}
         />
       </motion.div>
