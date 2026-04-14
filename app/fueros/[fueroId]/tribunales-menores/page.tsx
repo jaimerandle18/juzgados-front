@@ -9,7 +9,7 @@ export default async function Page({
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/dependencias`,
-    { cache: "no-store" }
+    { next: { revalidate: 300 } }
   );
 
   const datos = await res.json();

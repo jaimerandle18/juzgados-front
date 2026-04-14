@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { api } from "../../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
@@ -15,7 +14,6 @@ export default function EditarForm({ id, miVoto }: any) {
     miVoto.comentario ? JSON.parse(miVoto.comentario) : {}
   );
   const { toastSuccess, toastError } = useToast();
-  const router = useRouter();
 
   const preguntas = [
     { id: "celeridad_proveer", texto: "Celeridad para proveer escritos", opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"] },
@@ -49,7 +47,6 @@ export default function EditarForm({ id, miVoto }: any) {
 
     celebrate();
     toastSuccess("Cambios guardados");
-    router.refresh();
   };
 
   return (

@@ -13,7 +13,7 @@ export default async function Page({ params }: any) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/votos/${id}`,
     {
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: { Authorization: `Bearer ${token ?? ""}` },
     }
   );

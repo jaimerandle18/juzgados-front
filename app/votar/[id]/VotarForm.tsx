@@ -97,11 +97,6 @@ export default function VotarForm({
     celebrate();
     toastSuccess(`${dependenciaNombre} evaluado correctamente`);
 
-    // Invalida el RSC cache de las rutas ya visitadas del router
-    // (rankings, detalle, listas de juzgados) así al navegar hacia atrás
-    // o entrar a cualquiera de ellas se re-fetchea con el voto nuevo.
-    router.refresh();
-
     setTimeout(() => {
       showLoader();
       router.push("/mis-evaluaciones");

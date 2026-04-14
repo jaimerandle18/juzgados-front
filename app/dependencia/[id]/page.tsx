@@ -11,10 +11,7 @@ export default async function Page({ params }: any) {
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/dependencias/${id}`,
     {
       method: "GET",
-      // Los votos impactan acá (promedio + cantidad). Necesitamos datos
-      // frescos al volver después de evaluar, sino el promedio se ve
-      // desactualizado durante el TTL de cache.
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
       },

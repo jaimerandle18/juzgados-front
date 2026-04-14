@@ -17,7 +17,6 @@ export default function VotarWrapper({ id, miVoto, dependenciaNombre }: any) {
     try {
       await api.delete(`/votos/${id}`);
       setDeleteTarget(null);
-      router.refresh();
       navigateWithLoader(router,"/mis-evaluaciones");
     } catch (err) {
       console.error("Error borrando evaluación", err);
