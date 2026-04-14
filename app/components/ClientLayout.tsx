@@ -54,6 +54,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     hideLoader();
   }, [pathname]);
 
+  // Al cambiar de ruta, arrancar siempre desde arriba (no heredar el
+  // scroll de la página anterior). Sin smooth para que no se vea el
+  // "salto" en pantalla al navegar.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   // Items principales del nav. "Mi perfil" y "Mis evaluaciones" viven
   // en el dropdown del avatar, no en la nav principal.
   const allNavItems = [
