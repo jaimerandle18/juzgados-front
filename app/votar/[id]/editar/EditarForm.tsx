@@ -4,13 +4,16 @@ import { useState } from "react";
 import { api } from "../../../../src/lib/api";
 import { Star } from "lucide-react";
 import clsx from "clsx";
+import { useToast } from "@/components/Toast";
+import { hapticLight, hapticSelection } from "@/utils/haptics";
+import { celebrate } from "@/utils/confetti";
 
 export default function EditarForm({ id, miVoto }: any) {
   const [puntuacion, setPuntuacion] = useState(miVoto.puntuacion);
   const [form, setForm] = useState(
     miVoto.comentario ? JSON.parse(miVoto.comentario) : {}
   );
-  const [success, setSuccess] = useState(false);
+  const { toastSuccess, toastError } = useToast();
 
   const preguntas = [
     { id: "celeridad_proveer", texto: "Celeridad para proveer escritos", opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"] },
@@ -25,18 +28,25 @@ export default function EditarForm({ id, miVoto }: any) {
   ];
 
   const handleSelect = (key: any, value: any) => {
+    hapticLight();
     setForm((prev:any)=> ({ ...prev, [key]: value }));
   };
 
   const guardarCambios = async () => {
-    await api.post("/votos", {
-      dependencia_id: Number(id),
-      puntuacion,
-      comentario: JSON.stringify(form),
-      ...form,
-    });
+    try {
+      await api.post("/votos", {
+        dependencia_id: Number(id),
+        puntuacion,
+        comentario: JSON.stringify(form),
+        ...form,
+      });
+    } catch (e) {
+      toastError("No se pudieron guardar los cambios");
+      throw e;
+    }
 
-    setSuccess(true);
+    celebrate();
+    toastSuccess("Cambios guardados");
   };
 
   return (
@@ -53,7 +63,10 @@ export default function EditarForm({ id, miVoto }: any) {
         {[1, 2, 3, 4, 5].map(n => (
           <Star
             key={n}
-            onClick={() => setPuntuacion(n)}
+            onClick={() => {
+              hapticSelection();
+              setPuntuacion(n);
+            }}
             className={clsx(
               "w-10 h-10 cursor-pointer",
               n <= puntuacion ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
@@ -93,12 +106,6 @@ export default function EditarForm({ id, miVoto }: any) {
       >
         Guardar cambios
       </button>
-
-      {success && (
-        <p className="text-green-600 text-center mt-4">
-          ✓ Cambios guardados con éxito
-        </p>
-      )}
     </main>
   );
 }

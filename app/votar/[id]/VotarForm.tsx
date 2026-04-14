@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { showLoader } from "@/components/globalLoader";
 import { useToast } from "@/components/Toast";
 import { hapticLight, hapticSelection } from "@/utils/haptics";
+import { celebrate } from "@/utils/confetti";
 
 export default function VotarForm({
   id,
@@ -93,6 +94,7 @@ export default function VotarForm({
       throw e;
     }
 
+    celebrate();
     toastSuccess(`${dependenciaNombre} evaluado correctamente`);
 
     setTimeout(() => {
