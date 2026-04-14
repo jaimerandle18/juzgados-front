@@ -1,18 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, X } from "lucide-react";
 import { api } from "../../src/lib/api";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
 import { SkeletonMiEvaluacion } from "@/components/Skeleton";
 import { useToast } from "@/components/Toast";
 import { relativeTime, fullDate } from "@/utils/time";
 
+// Normaliza texto para búsqueda case/accent-insensitive
+function norm(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // saca acentos
+}
+
 export default function MisEvaluacionesPage() {
   const [evaluaciones, setEvaluaciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const { toastSuccess, toastError } = useToast();
+
+  const evaluacionesFiltradas = useMemo(() => {
+    const q = norm(query.trim());
+    if (!q) return evaluaciones;
+    return evaluaciones.filter((v) => {
+      const nombre = norm(v.dependencia?.nombre || "");
+      return nombre.includes(q);
+    });
+  }, [evaluaciones, query]);
 
   useEffect(() => {
     const cargar = async () => {
@@ -58,7 +77,42 @@ export default function MisEvaluacionesPage() {
         </div>
       )}
 
-      {!loading && null}
+      {/* BUSCADOR (solo si hay >=2 evaluaciones, abajo no aporta nada) */}
+      {!loading && evaluaciones.length >= 2 && (
+        <div className="relative w-full mb-6">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar entre tus evaluaciones..."
+            className="
+              w-full pl-12 pr-12 py-3.5
+              rounded-2xl
+              bg-white/70 backdrop-blur-lg
+              border border-gray-200
+              shadow-md
+              text-gray-900 placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+              transition-all
+            "
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Limpiar búsqueda"
+              className="
+                absolute right-3 top-1/2 -translate-y-1/2
+                p-1.5 rounded-full text-gray-400
+                hover:text-gray-700 hover:bg-gray-100 transition
+              "
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {!loading && evaluaciones.length === 0 && (
         <p className="text-gray-600 text-center mt-10">
@@ -66,9 +120,15 @@ export default function MisEvaluacionesPage() {
         </p>
       )}
 
+      {!loading && evaluaciones.length > 0 && evaluacionesFiltradas.length === 0 && (
+        <p className="text-gray-600 text-center mt-10">
+          No hay evaluaciones que coincidan con &quot;{query}&quot;.
+        </p>
+      )}
+
       {/* LISTA DE EVALUACIONES */}
       <div className="space-y-6">
-        {evaluaciones.map((v: any) => (
+        {evaluacionesFiltradas.map((v: any) => (
           <div
             key={v.id}
             className="
