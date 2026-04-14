@@ -47,9 +47,12 @@ function rankearBayesiano(items: RankedDep[], orden: "mejores" | "peores"): Rank
 }
 
 export default async function RankingsPage() {
+  // no-store: el ranking tiene que reflejar los votos apenas se emiten.
+  // Con revalidate: 120 un usuario que vota se quedaba hasta 2 minutos
+  // viendo el ranking viejo y pensaba que la app no registró su voto.
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/pjn/rankings`,
-    { next: { revalidate: 120 } }
+    { cache: "no-store" }
   );
 
   const raw: { mejores: RankedDep[]; peores: RankedDep[] } = await res.json();

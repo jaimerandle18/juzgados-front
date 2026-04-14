@@ -5,7 +5,7 @@ export default async function Page({ params }: { params: Promise<{ fueroId: stri
     const { fueroId } = await params;
   
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pjn/fueros/${fueroId}/juzgados`, {
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
   
     const juzgados = await res.json();
