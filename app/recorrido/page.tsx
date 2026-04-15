@@ -60,18 +60,43 @@ function optimizarPorCercania<T extends Coord>(origen: Coord, puntos: T[]): T[] 
 }
 
 // Geolocalizacion envuelta en promesa. Devuelve null si el usuario niega,
-// no hay soporte, o tarda demasiado.
+// no hay soporte, o tarda demasiado. En el WebView de Capacitor iOS el
+// timeout del navegador no siempre se respeta (p.ej. si el dialog de
+// permisos queda abierto), asi que sumamos un hard-timeout nuestro.
 function pedirUbicacion(): Promise<Coord | null> {
   return new Promise((resolve) => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       return resolve(null);
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => resolve(null),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 }
-    );
+    let terminado = false;
+    const finalizar = (c: Coord | null) => {
+      if (terminado) return;
+      terminado = true;
+      resolve(c);
+    };
+    // Hard-timeout de 6s: si el webview no responde en ese lapso, seguimos
+    // sin ubicacion y abrimos Maps con el orden manual. Mejor que dejar al
+    // usuario viendo "Armando recorrido..." para siempre.
+    const t = setTimeout(() => finalizar(null), 6000);
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          clearTimeout(t);
+          finalizar({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        () => {
+          clearTimeout(t);
+          finalizar(null);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 60_000 }
+      );
+    } catch {
+      clearTimeout(t);
+      finalizar(null);
+    }
   });
 }
 
