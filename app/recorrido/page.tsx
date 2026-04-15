@@ -253,7 +253,7 @@ export default function RecorridoPage() {
               placeholder="Buscar juzgado, camara, sala..."
               disabled={seleccionados.length >= MAX_UBICACIONES}
               className="
-                w-full pl-12 pr-4 py-3.5
+                w-full pl-10 pr-4 py-3.5
                 rounded-2xl
                 bg-white/70 backdrop-blur-lg
                 border border-gray-200
@@ -475,8 +475,8 @@ export default function RecorridoPage() {
             aria-label="Abrir recorrido en Google Maps"
             className="
               w-full
-              flex items-center gap-4
-              pl-3 pr-5 py-3
+              flex items-center gap-3
+              pl-2.5 pr-4 py-2
               rounded-2xl
               bg-white
               border border-gray-200
@@ -489,10 +489,10 @@ export default function RecorridoPage() {
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqvez5ObFklOvff8oJJhHbex2KydC-_HmUqA&s"
               alt=""
-              className="w-20 h-20 rounded-xl shrink-0 object-cover"
+              className="w-14 h-14 rounded-xl shrink-0 object-cover"
             />
             <div className="flex-1 text-left">
-              <p className="font-bold text-gray-900 leading-tight">
+              <p className="font-bold text-gray-900 text-sm leading-tight">
                 Abrir en Google Maps
               </p>
               <p className="text-xs text-gray-500 mt-0.5">
@@ -501,7 +501,7 @@ export default function RecorridoPage() {
             </div>
             <span
               aria-hidden="true"
-              className="text-gray-400 text-xl leading-none"
+              className="text-gray-400 text-lg leading-none"
             >
               ›
             </span>
