@@ -123,7 +123,7 @@ export default function RecorridoPage() {
 
   // El endpoint /buscar devuelve una ficha liviana (sin domicilio/localidad),
   // asi que al agregar pedimos el detalle para tener la direccion real.
-  // Agregamos el item primero para que el UI responda al toque, y despues
+  // Agregamos el item primero para que la UI responda al toque y despues
   // lo enriquecemos cuando llega la respuesta.
   const completarDetalle = async (id: number) => {
     try {
