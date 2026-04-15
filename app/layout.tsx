@@ -10,9 +10,16 @@ import { App } from "@capacitor/app";
 
 export const metadata = { title: "Data Jury", description: "Sistema de valoración de juzgados" };
 
+// Bloqueamos el zoom del WebView: en iOS, al enfocar un input con
+// font-size < 16px Safari hace autozoom y no vuelve solo; esto dejaba
+// la pantalla "mas grande" despues de escribir. Como es una app mobile
+// con layout fijo, directamente desactivamos el pinch-zoom.
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 

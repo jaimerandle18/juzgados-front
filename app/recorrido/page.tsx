@@ -416,7 +416,7 @@ export default function RecorridoPage() {
                             className="
                               w-full rounded-xl
                               bg-white border border-gray-200
-                              px-3 py-2 text-sm text-gray-900 placeholder-gray-400
+                              px-3 py-2 text-base text-gray-900 placeholder-gray-400
                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                               resize-none
                             "
@@ -452,7 +452,7 @@ export default function RecorridoPage() {
             "
           >
             <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2xzPbptUcOWQz-4Rjd42Na2gJ6Sh26Rv3Uw&s"
+              src="/google-maps-logo.jpg"
               alt=""
               className="w-14 h-14 rounded-xl shrink-0"
             />
