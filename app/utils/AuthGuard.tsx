@@ -29,6 +29,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // En cada boot fresco de la app, limpiar guest_mode para que el
+    // usuario vuelva a pasar por el login. Se detecta con un flag en
+    // sessionStorage (que se resetea al cerrar/reabrir la app).
+    try {
+      if (!sessionStorage.getItem("dj_session_started")) {
+        clearGuestMode();
+        sessionStorage.setItem("dj_session_started", "1");
+      }
+    } catch {}
+
     const token = getCookie("auth_token");
     const guest = isGuestMode();
 
