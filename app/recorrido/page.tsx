@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { api } from "../../src/lib/api";
-import { Search, X, Navigation, AlertCircle, Locate } from "lucide-react";
+import { Search, X, Navigation, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Resultado {
@@ -15,6 +15,8 @@ interface Resultado {
 }
 
 const MAX_UBICACIONES = 10;
+const STORAGE_KEY_SELECCIONADOS = "dj_recorrido_seleccionados";
+const STORAGE_KEY_NOTAS = "dj_recorrido_notas";
 
 export default function RecorridoPage() {
   const [query, setQuery] = useState("");
@@ -22,10 +24,45 @@ export default function RecorridoPage() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Resultado[]>([]);
+  const [notas, setNotas] = useState<Record<number, string>>({});
+  const [notaAbiertaId, setNotaAbiertaId] = useState<number | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const cacheRef = useRef<Map<string, Resultado[]>>(new Map());
+
+  // Cargar recorrido guardado al abrir la app. Recien despues habilitamos
+  // la persistencia, asi no pisamos lo guardado con el estado vacio inicial.
+  useEffect(() => {
+    try {
+      const rawSel = localStorage.getItem(STORAGE_KEY_SELECCIONADOS);
+      if (rawSel) {
+        const parsed = JSON.parse(rawSel);
+        if (Array.isArray(parsed)) setSeleccionados(parsed);
+      }
+      const rawNotas = localStorage.getItem(STORAGE_KEY_NOTAS);
+      if (rawNotas) {
+        const parsed = JSON.parse(rawNotas);
+        if (parsed && typeof parsed === "object") setNotas(parsed);
+      }
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY_SELECCIONADOS, JSON.stringify(seleccionados));
+    } catch {}
+  }, [seleccionados, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY_NOTAS, JSON.stringify(notas));
+    } catch {}
+  }, [notas, hydrated]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -83,6 +120,32 @@ export default function RecorridoPage() {
 
   const quitar = (id: number) => {
     setSeleccionados((prev) => prev.filter((s) => s.id !== id));
+    setNotas((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setNotaAbiertaId((prev) => (prev === id ? null : prev));
+  };
+
+  const toggleNota = (id: number) => {
+    setNotaAbiertaId((prev) => (prev === id ? null : id));
+  };
+
+  const actualizarNota = (id: number, valor: string) => {
+    setNotas((prev) => ({ ...prev, [id]: valor }));
+  };
+
+  const limpiarRecorrido = () => {
+    if (seleccionados.length === 0) return;
+    const ok = window.confirm(
+      "¿Limpiar todo el recorrido? Se borraran los juzgados seleccionados y sus notas."
+    );
+    if (!ok) return;
+    setSeleccionados([]);
+    setNotas({});
+    setNotaAbiertaId(null);
   };
 
   const tipoLabel = (tipo: string) => {
@@ -209,52 +272,124 @@ export default function RecorridoPage() {
           )}
         </div>
 
-        {/* Contador */}
+        {/* Contador + limpiar */}
         {seleccionados.length > 0 && (
-          <p className="text-sm text-gray-700 text-center font-medium">
-            {seleccionados.length} de {MAX_UBICACIONES} ubicaciones
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-700 font-medium">
+              {seleccionados.length} de {MAX_UBICACIONES} ubicaciones
+            </p>
+            <button
+              onClick={limpiarRecorrido}
+              className="flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-full transition"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Limpiar recorrido
+            </button>
+          </div>
         )}
 
         {/* Lista de seleccionados */}
         <div className="flex flex-col gap-3">
           <AnimatePresence>
-            {seleccionados.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.2 }}
-                className="
-                  flex items-center gap-3
-                  bg-white/70 backdrop-blur-lg
-                  border border-gray-200
-                  rounded-2xl p-4 shadow-md
-                "
-              >
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm shrink-0">
-                  {index + 1}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm truncate">
-                    {item.nombre}
-                  </p>
-                  <p className="text-xs text-gray-700 truncate">
-                    {item.domicilio || "Sin domicilio"}
-                    {item.localidad ? `, ${item.localidad}` : ""}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => quitar(item.id)}
-                  className="shrink-0 p-1.5 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 transition"
+            {seleccionados.map((item, index) => {
+              const nota = notas[item.id] ?? "";
+              const abierta = notaAbiertaId === item.id;
+              const tieneNota = nota.trim().length > 0;
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.2 }}
+                  className="
+                    flex flex-col
+                    bg-white/70 backdrop-blur-lg
+                    border border-gray-200
+                    rounded-2xl p-4 shadow-md
+                  "
                 >
-                  <X className="w-5 h-5" />
-                </button>
-              </motion.div>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm shrink-0">
+                      {index + 1}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate">
+                        {item.nombre}
+                      </p>
+                      <p className="text-xs text-gray-700 truncate">
+                        {item.domicilio || "Sin domicilio"}
+                        {item.localidad ? `, ${item.localidad}` : ""}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => toggleNota(item.id)}
+                      aria-label={tieneNota ? "Editar nota" : "Agregar nota"}
+                      aria-expanded={abierta}
+                      className={`
+                        shrink-0 p-1.5 rounded-full transition relative
+                        ${tieneNota
+                          ? "text-amber-600 hover:bg-amber-50"
+                          : "text-gray-500 hover:bg-blue-50 hover:text-blue-600"}
+                      `}
+                    >
+                      <StickyNote className="w-5 h-5" />
+                      {tieneNota && (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 border border-white" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => quitar(item.id)}
+                      aria-label="Quitar del recorrido"
+                      className="shrink-0 p-1.5 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 transition"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {!abierta && tieneNota && (
+                    <div className="mt-3 ml-11 flex items-start gap-2 text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                      <StickyNote className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-600" />
+                      <p className="whitespace-pre-wrap break-words">{nota}</p>
+                    </div>
+                  )}
+
+                  <AnimatePresence initial={false}>
+                    {abierta && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 ml-11">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            ¿Qué tenés que hacer acá?
+                          </label>
+                          <textarea
+                            value={nota}
+                            onChange={(e) => actualizarNota(item.id, e.target.value)}
+                            placeholder="Ej: presentar escrito, retirar copias, mesa de entradas..."
+                            rows={3}
+                            className="
+                              w-full rounded-xl
+                              bg-white border border-gray-200
+                              px-3 py-2 text-sm text-gray-900 placeholder-gray-400
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                              resize-none
+                            "
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
 

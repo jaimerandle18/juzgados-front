@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, LogOut } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { getCookie } from "cookies-next";
 import logo from "../../public/dataJury1.png";
 import GlobalLoadingScreen from "./GlobalLoadingScreen";
+import SplashScreen from "./SplashScreen";
 import UserAvatarMenu from "./UserAvatarMenu";
 import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
@@ -20,7 +21,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [open, setOpen] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const [bootSplash, setBootSplash] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+
+  // Splash de arranque: se muestra una sola vez por sesión, al abrir la app,
+  // antes de cualquier pantalla (login, registro o home).
+  useEffect(() => {
+    try {
+      const shown = sessionStorage.getItem("dj_boot_splash_shown");
+      if (!shown) setBootSplash(true);
+    } catch {
+      setBootSplash(true);
+    }
+  }, []);
+
+  const onBootSplashDone = useCallback(() => {
+    try { sessionStorage.setItem("dj_boot_splash_shown", "1"); } catch {}
+    setBootSplash(false);
+  }, []);
 
   // Cerrar menú mobile al tocar fuera del header
   useEffect(() => {
@@ -99,6 +117,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen text-gray-900 relative z-0">
+      <AnimatePresence>
+        {bootSplash && <SplashScreen onDone={onBootSplashDone} />}
+      </AnimatePresence>
+
       {/* ✅ Este deco SIEMPRE atrás */}
       <div className="pointer-events-none absolute inset-0 z-[-1] bg-[radial-gradient(circle_at_30%_20%,rgba(0,140,255,0.18),transparent_60%)]" />
 
