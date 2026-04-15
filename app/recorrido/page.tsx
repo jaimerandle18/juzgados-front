@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { api } from "../../src/lib/api";
-import { Search, X, Navigation, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
+import { Search, X, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Resultado {
@@ -57,6 +57,17 @@ export default function RecorridoPage() {
     } catch {}
   }, [seleccionados, hydrated]);
 
+  // Los recorridos guardados con la version vieja no traen domicilio.
+  // Apenas hidratamos, completamos el detalle de los que falten.
+  useEffect(() => {
+    if (!hydrated) return;
+    seleccionados.forEach((s) => {
+      if (!s.domicilio) completarDetalle(s.id);
+    });
+    // Solo en el momento de hidratar; los nuevos ya se completan en agregar().
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -110,12 +121,36 @@ export default function RecorridoPage() {
     }, 300);
   };
 
+  // El endpoint /buscar devuelve una ficha liviana (sin domicilio/localidad),
+  // asi que al agregar pedimos el detalle para tener la direccion real.
+  // Agregamos el item primero para que el UI responda al toque, y despues
+  // lo enriquecemos cuando llega la respuesta.
+  const completarDetalle = async (id: number) => {
+    try {
+      const { data } = await api.get(`/pjn/dependencias/${id}`);
+      setSeleccionados((prev) =>
+        prev.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                domicilio: data.domicilio ?? s.domicilio,
+                localidad: data.localidad ?? s.localidad,
+              }
+            : s
+        )
+      );
+    } catch {
+      // si falla, igual queda agregado con lo que tenemos
+    }
+  };
+
   const agregar = (item: Resultado) => {
     if (seleccionados.length >= MAX_UBICACIONES) return;
     if (seleccionados.some((s) => s.id === item.id)) return;
     setSeleccionados((prev) => [...prev, item]);
     setOpen(false);
     setQuery("");
+    if (!item.domicilio) completarDetalle(item.id);
   };
 
   const quitar = (id: number) => {
@@ -204,7 +239,7 @@ export default function RecorridoPage() {
         </div>
 
         {/* Buscador */}
-        <div ref={containerRef} className="relative w-full">
+        <div ref={containerRef} className="relative w-[90%] mx-auto">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -408,7 +443,11 @@ export default function RecorridoPage() {
               flex items-center justify-center gap-3
             "
           >
-            <Navigation className="w-5 h-5" />
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2xzPbptUcOWQz-4Rjd42Na2gJ6Sh26Rv3Uw&s"
+              alt=""
+              className="w-6 h-6"
+            />
             Abrir recorrido en Google Maps
           </motion.button>
         )}
