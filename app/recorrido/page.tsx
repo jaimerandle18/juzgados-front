@@ -411,6 +411,15 @@ export default function RecorridoPage() {
                           <textarea
                             value={nota}
                             onChange={(e) => actualizarNota(item.id, e.target.value)}
+                            onBlur={() =>
+                              // Al tocar fuera del textarea "guardamos" (la
+                              // persistencia ya es automatica via localStorage)
+                              // y colapsamos el editor.
+                              setNotaAbiertaId((prev) =>
+                                prev === item.id ? null : prev
+                              )
+                            }
+                            autoFocus
                             placeholder="Ej: presentar escrito, retirar copias, mesa de entradas..."
                             rows={3}
                             className="
@@ -452,7 +461,7 @@ export default function RecorridoPage() {
             "
           >
             <img
-              src="/google-maps-logo.jpg"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqvez5ObFklOvff8oJJhHbex2KydC-_HmUqA&s"
               alt=""
               className="w-14 h-14 rounded-xl shrink-0"
             />
