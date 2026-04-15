@@ -27,6 +27,7 @@ export default function RecorridoPage() {
   const [notas, setNotas] = useState<Record<number, string>>({});
   const [notaAbiertaId, setNotaAbiertaId] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [maxModalOpen, setMaxModalOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -148,8 +149,12 @@ export default function RecorridoPage() {
   };
 
   const agregar = (item: Resultado) => {
-    if (seleccionados.length >= MAX_UBICACIONES) return;
     if (seleccionados.some((s) => s.id === item.id)) return;
+    if (seleccionados.length >= MAX_UBICACIONES) {
+      setOpen(false);
+      setMaxModalOpen(true);
+      return;
+    }
     setSeleccionados((prev) => [...prev, item]);
     setOpen(false);
     setQuery("");
@@ -226,42 +231,25 @@ export default function RecorridoPage() {
           <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
         </div>
 
-        {/* Aviso */}
-        <div className="flex items-start gap-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-2xl p-4">
-          <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-blue-900 font-medium">
-            Selecciona hasta <strong>{MAX_UBICACIONES} ubicaciones</strong> y te armamos el recorrido
-            en Google Maps con la mejor ruta.
-          </p>
-        </div>
-
-        {/* Punto de partida = ubicación del usuario (lo resuelve Maps) */}
-        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium bg-green-50/80 border border-green-200 text-green-800">
-          <Locate className="w-4 h-4 shrink-0" />
-          <span>Google Maps partirá desde tu ubicación actual</span>
-        </div>
-
         {/* Buscador */}
         <div ref={containerRef} className="relative w-[90%] self-center">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               value={query}
               onChange={(e) => buscar(e.target.value)}
               onFocus={() => resultados.length > 0 && setOpen(true)}
               placeholder="Buscar juzgado, camara, sala..."
-              disabled={seleccionados.length >= MAX_UBICACIONES}
               className="
-                w-full pl-10 pr-4 py-3.5
+                w-full pl-9 pr-4 py-3.5
                 rounded-2xl
                 bg-white/70 backdrop-blur-lg
                 border border-gray-200
                 shadow-md
                 text-gray-900 placeholder-gray-400
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                focus:outline-none
                 transition-all
-                disabled:opacity-50 disabled:cursor-not-allowed
               "
             />
             {loading && (
@@ -466,7 +454,14 @@ export default function RecorridoPage() {
           </AnimatePresence>
         </div>
 
-        {/* Boton de armar recorrido */}
+        {/* Aviso de ubicacion + boton de armar recorrido */}
+        {seleccionados.length >= 1 && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium bg-green-50/80 border border-green-200 text-green-800">
+            <Locate className="w-4 h-4 shrink-0" />
+            <span>Google Maps partirá desde tu ubicación actual</span>
+          </div>
+        )}
+
         {seleccionados.length >= 1 && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
@@ -508,6 +503,47 @@ export default function RecorridoPage() {
           </motion.button>
         )}
       </div>
+
+      {/* Modal: limite de ubicaciones alcanzado */}
+      <AnimatePresence>
+        {maxModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMaxModalOpen(false)}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 24 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
+                <h3 className="font-bold text-lg text-gray-900">
+                  Llegaste al máximo
+                </h3>
+              </div>
+              <p className="text-sm text-gray-700 mb-5">
+                Solo podés armar un recorrido con hasta{" "}
+                <strong>{MAX_UBICACIONES} ubicaciones</strong>. Quitá alguna si
+                querés sumar otra.
+              </p>
+              <button
+                type="button"
+                onClick={() => setMaxModalOpen(false)}
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
