@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { api } from "../../src/lib/api";
 import { Search, X, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Browser } from "@capacitor/browser";
 import { Capacitor } from "@capacitor/core";
 
 interface Resultado {
@@ -334,27 +333,44 @@ export default function RecorridoPage() {
         // de doble slash en la URL).
       }
 
-      const direcciones = ordenados.map((s) => {
+      // Usamos el formato oficial api=1 de Google Maps: soporta destino +
+      // waypoints explicitos y es el que Google recomienda para compatibilidad
+      // cross-platform (web, Android app, iOS app). El formato path-based
+      // `/dir/X/Y/Z/` lo parsea distinto el iOS app y se come las paradas
+      // despues de la segunda.
+      //   https://www.google.com/maps/dir/?api=1&origin=&destination=X&waypoints=A|B|C
+      // Origin vacio -> Maps usa "Tu ubicación" como punto de partida.
+      //
+      // Priorizamos lat,lng cuando lo tenemos (mas preciso, URL mas cortas);
+      // si falta, cae al string direccion + localidad.
+      const puntos = ordenados.map((s) => {
+        if (typeof s.lat === "number" && typeof s.lng === "number") {
+          return `${s.lat},${s.lng}`;
+        }
         const dir = s.domicilio || s.nombre;
         return s.localidad ? `${dir}, ${s.localidad}` : dir;
       });
 
-      // Truco: en el formato path-based de Google Maps, dejar el origen
-      // VACÍO (doble slash al inicio) hace que Maps use automáticamente
-      // "Tu ubicación" como punto de partida — tanto en web como en la
-      // app nativa.
-      //   https://www.google.com/maps/dir//destino1/destino2/...
-      const segmentos = direcciones
-        .map((d) => encodeURIComponent(d).replace(/%20/g, "+"))
-        .join("/");
+      const destination = puntos[puntos.length - 1];
+      const waypoints = puntos.slice(0, -1);
 
-      const url = `https://www.google.com/maps/dir//${segmentos}/`;
+      const params = new URLSearchParams({
+        api: "1",
+        origin: "",
+        destination,
+        travelmode: "driving",
+      });
+      if (waypoints.length > 0) {
+        params.set("waypoints", waypoints.join("|"));
+      }
+      const url = `https://www.google.com/maps/dir/?${params.toString()}`;
 
-      // En el WebView de Capacitor, window.open con "_blank" no hace nada.
-      // Usamos el plugin Browser (Safari View Controller en iOS, Chrome
-      // Custom Tabs en Android) y dejamos window.open solo para web.
+      // En webview de iOS, navigate absoluto dispara universal links:
+      // si el usuario tiene Google Maps instalado, se abre el app nativo.
+      // Si no, cae a la version web en el browser del sistema.
+      // En web, abrir en otra pestaña como siempre.
       if (Capacitor.isNativePlatform()) {
-        await Browser.open({ url });
+        window.location.href = url;
       } else {
         window.open(url, "_blank");
       }
