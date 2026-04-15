@@ -61,6 +61,18 @@ function optimizarPorCercania<T extends Coord>(origen: Coord, puntos: T[]): T[] 
   return orden;
 }
 
+// Centroide (promedio de lat/lng). Sirve como origen "virtual" cuando no
+// tenemos GPS: el punto mas cercano al centroide arranca primero y los
+// outliers (p.ej. un juzgado en Bahia Blanca mientras el resto esta en
+// CABA) caen al final naturalmente.
+function centroide(puntos: Coord[]): Coord {
+  const sum = puntos.reduce(
+    (acc, p) => ({ lat: acc.lat + p.lat, lng: acc.lng + p.lng }),
+    { lat: 0, lng: 0 }
+  );
+  return { lat: sum.lat / puntos.length, lng: sum.lng / puntos.length };
+}
+
 // Geolocalizacion envuelta en promesa. Devuelve null si el usuario niega,
 // no hay soporte, o tarda demasiado. En el WebView de Capacitor iOS el
 // timeout del navegador no siempre se respeta (p.ej. si el dialog de
@@ -312,26 +324,27 @@ export default function RecorridoPage() {
     setArmando(true);
 
     try {
-      let ordenados = seleccionados;
-
-      // Solo optimizamos si TODOS los juzgados tienen coords. Si falta
-      // alguno no podemos comparar distancias parcialmente: caemos al
-      // orden manual del usuario.
-      const todosConCoords = seleccionados.every(
-        (s) => typeof s.lat === "number" && typeof s.lng === "number"
+      // Separamos los que tienen coords de los que no. Optimizamos los
+      // que tienen; los que no, quedan al final en el orden manual.
+      const conCoords = seleccionados.filter(
+        (s): s is Resultado & Coord =>
+          typeof s.lat === "number" && typeof s.lng === "number"
+      );
+      const sinCoords = seleccionados.filter(
+        (s) => typeof s.lat !== "number" || typeof s.lng !== "number"
       );
 
-      if (todosConCoords) {
-        const ubicacion = await pedirUbicacion();
-        if (ubicacion) {
-          ordenados = optimizarPorCercania(
-            ubicacion,
-            seleccionados as Array<Resultado & Coord>
-          );
-        }
-        // Si el usuario niega GPS -> orden manual. Maps igual va a usar
-        // "Tu ubicacion" como origen al abrirse (lo resuelve el truco
-        // de doble slash en la URL).
+      let ordenados: Resultado[] = seleccionados;
+
+      if (conCoords.length >= 2) {
+        // Origen: GPS si el usuario lo permite; si no, centroide de los
+        // puntos seleccionados (clustering natural, outliers al final).
+        const gps = await pedirUbicacion();
+        const origen: Coord = gps ?? centroide(conCoords);
+        const ordenadosConCoords = optimizarPorCercania(origen, conCoords);
+        // Los sin coords al final (raros, solo si el backend no los tiene
+        // geocodificados aun). Mantienen su orden relativo manual.
+        ordenados = [...ordenadosConCoords, ...sinCoords];
       }
 
       // Usamos el formato oficial api=1 de Google Maps: soporta destino +
