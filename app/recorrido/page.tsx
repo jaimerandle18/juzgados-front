@@ -128,13 +128,16 @@ export default function RecorridoPage() {
   const completarDetalle = async (id: number) => {
     try {
       const { data } = await api.get(`/pjn/dependencias/${id}`);
+      // El endpoint envuelve la ficha bajo `dependencia` (junto con integrantes
+      // y children). Aceptamos tambien el formato plano por si cambia.
+      const dep = data?.dependencia ?? data;
       setSeleccionados((prev) =>
         prev.map((s) =>
           s.id === id
             ? {
                 ...s,
-                domicilio: data.domicilio ?? s.domicilio,
-                localidad: data.localidad ?? s.localidad,
+                domicilio: dep?.domicilio ?? s.domicilio,
+                localidad: dep?.localidad ?? s.localidad,
               }
             : s
         )
@@ -239,7 +242,7 @@ export default function RecorridoPage() {
         </div>
 
         {/* Buscador */}
-        <div ref={containerRef} className="relative w-[90%] mx-auto">
+        <div ref={containerRef} className="relative w-[90%] self-center">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -428,27 +431,27 @@ export default function RecorridoPage() {
           </AnimatePresence>
         </div>
 
-        {/* Boton de armar recorrido */}
+        {/* Boton de armar recorrido: el logo ES el boton */}
         {seleccionados.length >= 1 && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={armarRecorrido}
+            aria-label="Abrir recorrido en Google Maps"
             className="
-              w-full py-4 rounded-2xl
-              bg-blue-600 hover:bg-blue-700
-              text-white font-semibold text-lg
-              shadow-lg hover:-translate-y-0.5
-              transition-all
-              flex items-center justify-center gap-3
+              self-center
+              rounded-2xl
+              transition-transform
+              hover:-translate-y-0.5
+              active:scale-95
+              drop-shadow-xl
             "
           >
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2xzPbptUcOWQz-4Rjd42Na2gJ6Sh26Rv3Uw&s"
-              alt=""
-              className="w-6 h-6"
+              alt="Abrir recorrido en Google Maps"
+              className="w-24 h-24 rounded-2xl"
             />
-            Abrir recorrido en Google Maps
           </motion.button>
         )}
       </div>
