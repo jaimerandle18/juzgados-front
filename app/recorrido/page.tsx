@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { api } from "../../src/lib/api";
 import { Search, X, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Browser } from "@capacitor/browser";
+import { Capacitor } from "@capacitor/core";
 
 interface Resultado {
   id: number;
@@ -348,7 +350,14 @@ export default function RecorridoPage() {
 
       const url = `https://www.google.com/maps/dir//${segmentos}/`;
 
-      window.open(url, "_blank");
+      // En el WebView de Capacitor, window.open con "_blank" no hace nada.
+      // Usamos el plugin Browser (Safari View Controller en iOS, Chrome
+      // Custom Tabs en Android) y dejamos window.open solo para web.
+      if (Capacitor.isNativePlatform()) {
+        await Browser.open({ url });
+      } else {
+        window.open(url, "_blank");
+      }
     } finally {
       setArmando(false);
     }
