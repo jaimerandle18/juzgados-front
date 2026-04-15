@@ -424,6 +424,19 @@ export default function RecorridoPage() {
                           <textarea
                             value={nota}
                             onChange={(e) => actualizarNota(item.id, e.target.value)}
+                            onFocus={(e) => {
+                              // El teclado de iOS aparece ~300ms despues del
+                              // focus y achica el viewport. Esperamos para
+                              // que scrollIntoView calcule con el viewport
+                              // ya recortado y el textarea quede visible.
+                              const el = e.currentTarget;
+                              setTimeout(() => {
+                                el.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "center",
+                                });
+                              }, 350);
+                            }}
                             onBlur={() =>
                               // Al tocar fuera del textarea "guardamos" (la
                               // persistencia ya es automatica via localStorage)
