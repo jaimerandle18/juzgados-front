@@ -389,10 +389,23 @@ export default function RecorridoPage() {
                   </div>
 
                   {!abierta && tieneNota && (
-                    <div className="mt-3 flex items-start gap-2 text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setNotaAbiertaId(item.id)}
+                      aria-label="Editar nota"
+                      className="
+                        mt-3 w-full text-left
+                        flex items-start gap-2
+                        text-xs text-amber-900
+                        bg-amber-50 border border-amber-200
+                        rounded-xl px-3 py-2
+                        hover:bg-amber-100 active:scale-[0.99]
+                        transition
+                      "
+                    >
                       <StickyNote className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-600" />
                       <p className="whitespace-pre-wrap break-words">{nota}</p>
-                    </div>
+                    </button>
                   )}
 
                   <AnimatePresence initial={false}>
@@ -463,7 +476,7 @@ export default function RecorridoPage() {
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqvez5ObFklOvff8oJJhHbex2KydC-_HmUqA&s"
               alt=""
-              className="w-14 h-14 rounded-xl shrink-0"
+              className="w-20 h-20 rounded-xl shrink-0 object-cover"
             />
             <div className="flex-1 text-left">
               <p className="font-bold text-gray-900 leading-tight">
