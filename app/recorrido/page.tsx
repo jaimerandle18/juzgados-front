@@ -28,6 +28,16 @@ export default function RecorridoPage() {
   const [notaAbiertaId, setNotaAbiertaId] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [maxModalOpen, setMaxModalOpen] = useState(false);
+  const [cardsExpandidas, setCardsExpandidas] = useState<Set<number>>(new Set());
+
+  const toggleCard = (id: number) => {
+    setCardsExpandidas((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -299,11 +309,11 @@ export default function RecorridoPage() {
         </div>
 
         {/* Contador + limpiar */}
-        {seleccionados.length > 0 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-700 font-medium">
-              {seleccionados.length} de {MAX_UBICACIONES} ubicaciones
-            </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-700 font-medium">
+            {seleccionados.length} de {MAX_UBICACIONES} ubicaciones
+          </p>
+          {seleccionados.length > 0 && (
             <button
               onClick={limpiarRecorrido}
               className="flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-full transition"
@@ -311,8 +321,8 @@ export default function RecorridoPage() {
               <Trash2 className="w-3.5 h-3.5" />
               Limpiar recorrido
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Lista de seleccionados */}
         <div className="flex flex-col gap-3">
@@ -321,6 +331,7 @@ export default function RecorridoPage() {
               const nota = notas[item.id] ?? "";
               const abierta = notaAbiertaId === item.id;
               const tieneNota = nota.trim().length > 0;
+              const expandida = cardsExpandidas.has(item.id);
               return (
                 <motion.div
                   key={item.id}
@@ -340,15 +351,29 @@ export default function RecorridoPage() {
                       {index + 1}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">
+                    <button
+                      type="button"
+                      onClick={() => toggleCard(item.id)}
+                      aria-expanded={expandida}
+                      aria-label={expandida ? "Colapsar" : "Ver completo"}
+                      className="flex-1 min-w-0 text-left"
+                    >
+                      <p
+                        className={`font-semibold text-gray-900 text-sm ${
+                          expandida ? "" : "truncate"
+                        }`}
+                      >
                         {item.nombre}
                       </p>
-                      <p className="text-xs text-gray-700 truncate">
+                      <p
+                        className={`text-xs text-gray-700 ${
+                          expandida ? "" : "truncate"
+                        }`}
+                      >
                         {item.domicilio || "Sin domicilio"}
                         {item.localidad ? `, ${item.localidad}` : ""}
                       </p>
-                    </div>
+                    </button>
 
                     <button
                       onClick={() => toggleNota(item.id)}
@@ -440,7 +465,7 @@ export default function RecorridoPage() {
                               w-full rounded-xl
                               bg-white border border-gray-200
                               px-3 py-2 text-base text-gray-900 placeholder-gray-400
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                              focus:outline-none
                               resize-none
                             "
                           />
