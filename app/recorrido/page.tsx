@@ -5,6 +5,7 @@ import { api } from "../../src/lib/api";
 import { Search, X, AlertCircle, Locate, StickyNote, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Capacitor } from "@capacitor/core";
+import LoadingScreen from "../components/LoadingScreen";
 
 interface Resultado {
   id: number;
@@ -748,6 +749,17 @@ export default function RecorridoPage() {
           </motion.button>
         )}
       </div>
+
+      {/* Loader full-screen mientras armamos el recorrido optimizado.
+          Tapa la pantalla hasta que Maps abre (o cae el fallback). */}
+      {armando && (
+        <LoadingScreen
+          message="Vas a ser redirigido a Google Maps cuando encontremos el recorrido más eficiente. Esperá unos segundos."
+          brandLogoUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqvez5ObFklOvff8oJJhHbex2KydC-_HmUqA&s"
+          brandLogoAlt="Google Maps"
+          showSponsor
+        />
+      )}
 
       {/* Modal: limite de ubicaciones alcanzado */}
       <AnimatePresence>

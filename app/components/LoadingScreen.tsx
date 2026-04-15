@@ -7,11 +7,22 @@ import image from "../../public/agaboga.png";
 type LoadingScreenProps = {
   message?: string;
   showSponsor?: boolean;
+  /**
+   * Logo adicional para mostrar debajo del mensaje (p.ej. el de Google Maps
+   * en el flujo de armar recorrido, indicando a donde vas a ir a parar).
+   */
+  brandLogoUrl?: string;
+  brandLogoAlt?: string;
 };
 
 const SPONSOR_URL = "https://www.asocgobiernoabierto.org/wp-content/uploads/2026/03/Logotipo-AGA.png";
 
-export default function LoadingScreen({ message, showSponsor }: LoadingScreenProps) {
+export default function LoadingScreen({
+  message,
+  showSponsor,
+  brandLogoUrl,
+  brandLogoAlt,
+}: LoadingScreenProps) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50 px-6 text-center">
       <motion.div
@@ -43,6 +54,17 @@ export default function LoadingScreen({ message, showSponsor }: LoadingScreenPro
            <p className="text-gray-700 text-sm max-w-sm leading-relaxed">
            Cargando...
          </p>
+      )}
+
+      {brandLogoUrl && (
+        <motion.img
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          src={brandLogoUrl}
+          alt={brandLogoAlt || ""}
+          className="mt-6 w-16 h-16 rounded-xl object-cover shadow-md"
+        />
       )}
 
       {showSponsor && (
