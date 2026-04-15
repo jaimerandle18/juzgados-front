@@ -9,9 +9,70 @@ interface Resultado {
   id: number;
   nombre: string;
   tipo_funcional: string;
-  domicilio?: string;
-  localidad?: string;
+  domicilio?: string | null;
+  localidad?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   fuero?: { nombre: string } | null;
+}
+
+// ----- Utils de ruteo -----
+
+type Coord = { lat: number; lng: number };
+
+// Distancia en km usando Haversine. Para ~10 puntos en CABA la diferencia
+// con Euclidean es despreciable pero esto es correcto para cualquier lugar.
+function haversineKm(a: Coord, b: Coord): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const l1 = toRad(a.lat);
+  const l2 = toRad(b.lat);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(l1) * Math.cos(l2);
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+// Heuristica nearest-neighbor: arranca en `origen` y en cada paso salta al
+// punto no visitado mas cercano. Con 10 puntos, el resultado es
+// indistinguible del optimo global (TSP) y se calcula en microsegundos.
+function optimizarPorCercania<T extends Coord>(origen: Coord, puntos: T[]): T[] {
+  const resto = [...puntos];
+  const orden: T[] = [];
+  let actual: Coord = origen;
+  while (resto.length) {
+    let mejorIdx = 0;
+    let mejorDist = Infinity;
+    for (let i = 0; i < resto.length; i++) {
+      const d = haversineKm(actual, resto[i]);
+      if (d < mejorDist) {
+        mejorDist = d;
+        mejorIdx = i;
+      }
+    }
+    const sig = resto.splice(mejorIdx, 1)[0];
+    orden.push(sig);
+    actual = sig;
+  }
+  return orden;
+}
+
+// Geolocalizacion envuelta en promesa. Devuelve null si el usuario niega,
+// no hay soporte, o tarda demasiado.
+function pedirUbicacion(): Promise<Coord | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      return resolve(null);
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 }
+    );
+  });
 }
 
 const MAX_UBICACIONES = 10;
@@ -29,6 +90,7 @@ export default function RecorridoPage() {
   const [hydrated, setHydrated] = useState(false);
   const [maxModalOpen, setMaxModalOpen] = useState(false);
   const [cardsExpandidas, setCardsExpandidas] = useState<Set<number>>(new Set());
+  const [armando, setArmando] = useState(false);
 
   const toggleCard = (id: number) => {
     setCardsExpandidas((prev) => {
@@ -68,12 +130,14 @@ export default function RecorridoPage() {
     } catch {}
   }, [seleccionados, hydrated]);
 
-  // Los recorridos guardados con la version vieja no traen domicilio.
-  // Apenas hidratamos, completamos el detalle de los que falten.
+  // Los recorridos guardados con la version vieja no traen domicilio (ni
+  // lat/lng). Apenas hidratamos, completamos el detalle de los que falten.
   useEffect(() => {
     if (!hydrated) return;
     seleccionados.forEach((s) => {
-      if (!s.domicilio) completarDetalle(s.id);
+      const faltaDireccion = !s.domicilio;
+      const faltanCoords = typeof s.lat !== "number" || typeof s.lng !== "number";
+      if (faltaDireccion || faltanCoords) completarDetalle(s.id);
     });
     // Solo en el momento de hidratar; los nuevos ya se completan en agregar().
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,6 +213,8 @@ export default function RecorridoPage() {
                 ...s,
                 domicilio: dep?.domicilio ?? s.domicilio,
                 localidad: dep?.localidad ?? s.localidad,
+                lat: typeof dep?.lat === "number" ? dep.lat : s.lat,
+                lng: typeof dep?.lng === "number" ? dep.lng : s.lng,
               }
             : s
         )
@@ -168,7 +234,10 @@ export default function RecorridoPage() {
     setSeleccionados((prev) => [...prev, item]);
     setOpen(false);
     setQuery("");
-    if (!item.domicilio) completarDetalle(item.id);
+    // Si el search no trajo todo (domicilio/coords), pedimos el detalle.
+    const faltaDireccion = !item.domicilio;
+    const faltanCoords = typeof item.lat !== "number" || typeof item.lng !== "number";
+    if (faltaDireccion || faltanCoords) completarDetalle(item.id);
   };
 
   const quitar = (id: number) => {
@@ -211,26 +280,53 @@ export default function RecorridoPage() {
     return map[tipo] || tipo;
   };
 
-  const armarRecorrido = () => {
-    if (seleccionados.length < 1) return;
+  const armarRecorrido = async () => {
+    if (seleccionados.length < 1 || armando) return;
+    setArmando(true);
 
-    const direcciones = seleccionados.map((s) => {
-      const dir = s.domicilio || s.nombre;
-      return s.localidad ? `${dir}, ${s.localidad}` : dir;
-    });
+    try {
+      let ordenados = seleccionados;
 
-    // Truco: en el formato path-based de Google Maps, dejar el origen
-    // VACÍO (doble slash al inicio) hace que Maps use automáticamente
-    // "Tu ubicación" como punto de partida — tanto en web como en la
-    // app nativa. Así no necesitamos pedir GPS desde la webview.
-    //   https://www.google.com/maps/dir//destino1/destino2/...
-    const segmentos = direcciones
-      .map((d) => encodeURIComponent(d).replace(/%20/g, "+"))
-      .join("/");
+      // Solo optimizamos si TODOS los juzgados tienen coords. Si falta
+      // alguno no podemos comparar distancias parcialmente: caemos al
+      // orden manual del usuario.
+      const todosConCoords = seleccionados.every(
+        (s) => typeof s.lat === "number" && typeof s.lng === "number"
+      );
 
-    const url = `https://www.google.com/maps/dir//${segmentos}/`;
+      if (todosConCoords) {
+        const ubicacion = await pedirUbicacion();
+        if (ubicacion) {
+          ordenados = optimizarPorCercania(
+            ubicacion,
+            seleccionados as Array<Resultado & Coord>
+          );
+        }
+        // Si el usuario niega GPS -> orden manual. Maps igual va a usar
+        // "Tu ubicacion" como origen al abrirse (lo resuelve el truco
+        // de doble slash en la URL).
+      }
 
-    window.open(url, "_blank");
+      const direcciones = ordenados.map((s) => {
+        const dir = s.domicilio || s.nombre;
+        return s.localidad ? `${dir}, ${s.localidad}` : dir;
+      });
+
+      // Truco: en el formato path-based de Google Maps, dejar el origen
+      // VACÍO (doble slash al inicio) hace que Maps use automáticamente
+      // "Tu ubicación" como punto de partida — tanto en web como en la
+      // app nativa.
+      //   https://www.google.com/maps/dir//destino1/destino2/...
+      const segmentos = direcciones
+        .map((d) => encodeURIComponent(d).replace(/%20/g, "+"))
+        .join("/");
+
+      const url = `https://www.google.com/maps/dir//${segmentos}/`;
+
+      window.open(url, "_blank");
+    } finally {
+      setArmando(false);
+    }
   };
 
   return (
@@ -564,6 +660,7 @@ export default function RecorridoPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={armarRecorrido}
+            disabled={armando}
             aria-label="Abrir recorrido en Google Maps"
             className="
               w-full
@@ -576,6 +673,7 @@ export default function RecorridoPage() {
               transition-all
               hover:-translate-y-0.5 hover:shadow-xl
               active:scale-[0.98]
+              disabled:opacity-70 disabled:cursor-progress
             "
           >
             <img
@@ -585,10 +683,10 @@ export default function RecorridoPage() {
             />
             <div className="flex-1 text-left">
               <p className="font-bold text-gray-900 text-sm leading-tight">
-                Abrir en Google Maps
+                {armando ? "Armando recorrido…" : "Abrir en Google Maps"}
               </p>
               <p className="text-xs text-gray-500 mt-0.5">
-                Iniciar recorrido
+                {armando ? "Ordenando por cercanía" : "Iniciar recorrido"}
               </p>
             </div>
             <span
