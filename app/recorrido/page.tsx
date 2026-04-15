@@ -324,6 +324,78 @@ export default function RecorridoPage() {
           )}
         </div>
 
+        {/* Estado vacio: explicamos como se arma un recorrido */}
+        {seleccionados.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="
+              bg-white/70 backdrop-blur-lg
+              border border-gray-200 rounded-2xl
+              p-5 shadow-md
+            "
+          >
+            <h2 className="font-bold text-gray-900 mb-1">
+              ¿Cómo armar tu recorrido?
+            </h2>
+            <p className="text-xs text-gray-500 mb-4">
+              En tres pasos y listo.
+            </p>
+
+            <ol className="flex flex-col gap-4">
+              <li className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex items-center justify-center shrink-0">
+                  1
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-gray-900 flex items-center gap-1.5">
+                    <Search className="w-3.5 h-3.5 text-blue-500" />
+                    Buscá tus destinos
+                  </p>
+                  <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                    Escribí el nombre del juzgado, cámara o sala en el buscador
+                    de arriba.
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex items-center justify-center shrink-0">
+                  2
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-gray-900 flex items-center gap-1.5">
+                    <StickyNote className="w-3.5 h-3.5 text-amber-500" />
+                    Sumá hasta {MAX_UBICACIONES} ubicaciones
+                  </p>
+                  <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                    Tocá un resultado para agregarlo al recorrido. Si querés,
+                    anotá qué tenés que hacer en cada uno (presentar escrito,
+                    retirar copias, mesa de entradas...).
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex items-center justify-center shrink-0">
+                  3
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-gray-900 flex items-center gap-1.5">
+                    <Locate className="w-3.5 h-3.5 text-green-600" />
+                    Abrí en Google Maps
+                  </p>
+                  <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                    Te armamos la ruta desde tu ubicación actual, con el orden
+                    más eficiente para visitarlas todas.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </motion.div>
+        )}
+
         {/* Lista de seleccionados */}
         <div className="flex flex-col gap-3">
           <AnimatePresence>
