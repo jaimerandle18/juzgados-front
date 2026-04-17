@@ -24,6 +24,7 @@ export default function AdminUsuariosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Usuario | null>(null);
 
   const myId = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -104,6 +105,63 @@ export default function AdminUsuariosPage() {
       {loading && <p className="text-center text-gray-500 py-8">Cargando...</p>}
       {error && <p className="text-center text-red-500 py-4">{error}</p>}
 
+      {confirmTarget && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4"
+          onClick={() => savingId === null && setConfirmTarget(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              {confirmTarget.es_admin
+                ? "Quitar permisos de admin"
+                : "Dar permisos de admin"}
+            </h3>
+            <p className="text-sm text-gray-700 mb-1">
+              {confirmTarget.es_admin
+                ? "Vas a quitarle los permisos de admin a:"
+                : "Vas a darle permisos de admin a:"}
+            </p>
+            <p className="font-semibold text-gray-900">
+              {(confirmTarget.nombre || "") + " " + (confirmTarget.apellido || "")}
+            </p>
+            <p className="text-sm text-gray-500 mb-5">{confirmTarget.email}</p>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmTarget(null)}
+                disabled={savingId !== null}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  const target = confirmTarget;
+                  await toggleAdmin(target);
+                  setConfirmTarget(null);
+                }}
+                disabled={savingId !== null}
+                className={
+                  "px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 " +
+                  (confirmTarget.es_admin
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-blue-600 hover:bg-blue-700")
+                }
+              >
+                {savingId === confirmTarget.id
+                  ? "Guardando..."
+                  : confirmTarget.es_admin
+                  ? "Sí, quitar admin"
+                  : "Sí, hacer admin"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!loading && !error && (
         <>
           <p className="text-sm text-gray-600 mb-3">
@@ -145,7 +203,7 @@ export default function AdminUsuariosPage() {
 
                     {!isSelf && (
                       <button
-                        onClick={() => toggleAdmin(u)}
+                        onClick={() => setConfirmTarget(u)}
                         disabled={savingId === u.id}
                         className={
                           u.es_admin
