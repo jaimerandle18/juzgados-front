@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "src/lib/api";
+import { showLoader } from "../../components/globalLoader";
 
 type Usuario = {
   id: string;
@@ -111,13 +112,13 @@ export default function AdminAccionesPage() {
         <h1 className="text-3xl font-extrabold mb-3">Acciones</h1>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
           <button
-            onClick={() => router.push("/admin/stats")}
+            onClick={() => { showLoader(); router.push("/admin/stats"); }}
             className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
           >
             Estadísticas
           </button>
           <button
-            onClick={() => router.push("/admin/usuarios")}
+            onClick={() => { showLoader(); router.push("/admin/usuarios"); }}
             className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
           >
             Usuarios
