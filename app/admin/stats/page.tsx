@@ -7,8 +7,6 @@ import { api } from "src/lib/api";
 type Stats = {
   usuarios: {
     total: number;
-    verificados: number;
-    abogadosVerificados: number;
     admins: number;
     nuevosUltimos30d: number;
   };
@@ -84,9 +82,9 @@ export default function AdminStatsPage() {
 
   return (
     <main className="min-h-screen px-4 pt-8 pb-24 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold">Estadísticas</h1>
-        <div className="flex gap-2">
+      <div className="mb-6">
+        <h1 className="text-3xl font-extrabold mb-3">Estadísticas</h1>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
           <button
             onClick={() => router.push("/admin/usuarios")}
             className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
@@ -108,10 +106,11 @@ export default function AdminStatsPage() {
       {stats && (
         <>
           <h2 className="text-lg font-bold mt-2 mb-3 text-gray-700">Usuarios</h2>
+          <p className="text-xs text-gray-500 mb-3">
+            Sólo cuenta usuarios con email verificado.
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <KpiCard label="Total" value={stats.usuarios.total} />
-            <KpiCard label="Verificados" value={stats.usuarios.verificados} />
-            <KpiCard label="Abogados validados" value={stats.usuarios.abogadosVerificados} />
             <KpiCard label="Admins" value={stats.usuarios.admins} />
             <KpiCard label="Nuevos (30d)" value={stats.usuarios.nuevosUltimos30d} />
           </div>
