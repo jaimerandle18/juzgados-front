@@ -45,6 +45,23 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // Rutas públicas siempre permitidas
     if (PUBLIC_ROUTES.includes(pathname)) return;
 
+    // Rutas de admin: requieren token + flag es_admin en localStorage
+    if (pathname === "/admin-select" || pathname.startsWith("/admin")) {
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+      let isAdmin = false;
+      try {
+        isAdmin = localStorage.getItem("es_admin") === "1";
+      } catch {}
+      if (!isAdmin) {
+        router.replace("/");
+        return;
+      }
+      return;
+    }
+
     // Rutas que requieren login real (no invitado)
     if (AUTH_ONLY_ROUTES.includes(pathname) || pathname.startsWith("/votar")) {
       if (!token) {

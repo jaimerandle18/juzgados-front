@@ -31,6 +31,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { email, contrasenia: password });
       const token = res?.data?.token;
+      const esAdmin = Boolean(res?.data?.user?.es_admin);
 
       if (!token || typeof token !== "string") {
         setError("No llegó token del backend");
@@ -46,10 +47,15 @@ export default function LoginPage() {
 
       try { localStorage.setItem("auth_token", token); } catch {}
       try { sessionStorage.setItem("auth_token", token); } catch {}
+      try { localStorage.setItem("es_admin", esAdmin ? "1" : "0"); } catch {}
+      try {
+        const uid = res?.data?.user?.id;
+        if (uid) localStorage.setItem("user_id", String(uid));
+      } catch {}
 
       clearGuestMode();
       setLoading(false);
-      router.replace("/");
+      router.replace(esAdmin ? "/admin-select" : "/");
       // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);

@@ -54,6 +54,10 @@ export default function UserAvatarMenu() {
   const logout = () => {
     showLoader("Cerrando sesión…");
     clearGuestMode();
+    try {
+      localStorage.removeItem("es_admin");
+      localStorage.removeItem("user_id");
+    } catch {}
     requestAnimationFrame(() => {
       setTimeout(() => {
         window.location.href = "/logout";
