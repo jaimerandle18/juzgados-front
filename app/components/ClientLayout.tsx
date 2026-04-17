@@ -21,6 +21,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [open, setOpen] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [bootSplash, setBootSplash] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -66,6 +67,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const logged = typeof token === "string" && token.length > 0;
     setIsLogged(logged);
     setIsGuest(!logged && isGuestMode());
+    try {
+      setIsAdmin(logged && localStorage.getItem("es_admin") === "1");
+    } catch {
+      setIsAdmin(false);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -92,6 +98,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const mobileExtraItems = [
     { label: "Mis evaluaciones", href: "/mis-evaluaciones" },
     { label: "Mi perfil", href: "/perfil" },
+  ];
+
+  const adminMobileItems = [
+    { label: "Estadísticas", href: "/admin/stats" },
+    { label: "Usuarios", href: "/admin/usuarios" },
+    { label: "Acciones", href: "/admin/acciones" },
   ];
 
   const navItems = isGuest
@@ -237,6 +249,34 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   </Link>
                 );
               })}
+
+              {isAdmin && (
+                <>
+                  <div className="pt-2 mt-2 border-t border-gray-200/70">
+                    <p className="px-3 pb-1 text-[11px] font-bold tracking-wider text-gray-400 uppercase">
+                      Admin
+                    </p>
+                  </div>
+                  {adminMobileItems.map((item) => {
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => {
+                          setOpen(false);
+                          if (!active) showLoader();
+                        }}
+                        className={`block py-2 text-lg font-semibold rounded-md px-3 transition ${
+                          active ? "bg-blue-100 text-blue-700" : "text-gray-800 hover:bg-gray-100"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
 
               {isGuest ? (
                 <button
