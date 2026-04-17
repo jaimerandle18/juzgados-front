@@ -11,9 +11,49 @@ type Usuario = {
   nombre: string | null;
   apellido: string | null;
   created_at: string;
+  cpacf_tomo: string | null;
+  cpacf_folio: string | null;
   es_verificado: boolean;
   es_abogado_verificado: boolean;
 };
+
+function toCSV(rows: Usuario[]): string {
+  const headers = ["Email", "Nombre", "Apellido", "Tomo", "Folio", "Fecha creación"];
+  const esc = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const lines = [headers.join(",")];
+  for (const u of rows) {
+    lines.push(
+      [
+        u.email,
+        u.nombre || "",
+        u.apellido || "",
+        u.cpacf_tomo || "",
+        u.cpacf_folio || "",
+        new Date(u.created_at).toLocaleDateString("es-AR"),
+      ]
+        .map(esc)
+        .join(",")
+    );
+  }
+  // BOM para que Excel abra bien los acentos en UTF-8
+  return "\uFEFF" + lines.join("\n");
+}
+
+function downloadCSV(rows: Usuario[], filename: string) {
+  const csv = toCSV(rows);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 export default function AdminAccionesPage() {
   const router = useRouter();
@@ -165,6 +205,19 @@ export default function AdminAccionesPage() {
             Limpiar ({selected.size})
           </button>
         )}
+
+        <div className="flex-1" />
+
+        <button
+          onClick={() => {
+            const today = new Date().toISOString().slice(0, 10);
+            downloadCSV(filtered, `datajury-usuarios-${today}.csv`);
+          }}
+          disabled={filtered.length === 0}
+          className="text-sm border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+        >
+          Exportar todos (CSV)
+        </button>
       </div>
 
       {loading && <p className="text-center text-gray-500 py-8">Cargando...</p>}
@@ -231,6 +284,17 @@ export default function AdminAccionesPage() {
             </div>
 
             <div className="flex-1" />
+
+            <button
+              onClick={() => {
+                const rows = usuarios.filter((u) => selected.has(u.id));
+                const today = new Date().toISOString().slice(0, 10);
+                downloadCSV(rows, `datajury-usuarios-${today}.csv`);
+              }}
+              className="bg-white border border-gray-300 text-gray-800 px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-50"
+            >
+              Exportar CSV
+            </button>
 
             <button
               onClick={copyEmails}
