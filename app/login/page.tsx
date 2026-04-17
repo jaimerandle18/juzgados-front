@@ -55,7 +55,7 @@ export default function LoginPage() {
 
       clearGuestMode();
       setLoading(false);
-      router.replace(esAdmin ? "/admin-select" : "/");
+      router.replace("/");
       // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);

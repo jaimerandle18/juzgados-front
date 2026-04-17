@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { LogOut, User, Star, ChevronDown } from "lucide-react";
+import { LogOut, User, Star, ChevronDown, BarChart3, Users, Mail } from "lucide-react";
 import { api } from "../../src/lib/api";
 import { showLoader } from "./globalLoader";
 import { clearGuestMode } from "../utils/AuthGuard";
@@ -35,13 +35,25 @@ function nombreCompleto(u: DjUser | null) {
 
 export default function UserAvatarMenu() {
   const [user, setUser] = useState<DjUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    try {
+      setIsAdmin(localStorage.getItem("es_admin") === "1");
+    } catch {}
+
     let cancel = false;
     api
       .get("/usuarios/me")
       .then((res) => {
-        if (!cancel) setUser(res.data);
+        if (!cancel) {
+          setUser(res.data);
+          if (res.data?.es_admin != null) {
+            const flag = Boolean(res.data.es_admin);
+            setIsAdmin(flag);
+            try { localStorage.setItem("es_admin", flag ? "1" : "0"); } catch {}
+          }
+        }
       })
       .catch(() => {
         /* sin cuenta o sin red; el dropdown igual funciona con iniciales "?" */
@@ -139,6 +151,60 @@ export default function UserAvatarMenu() {
             </Link>
           )}
         </MenuItem>
+
+        {isAdmin && (
+          <>
+            <div className="my-1 border-t border-gray-100" />
+            <p className="px-4 pt-2 pb-1 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+              Admin
+            </p>
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  href="/admin/stats"
+                  onClick={() => showLoader()}
+                  className={`
+                    flex items-center gap-3 px-4 py-2.5 text-sm
+                    ${focus ? "bg-blue-50 text-blue-700" : "text-gray-800"}
+                  `}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Estadísticas
+                </Link>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  href="/admin/usuarios"
+                  onClick={() => showLoader()}
+                  className={`
+                    flex items-center gap-3 px-4 py-2.5 text-sm
+                    ${focus ? "bg-blue-50 text-blue-700" : "text-gray-800"}
+                  `}
+                >
+                  <Users className="w-4 h-4" />
+                  Usuarios
+                </Link>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  href="/admin/acciones"
+                  onClick={() => showLoader()}
+                  className={`
+                    flex items-center gap-3 px-4 py-2.5 text-sm
+                    ${focus ? "bg-blue-50 text-blue-700" : "text-gray-800"}
+                  `}
+                >
+                  <Mail className="w-4 h-4" />
+                  Acciones
+                </Link>
+              )}
+            </MenuItem>
+          </>
+        )}
 
         <div className="my-1 border-t border-gray-100" />
 

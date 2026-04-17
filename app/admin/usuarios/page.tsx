@@ -77,12 +77,20 @@ export default function AdminUsuariosPage() {
     <main className="min-h-screen px-4 pt-8 pb-24 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-extrabold">Usuarios</h1>
-        <button
-          onClick={() => router.push("/admin/stats")}
-          className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
-        >
-          Ver estadísticas
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push("/admin/stats")}
+            className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
+          >
+            Estadísticas
+          </button>
+          <button
+            onClick={() => router.push("/admin/acciones")}
+            className="text-sm bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
+          >
+            Acciones
+          </button>
+        </div>
       </div>
 
       <input

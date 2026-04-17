@@ -18,6 +18,14 @@ export function isGuestMode(): boolean {
 
 export function setGuestMode() {
   document.cookie = "guest_mode=1; Path=/; Max-Age=86400; SameSite=Lax";
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    fetch(`${baseUrl}/metrics/guest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
 }
 
 export function clearGuestMode() {
@@ -46,7 +54,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (PUBLIC_ROUTES.includes(pathname)) return;
 
     // Rutas de admin: requieren token + flag es_admin en localStorage
-    if (pathname === "/admin-select" || pathname.startsWith("/admin")) {
+    if (pathname.startsWith("/admin")) {
       if (!token) {
         router.replace("/login");
         return;
