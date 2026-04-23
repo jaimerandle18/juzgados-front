@@ -97,6 +97,7 @@ function MenuCard({
   return (
     <motion.button
       type="button"
+      tabIndex={0}
       onClick={go}
       whileHover={hasHover ? { scale: 1.03 } : undefined}
       whileTap={hasHover ? { scale: 0.98 } : undefined}

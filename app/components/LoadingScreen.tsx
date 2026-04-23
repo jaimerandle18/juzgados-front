@@ -15,7 +15,7 @@ type LoadingScreenProps = {
   brandLogoAlt?: string;
 };
 
-const SPONSOR_URL = "https://www.asocgobiernoabierto.org/wp-content/uploads/2026/03/Logotipo-AGA.png";
+const SPONSOR_URL = "/gobiernoabierto.png";
 
 export default function LoadingScreen({
   message,
@@ -77,14 +77,39 @@ export default function LoadingScreen({
           <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">
             Sponsored by
           </p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={SPONSOR_URL}
-            alt="Gobierno Abierto"
-            width={170}
-            height={55}
-            style={{ objectFit: "contain" }}
-          />
+          <div className="flex items-center gap-5">
+            {/* Gobierno Abierto */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={SPONSOR_URL}
+              alt="Gobierno Abierto"
+              width={170}
+              height={55}
+              style={{ objectFit: "contain" }}
+            />
+
+            {/* Separador */}
+            <div className="h-12 w-px bg-gray-300" />
+
+            {/* FORES */}
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/fores_logo.jpeg"
+                alt="FORES"
+                width={40}
+                height={40}
+                className="rounded-full"
+                style={{ objectFit: "contain" }}
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-gray-700 leading-tight">fores</span>
+                <span className="text-[10px] text-gray-500 leading-tight max-w-[130px]">
+                  foro de estudios sobre la administración de justicia
+                </span>
+              </div>
+            </div>
+          </div>
         </motion.div>
       )}
     </div>

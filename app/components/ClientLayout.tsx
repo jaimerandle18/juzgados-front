@@ -15,6 +15,7 @@ import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
 import { Capacitor } from "@capacitor/core";
 import { isGuestMode, clearGuestMode } from "../utils/AuthGuard";
+import SponsorMarquee from "./SponsorMarquee";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -128,7 +129,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   };
 
   return (
-    <div className="min-h-screen text-gray-900 relative z-0">
+    <div className="min-h-screen flex flex-col text-gray-900 relative z-0">
       <AnimatePresence>
         {bootSplash && <SplashScreen onDone={onBootSplashDone} />}
       </AnimatePresence>
@@ -179,6 +180,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 style={{ objectFit: "contain", display: "block" }}
               />
             </Link>
+
 
             {showNav && (
               <nav className="hidden md:flex space-x-6 text-sm font-medium items-center">
@@ -303,14 +305,30 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               )}
             </motion.div>
           )}
+
         </div>
       </header>
 
-      <main className="px-6 max-w-6xl mx-auto relative z-10" style={{ paddingTop: "calc(7rem + env(safe-area-inset-top, 0px))" }}>
+      <main className="flex-1 px-6 max-w-6xl mx-auto relative z-10 w-full" style={{ paddingTop: "calc(7rem + env(safe-area-inset-top, 0px))" }}>
         <GlobalLoadingScreen />
         <NativeGestures edgeZonePx={30} />
         {children}
       </main>
+
+      {/* Sponsor ticker abajo — solo en home, login y register */}
+      {(pathname === "/login" || pathname === "/register") && (
+        <footer
+          className="fixed bottom-0 left-0 w-full z-40 bg-white/40 backdrop-blur-2xl"
+          style={{
+            WebkitBackdropFilter: "blur(40px)",
+            backdropFilter: "blur(40px)",
+            maskImage: "linear-gradient(to right, transparent 0%, black 35%, black 65%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 35%, black 65%, transparent 100%)",
+          }}
+        >
+          <SponsorMarquee />
+        </footer>
+      )}
     </div>
   );
 }

@@ -15,6 +15,15 @@ module.exports = {
   },
   theme: {
     extend: {
+      animation: {
+        marquee: "marquee 70s linear infinite",
+      },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+      },
       colors: {
         fondo: "#121212",
         rojo: "#B71C1C",

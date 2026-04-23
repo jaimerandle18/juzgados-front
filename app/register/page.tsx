@@ -137,9 +137,9 @@ const [folio, setFolio] = useState("");
           Registrarse
         </button>
 
-        <p className="text-sm text-gray-700 text-center mt-2">
+        <p className="text-sm text-gray-700 text-center mt-2 mb-16">
           ¿Ya tenés cuenta?
-          <AnchorWithLoader href="/login" className="text-blue-600 font-semibold ml-1 hover:underline">
+          <AnchorWithLoader href="/login" className="ml-1 inline-block px-2 py-0.5 rounded-md bg-blue-600 text-white font-semibold text-xs shadow-md hover:bg-blue-700 transition-all">
             Iniciar sesión
           </AnchorWithLoader>
         </p>

@@ -131,7 +131,10 @@ export default function LoginPage() {
 
           <p className="text-sm text-gray-700 text-center">
             ¿No tenés cuenta?
-            <AnchorWithLoader href="/register" className="text-blue-600 font-semibold ml-1 hover:underline">
+            <AnchorWithLoader
+              href="/register"
+              className="ml-1 inline-block px-2 py-0.5 rounded-md bg-blue-600 text-white font-semibold text-xs shadow-md hover:bg-blue-700 transition-all"
+            >
               Registrate
             </AnchorWithLoader>
           </p>
