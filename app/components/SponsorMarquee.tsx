@@ -23,7 +23,7 @@ export default function SponsorMarquee() {
 function Track() {
   return (
     <div className="flex items-center shrink-0">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 20 }).map((_, i) => (
         <div key={i} className="flex items-center shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
