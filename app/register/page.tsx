@@ -53,7 +53,7 @@ const [folio, setFolio] = useState("");
   };
 
   return (
-    <main className="min-h-screen  flex flex-col items-center px-4 pt-10" >
+    <main className="flex flex-col items-center px-4 pt-10">
      {loading && (
   <LoadingScreen
     message="Estamos validando tu matrícula con el Colegio Público de Abogados. Esto puede tardar unos segundos, por favor no cierres la página."

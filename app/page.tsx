@@ -37,7 +37,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen px-6 pt-10">
+    <main className="px-6 pt-10">
       <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
         <SearchBar />
 

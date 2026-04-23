@@ -40,7 +40,7 @@ export default function VerifyTokenPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 pt-10">
+    <main className="flex flex-col items-center px-4 pt-10">
       {loading && <LoadingScreen />}
 
       {/* TÍTULO */}

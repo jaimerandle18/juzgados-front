@@ -78,8 +78,8 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">
           Sponsored by
         </p>
-        <div className="flex items-center gap-5">
-          {/* Gobierno Abierto */}
+        {/* Desktop: horizontal / Mobile: vertical */}
+        <div className="flex items-center gap-5 max-sm:hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={SPONSOR_URL}
@@ -88,11 +88,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
             height={55}
             style={{ objectFit: "contain" }}
           />
-
-          {/* Separador */}
           <div className="h-12 w-px bg-gray-300" />
-
-          {/* FORES */}
           <div className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -106,6 +102,34 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-700 leading-tight">fores</span>
               <span className="text-[10px] text-gray-500 leading-tight max-w-[130px]">
+                foro de estudios sobre la administración de justicia
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile: uno arriba del otro, mismo tamaño */}
+        <div className="flex flex-col items-center gap-4 sm:hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={SPONSOR_URL}
+            alt="Gobierno Abierto"
+            height={45}
+            style={{ height: 45, width: "auto", objectFit: "contain" }}
+          />
+          <div className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/fores_logo.jpeg"
+              alt="FORES"
+              width={24}
+              height={24}
+              className="rounded-full"
+              style={{ objectFit: "contain" }}
+            />
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-gray-700 leading-tight">fores</span>
+              <span className="text-[9px] text-gray-500 leading-tight max-w-[120px]">
                 foro de estudios sobre la administración de justicia
               </span>
             </div>

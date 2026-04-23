@@ -69,18 +69,18 @@ export default function LoginPage() {
     <>
       {loading && <LoadingScreen message="Iniciando sesión..." />}
 
-      <main className="min-h-screen flex flex-col items-center pt-14 px-4">
-        <div className="text-center mb-12">
+      <main className="flex flex-col items-center pt-6 sm:pt-14 px-4">
+        <div className="text-center mb-6 sm:mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
           <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
         </div>
 
-        <div className="w-full max-w-sm flex flex-col space-y-10 md:space-y-5">
+        <div className="w-full max-w-sm flex flex-col space-y-5">
           <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
             <input
               type="email"
               placeholder="Correo electrónico"
-              className="bg-white border border-gray-300 rounded-xl px-4 py-4 w-full focus:ring-2 focus:ring-blue-400 text-gray-900 mt-10 md:mt-1"
+              className="bg-white border border-gray-300 rounded-xl px-4 py-4 w-full focus:ring-2 focus:ring-blue-400 text-gray-900 mt-1"
               value={email}
               onChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
@@ -100,7 +100,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:-translate-y-0.5 transition-all mt-7 md:mt-1 disabled:opacity-60"
+              className="bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:-translate-y-0.5 transition-all mt-1 disabled:opacity-60"
             >
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
@@ -129,7 +129,7 @@ export default function LoginPage() {
             Ingresar como invitado
           </button>
 
-          <p className="text-sm text-gray-700 text-center">
+          <p className="text-sm text-gray-700 text-center mt-10">
             ¿No tenés cuenta?
             <AnchorWithLoader
               href="/register"

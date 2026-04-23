@@ -76,7 +76,7 @@ export default function AdminUsuariosPage() {
   };
 
   return (
-    <main className="min-h-screen px-4 pt-8 pb-24 max-w-4xl mx-auto">
+    <main className="px-4 pt-8 pb-24 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-extrabold mb-3">Usuarios</h1>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">

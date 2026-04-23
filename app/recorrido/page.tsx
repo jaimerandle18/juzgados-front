@@ -394,7 +394,7 @@ export default function RecorridoPage() {
   };
 
   return (
-    <main className="min-h-screen px-6 pt-10 pb-20">
+    <main className="px-6 pt-10 pb-20">
       <div className="max-w-lg mx-auto flex flex-col gap-6">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold tracking-tight">Armar recorrido</h1>
