@@ -23,6 +23,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Ingresá un email válido");
+      return;
+    }
+
     setLoading(true);
 
     // 🔧 iOS: forzá un frame para que pinte el overlay antes del await
@@ -45,8 +50,6 @@ export default function LoginPage() {
         `auth_token=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax` +
         (isHttps ? "; Secure" : "");
 
-      try { localStorage.setItem("auth_token", token); } catch {}
-      try { sessionStorage.setItem("auth_token", token); } catch {}
       try { localStorage.setItem("es_admin", esAdmin ? "1" : "0"); } catch {}
       try {
         const uid = res?.data?.user?.id;
@@ -77,18 +80,24 @@ export default function LoginPage() {
 
         <div className="w-full max-w-sm flex flex-col space-y-5">
           <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+            <label htmlFor="login-email" className="sr-only">Correo electrónico</label>
             <input
+              id="login-email"
               type="email"
+              autoComplete="email"
               placeholder="Correo electrónico"
               className="bg-white border border-gray-300 rounded-xl px-4 py-4 w-full focus:ring-2 focus:ring-blue-400 text-gray-900 mt-1"
               value={email}
               onChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
 
+            <label htmlFor="login-password" className="sr-only">Contraseña</label>
             <input
+              id="login-password"
               type="password"
+              autoComplete="current-password"
               placeholder="Contraseña"
-              className="bg-white border border-gray-300 rounded-xl px-4 py-4 w-full focus:ring-2 focus:ring-blue-400 text-gray-900 mt-1 md:mt-1"
+              className="bg-white border border-gray-300 rounded-xl px-4 py-4 w-full focus:ring-2 focus:ring-blue-400 text-gray-900 mt-1"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

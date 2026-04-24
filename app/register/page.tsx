@@ -33,6 +33,12 @@ const [folio, setFolio] = useState("");
   return;
    }
 
+   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+     setError("Ingresá un email válido");
+     setLoading(false);
+     return;
+   }
+
     try {
       const res = await api.post("/auth/register", {
         nombre,
@@ -80,48 +86,60 @@ const [folio, setFolio] = useState("");
 
 
       <form className="w-full max-w-sm flex flex-col gap-5" onSubmit={handleSubmit}>
+        <label htmlFor="reg-nombre" className="sr-only">Nombre</label>
         <input
+          id="reg-nombre"
+          autoComplete="given-name"
           className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
         />
 
+        <label htmlFor="reg-apellido" className="sr-only">Apellido</label>
         <input
+          id="reg-apellido"
+          autoComplete="family-name"
           className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Apellido"
           value={apellido}
           onChange={(e) => setApellido(e.target.value)}
         />
+
+        <label htmlFor="reg-tomo" className="sr-only">Tomo</label>
         <input
-  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
-  placeholder="Tomo (hasta 3 dígitos)"
-  value={tomo}
-  onChange={(e) =>
-    setTomo(e.target.value.replace(/\D/g, "").slice(0, 3))
-  }
-/>
+          id="reg-tomo"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
+          placeholder="Tomo (hasta 3 dígitos)"
+          value={tomo}
+          onChange={(e) => setTomo(e.target.value.replace(/\D/g, "").slice(0, 3))}
+        />
 
-<input
-  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
-  placeholder="Folio (hasta 4 dígitos)"
-  value={folio}
-  onChange={(e) =>
-    setFolio(e.target.value.replace(/\D/g, "").slice(0, 4))
-  }
-/>
-
-
-<input
-  type="email"
-  className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
-  placeholder="Correo electrónico"
-  value={email}
-  onChange={(e) => setEmail(e.target.value.toLowerCase())}
-/>
-
+        <label htmlFor="reg-folio" className="sr-only">Folio</label>
         <input
+          id="reg-folio"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full"
+          placeholder="Folio (hasta 4 dígitos)"
+          value={folio}
+          onChange={(e) => setFolio(e.target.value.replace(/\D/g, "").slice(0, 4))}
+        />
+
+        <label htmlFor="reg-email" className="sr-only">Correo electrónico</label>
+        <input
+          id="reg-email"
+          type="email"
+          autoComplete="email"
+          className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
+          placeholder="Correo electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value.toLowerCase())}
+        />
+
+        <label htmlFor="reg-password" className="sr-only">Contraseña</label>
+        <input
+          id="reg-password"
           type="password"
+          autoComplete="new-password"
           className="bg-white border border-gray-300 rounded-xl px-4 py-3 w-full focus:ring-2 focus:ring-blue-400"
           placeholder="Contraseña"
           value={contrasenia}

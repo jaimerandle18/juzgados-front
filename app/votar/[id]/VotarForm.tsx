@@ -82,6 +82,12 @@ export default function VotarForm({
       return;
     }
 
+    const faltante = preguntas.find((p) => !form[p.id]);
+    if (faltante) {
+      toastError(`Te faltó votar "${faltante.texto}"`);
+      return;
+    }
+
     try {
       await api.post("/votos", {
         dependencia_id: Number(id),
