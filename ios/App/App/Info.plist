@@ -45,6 +45,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Data Jury usa Face ID para iniciar sesión de forma segura.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Data Jury usa tu ubicación para armar el recorrido entre juzgados desde donde estás.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

@@ -20,6 +20,7 @@
     "@types/canvas-confetti": "^1.9.0",
     "axios": "^1.13.1",
     "canvas-confetti": "^1.9.4",
+    "capacitor-native-biometric": "^4.2.2",
     "cookies-next": "^6.1.1",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.552.0",

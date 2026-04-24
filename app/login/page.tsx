@@ -1,45 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import AnchorWithLoader from "../components/AnchorWithLoader";
+import { showLoader } from "../components/globalLoader";
 import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
+import {
+  isBiometricAvailable,
+  saveCredentials,
+  getCredentialsWithBiometric,
+  hasStoredCredentials,
+} from "../utils/biometric";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [biometricReady, setBiometricReady] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Chequeamos si hay credenciales guardadas + biometrics disponible
+  useEffect(() => {
+    (async () => {
+      const available = await isBiometricAvailable();
+      if (!available) return;
+      const stored = await hasStoredCredentials();
+      setBiometricReady(stored);
+    })();
+  }, []);
+
+  const doLogin = async (loginEmail: string, loginPassword: string, saveBio = false) => {
+    setLoading(true);
     setError("");
 
-    if (!email || !password) {
-      setError("Ingresá tus credenciales");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Ingresá un email válido");
-      return;
-    }
-
-    setLoading(true);
-
-    // 🔧 iOS: forzá un frame para que pinte el overlay antes del await
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
 
     try {
-      const res = await api.post("/auth/login", { email, contrasenia: password });
+      const res = await api.post("/auth/login", { email: loginEmail, contrasenia: loginPassword });
       const token = res?.data?.token;
       const esAdmin = Boolean(res?.data?.user?.es_admin);
 
       if (!token || typeof token !== "string") {
         setError("No llegó token del backend");
+        setLoading(false);
         return;
       }
 
@@ -56,18 +62,46 @@ export default function LoginPage() {
         if (uid) localStorage.setItem("user_id", String(uid));
       } catch {}
 
+      // Guardar credenciales para Face ID en el primer login manual
+      if (saveBio) {
+        await saveCredentials(loginEmail, loginPassword);
+      }
+
       clearGuestMode();
       setLoading(false);
-
-      // Navegación real para que Safari ofrezca guardar credenciales
       window.location.href = "/";
-      // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);
       setError("Credenciales incorrectas");
-    } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setError("Ingresá tus credenciales");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Ingresá un email válido");
+      return;
+    }
+
+    // En el primer login manual, guardamos para Face ID si hay biometrics
+    const bioAvailable = await isBiometricAvailable();
+    await doLogin(email, password, bioAvailable);
+  };
+
+  const handleBiometricLogin = async () => {
+    const creds = await getCredentialsWithBiometric();
+    if (!creds) {
+      setError("No se pudo verificar Face ID");
+      return;
+    }
+    await doLogin(creds.username, creds.password, false);
   };
 
   return (
@@ -81,6 +115,29 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full max-w-sm flex flex-col space-y-5">
+          {/* Botón Face ID */}
+          {biometricReady && (
+            <button
+              type="button"
+              onClick={handleBiometricLogin}
+              disabled={loading}
+              className="w-full py-4 rounded-2xl font-semibold text-lg bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-60 flex items-center justify-center gap-3"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" aria-hidden="true">
+                <path d="M9 2a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0V4h1a1 1 0 1 0 0-2H9zm6 0a1 1 0 1 0 0 2h1v1a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1h-2zM4 9a1 1 0 0 0-2 0v2a1 1 0 1 0 2 0V9zm18 0a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0V9zM9 22a1 1 0 0 0-1-1H7a1 1 0 0 0 0 2h2zm7-1a1 1 0 1 0 0 2h2a1 1 0 0 0 1-1v-2a1 1 0 1 0-2 0v1h-1zM3 15a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 1 0 0-2H4v-1a1 1 0 0 0-1-1zm9-5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+              </svg>
+              Ingresar con Face ID
+            </button>
+          )}
+
+          {biometricReady && (
+            <div className="relative flex items-center my-2">
+              <div className="flex-1 border-t border-gray-300" />
+              <span className="px-3 text-sm text-gray-400">o ingresá manualmente</span>
+              <div className="flex-1 border-t border-gray-300" />
+            </div>
+          )}
+
           <form action="#" method="post" onSubmit={handleSubmit} className="flex flex-col space-y-6">
             <label htmlFor="login-email" className="sr-only">Correo electrónico</label>
             <input
@@ -129,6 +186,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => {
               setGuestMode();
+              showLoader();
               router.replace("/");
             }}
             className="
