@@ -56,17 +56,11 @@ export default function LoginPage() {
         if (uid) localStorage.setItem("user_id", String(uid));
       } catch {}
 
-      // Ofrecer al navegador guardar credenciales
-      try {
-        if (window.PasswordCredential) {
-          const cred = new PasswordCredential({ id: email, password });
-          await navigator.credentials.store(cred);
-        }
-      } catch {}
-
       clearGuestMode();
       setLoading(false);
-      router.replace("/");
+
+      // Navegación real para que Safari ofrezca guardar credenciales
+      window.location.href = "/";
       // NO hace falta router.refresh() acá (y a veces suma glitches en iOS)
     } catch (err) {
       console.error("login error:", err);
@@ -87,7 +81,7 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full max-w-sm flex flex-col space-y-5">
-          <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+          <form action="#" method="post" onSubmit={handleSubmit} className="flex flex-col space-y-6">
             <label htmlFor="login-email" className="sr-only">Correo electrónico</label>
             <input
               id="login-email"
