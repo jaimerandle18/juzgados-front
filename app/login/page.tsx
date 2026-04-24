@@ -56,6 +56,14 @@ export default function LoginPage() {
         if (uid) localStorage.setItem("user_id", String(uid));
       } catch {}
 
+      // Ofrecer al navegador guardar credenciales
+      try {
+        if (window.PasswordCredential) {
+          const cred = new PasswordCredential({ id: email, password });
+          await navigator.credentials.store(cred);
+        }
+      } catch {}
+
       clearGuestMode();
       setLoading(false);
       router.replace("/");
