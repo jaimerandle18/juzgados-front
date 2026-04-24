@@ -3,7 +3,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
 import { useEffect } from "react";
-import { showLoader } from "../components/globalLoader";
 
 // Rutas que requieren sesión real (no invitado)
 const AUTH_ONLY_ROUTES = ["/mis-evaluaciones", "/perfil"];
@@ -57,7 +56,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // Rutas de admin: requieren token + flag es_admin en localStorage
     if (pathname.startsWith("/admin")) {
       if (!token) {
-        showLoader();
         router.replace("/login");
         return;
       }
@@ -66,7 +64,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         isAdmin = localStorage.getItem("es_admin") === "1";
       } catch {}
       if (!isAdmin) {
-        showLoader();
         router.replace("/");
         return;
       }
@@ -76,7 +73,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // Rutas que requieren login real (no invitado)
     if (AUTH_ONLY_ROUTES.includes(pathname) || pathname.startsWith("/votar")) {
       if (!token) {
-        showLoader();
         router.replace("/login");
         return;
       }
@@ -84,7 +80,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Resto de rutas: permitir si tiene token O es invitado
     if (!token && !guest) {
-      showLoader();
       router.replace("/login");
     }
   }, [pathname]);

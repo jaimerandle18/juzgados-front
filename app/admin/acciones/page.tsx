@@ -74,7 +74,6 @@ export default function AdminAccionesPage() {
       setUsuarios(res.data.usuarios || []);
     } catch (e: any) {
       if (e?.response?.status === 403) {
-        showLoader();
         router.replace("/");
         return;
       }
