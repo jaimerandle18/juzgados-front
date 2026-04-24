@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import AnchorWithLoader from "../components/AnchorWithLoader";
+import { showLoader } from "../components/globalLoader";
 import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
 
 export default function LoginPage() {
@@ -125,6 +126,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => {
               setGuestMode();
+              showLoader();
               router.replace("/");
             }}
             className="

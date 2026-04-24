@@ -68,6 +68,7 @@ export default function AdminStatsPage() {
         setStats(res.data);
       } catch (e: any) {
         if (e?.response?.status === 403) {
+          showLoader();
           router.replace("/");
           return;
         }

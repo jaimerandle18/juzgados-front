@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteMyAccount } from "src/lib/auth"; // ajustá el path real
+import { deleteMyAccount } from "src/lib/auth";
+import { showLoader } from "./globalLoader";
 
 export default function DeleteAccountButton() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function DeleteAccountButton() {
 
       await deleteMyAccount();
 
-      // Después de borrar, mandalo a logout para limpiar cookie/token
+      showLoader();
       router.push("/login");
       router.refresh();
     } catch (err: any) {
