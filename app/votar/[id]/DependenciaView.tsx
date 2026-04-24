@@ -248,35 +248,37 @@ function ChildrenGrid({
             c.tipo_funcional === "grupo_juzgados";
 
           return (
-            <motion.a
-            onClick={() => showLoader()}
+            <motion.div
               key={c.id}
-              href={`/dependencia/${c.id}`}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: i * 0.05 }}
-              className="block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
-              border border-gray-200 shadow-md hover:shadow-xl
-              hover:-translate-y-1 transition-all group"
             >
-              <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
-                {c.nombre}
-              </h3>
+              <AnchorWithLoader
+                href={`/dependencia/${c.id}`}
+                className="block p-5 rounded-2xl bg-white/70 backdrop-blur-lg
+                border border-gray-200 shadow-md hover:shadow-xl
+                hover:-translate-y-1 transition-all group"
+              >
+                <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                  {c.nombre}
+                </h3>
 
-              {/* ⭐ solo dependencias reales */}
-              {!esGrupo && (
-                <StarRating
-                  value={c.promedio}
-                  cantidad={c.cantidad_votos}
-                  size="sm"
-                  tintedByValue
-                />
-              )}
+                {/* ⭐ solo dependencias reales */}
+                {!esGrupo && (
+                  <StarRating
+                    value={c.promedio}
+                    cantidad={c.cantidad_votos}
+                    size="sm"
+                    tintedByValue
+                  />
+                )}
 
-              <p className="mt-3 text-sm font-medium text-blue-600 group-hover:underline">
-                Ver detalle →
-              </p>
-            </motion.a>
+                <p className="mt-3 text-sm font-medium text-blue-600 group-hover:underline">
+                  Ver detalle →
+                </p>
+              </AnchorWithLoader>
+            </motion.div>
           );
         })}
       </div>
