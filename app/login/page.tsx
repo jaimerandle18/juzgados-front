@@ -74,7 +74,7 @@ export default function LoginPage() {
     <>
       {loading && <LoadingScreen message="Iniciando sesión..." />}
 
-      <main className="flex flex-col items-center pt-6 sm:pt-14 px-4">
+      <main className="flex flex-col items-center pt-6 sm:pt-14 px-4 pb-24">
         <div className="text-center mb-6 sm:mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight">Iniciar sesión</h1>
           <div className="dj-grad-line mx-auto mt-3 h-[3px] w-28 rounded-full" />
