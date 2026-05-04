@@ -8,7 +8,7 @@ import { useEffect } from "react";
 const AUTH_ONLY_ROUTES = ["/mis-evaluaciones", "/perfil"];
 
 // Rutas que NO requieren ni login ni invitado
-const PUBLIC_ROUTES = ["/login", "/register", "/verify-token", "/privacyPolicy", "/forgot-password", "/reset-password", "/terminos"];
+const PUBLIC_ROUTES = ["/login", "/register", "/verify-token", "/privacyPolicy", "/forgot-password", "/reset-password"];
 
 export function isGuestMode(): boolean {
   if (typeof document === "undefined") return false;

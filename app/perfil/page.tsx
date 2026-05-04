@@ -111,8 +111,8 @@ export default async function Page() {
       </div>
 
       <AnchorWithLoader
-        href="/terminos"
-        className="block text-xs text-gray-400 hover:text-gray-600 text-center mt-8 transition-colors"
+        href="/privacyPolicy"
+        className="block text-xs text-gray-700 hover:text-gray-900 text-center mt-8 transition-colors"
       >
         Términos y Condiciones
       </AnchorWithLoader>
