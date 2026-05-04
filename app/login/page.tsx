@@ -141,10 +141,11 @@ export default function LoginPage() {
             }}
             className="
               w-full py-4 rounded-2xl font-semibold text-lg
-              bg-transparent text-gray-700 border border-gray-400
-              hover:bg-gray-100 hover:border-gray-500
+              bg-white/40 backdrop-blur-md text-gray-900 border border-gray-300
+              hover:bg-white/60 hover:border-gray-400
               transition-all
             "
+            style={{ WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)" }
           >
             Ingresar como invitado
           </button>
