@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import AnchorWithLoader from "@/components/AnchorWithLoader";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import TermsLink from "@/components/TermsLink";
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -110,12 +111,7 @@ export default async function Page() {
         <DeleteAccountButton />
       </div>
 
-      <AnchorWithLoader
-        href="/privacyPolicy"
-        className="block text-xs text-gray-700 hover:text-gray-900 text-center mt-8 transition-colors"
-      >
-        Términos y Condiciones
-      </AnchorWithLoader>
+      <TermsLink className="mt-8" />
     </main>
   );
 }

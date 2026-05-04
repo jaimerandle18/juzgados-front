@@ -6,6 +6,7 @@ import { api } from "src/lib/api";
 import LoadingScreen from "../components/LoadingScreen";
 import AnchorWithLoader from "../components/AnchorWithLoader";
 import { setGuestMode, clearGuestMode } from "../utils/AuthGuard";
+import TermsLink from "../components/TermsLink";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -149,7 +150,7 @@ export default function LoginPage() {
             Ingresar como invitado
           </button>
 
-          <p className="text-sm text-gray-700 text-center mt-10">
+          <p className="text-sm text-gray-900 text-center mt-10">
             ¿No tenés cuenta?
             <AnchorWithLoader
               href="/register"
@@ -159,12 +160,7 @@ export default function LoginPage() {
             </AnchorWithLoader>
           </p>
 
-          <AnchorWithLoader
-            href="/privacyPolicy"
-            className="block text-xs text-gray-700 hover:text-gray-900 text-center mt-6 transition-colors"
-          >
-            Términos y Condiciones
-          </AnchorWithLoader>
+          <TermsLink className="mt-6" />
         </div>
       </main>
     </>
