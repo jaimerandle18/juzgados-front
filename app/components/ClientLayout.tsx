@@ -15,7 +15,6 @@ import { hideLoader, showLoader } from "./globalLoader";
 import NativeGestures from "./NativeGestures";
 import { Capacitor } from "@capacitor/core";
 import { isGuestMode, clearGuestMode } from "../utils/AuthGuard";
-import SponsorMarquee from "./SponsorMarquee";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -315,20 +314,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
 
-      {/* Sponsor ticker abajo — solo en home, login y register */}
-      {(pathname === "/login" || pathname === "/register") && (
-        <footer
-          className="fixed bottom-0 left-0 w-full z-40 bg-white/40 backdrop-blur-2xl"
-          style={{
-            WebkitBackdropFilter: "blur(40px)",
-            backdropFilter: "blur(40px)",
-            maskImage: "linear-gradient(to right, transparent 0%, black 35%, black 65%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 35%, black 65%, transparent 100%)",
-          }}
-        >
-          <SponsorMarquee />
-        </footer>
-      )}
     </div>
   );
 }
