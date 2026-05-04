@@ -141,9 +141,8 @@ export default function LoginPage() {
             }}
             className="
               w-full py-4 rounded-2xl font-semibold text-lg
-              bg-gray-800 text-white
-              hover:bg-gray-900
-              shadow-lg hover:-translate-y-0.5
+              bg-transparent text-gray-700 border border-gray-400
+              hover:bg-gray-100 hover:border-gray-500
               transition-all
             "
           >
