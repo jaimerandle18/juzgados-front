@@ -145,7 +145,7 @@ export default function LoginPage() {
               hover:bg-white/60 hover:border-gray-400
               transition-all
             "
-            style={{ WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)" }
+            style={{ WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)" }}
           >
             Ingresar como invitado
           </button>
