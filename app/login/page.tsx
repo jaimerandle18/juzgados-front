@@ -113,7 +113,7 @@ export default function LoginPage() {
 
             <AnchorWithLoader
               href="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium text-right -mt-2 transition-colors"
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium text-center -mt-2 transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </AnchorWithLoader>
