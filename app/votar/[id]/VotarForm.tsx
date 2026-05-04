@@ -52,7 +52,7 @@ export default function VotarForm({
     {
       id: "atencion_presencial",
       texto: "Atención presencial",
-      opciones: ["Buena", "Regular", "Deficiente"],
+      opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"],
     },
     {
       id: "cumple_honorarios",
@@ -61,13 +61,13 @@ export default function VotarForm({
     },
     {
       id: "audiencias_profesional",
-      texto: "Profesionalismo en audiencias",
-      opciones: ["Sí", "No"],
+      texto: "Conducción de audiencias",
+      opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"],
     },
     {
       id: "claridad_comunicacion",
       texto: "Claridad en la comunicación",
-      opciones: ["Muy clara", "Clara", "Regular", "Confusa"],
+      opciones: ["Muy clara", "Clara", "Regular", "Confusa", "Muy confusa"],
     },
   ];
 

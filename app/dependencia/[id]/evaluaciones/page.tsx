@@ -131,7 +131,7 @@ function renderAnalisis(votos: any[]) {
     { id: "responde_mails", texto: "¿Responden mails?" },
     { id: "atencion_presencial", texto: "Atención presencial" },
     { id: "cumple_honorarios", texto: "Cumplimiento de la ley de honorarios" },
-    { id: "audiencias_profesional", texto: "Profesionalismo en audiencias" },
+    { id: "audiencias_profesional", texto: "Conducción de audiencias" },
     { id: "claridad_comunicacion", texto: "Claridad en la comunicación" },
   ];
 

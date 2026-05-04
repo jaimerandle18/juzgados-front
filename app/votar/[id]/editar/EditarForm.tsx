@@ -21,10 +21,10 @@ export default function EditarForm({ id, miVoto }: any) {
     { id: "atencion_general", texto: "Atención general", opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"] },
     { id: "atiende_telefono", texto: "¿Atienden el teléfono?", opciones: ["Sí", "No"] },
     { id: "responde_mails", texto: "¿Responden mails?", opciones: ["Sí", "No"] },
-    { id: "atencion_presencial", texto: "Atención presencial", opciones: ["Buena", "Regular", "Deficiente"] },
+    { id: "atencion_presencial", texto: "Atención presencial", opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"] },
     { id: "cumple_honorarios", texto: "Cumplimiento de honorarios", opciones: ["Sí", "No", "Regula bajo"] },
-    { id: "audiencias_profesional", texto: "Profesionalismo", opciones: ["Sí", "No"] },
-    { id: "claridad_comunicacion", texto: "Claridad en la comunicación", opciones: ["Muy clara", "Clara", "Regular", "Confusa"] },
+    { id: "audiencias_profesional", texto: "Conducción de audiencias", opciones: ["Muy buena", "Buena", "Regular", "Mala", "Muy mala"] },
+    { id: "claridad_comunicacion", texto: "Claridad en la comunicación", opciones: ["Muy clara", "Clara", "Regular", "Confusa", "Muy confusa"] },
   ];
 
   const handleSelect = (key: any, value: any) => {
