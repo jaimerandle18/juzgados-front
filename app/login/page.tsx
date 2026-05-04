@@ -110,6 +110,13 @@ export default function LoginPage() {
               <p className="text-red-500 text-sm font-semibold text-center">{error}</p>
             )}
 
+            <AnchorWithLoader
+              href="/forgot-password"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium text-right -mt-2 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </AnchorWithLoader>
+
             <button
               type="submit"
               disabled={loading}
