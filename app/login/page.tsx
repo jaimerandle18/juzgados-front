@@ -158,6 +158,13 @@ export default function LoginPage() {
               Registrate
             </AnchorWithLoader>
           </p>
+
+          <AnchorWithLoader
+            href="/terminos"
+            className="block text-xs text-gray-400 hover:text-gray-600 text-center mt-6 transition-colors"
+          >
+            Términos y Condiciones
+          </AnchorWithLoader>
         </div>
       </main>
     </>

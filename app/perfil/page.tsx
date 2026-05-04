@@ -109,6 +109,13 @@ export default async function Page() {
         </AnchorWithLoader>
         <DeleteAccountButton />
       </div>
+
+      <AnchorWithLoader
+        href="/terminos"
+        className="block text-xs text-gray-400 hover:text-gray-600 text-center mt-8 transition-colors"
+      >
+        Términos y Condiciones
+      </AnchorWithLoader>
     </main>
   );
 }
