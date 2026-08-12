@@ -82,12 +82,6 @@ export default function VotarForm({
       return;
     }
 
-    const faltante = preguntas.find((p) => !form[p.id]);
-    if (faltante) {
-      toastError(`Te faltó votar "${faltante.texto}"`);
-      return;
-    }
-
     try {
       await api.post("/votos", {
         dependencia_id: Number(id),
@@ -169,10 +163,12 @@ export default function VotarForm({
       <button
         type="button"
         onClick={enviar}
+        disabled={!puntuacion}
         className="
           mt-14 w-full py-4 rounded-2xl text-white font-semibold
-          bg-blue-600 hover:bg-blue-700 
+          bg-blue-600 hover:bg-blue-700
           shadow-lg hover:-translate-y-0.5 transition-all
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
         "
       >
         Enviar evaluación
