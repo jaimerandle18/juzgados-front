@@ -37,8 +37,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="px-6 pt-10">
-      <div className="max-w-lg mx-auto flex flex-col gap-6 sm:gap-8">
+    <main className="pt-2 sm:pt-4">
+      <div className="max-w-lg mx-auto flex flex-col gap-4 sm:gap-5">
         <SearchBar />
 
         <MenuCard
@@ -107,8 +107,8 @@ function MenuCard({
       className="
         dj-card
         relative overflow-hidden
-        p-6 w-full
-        flex flex-col items-center text-center gap-4
+        p-5 w-full
+        flex flex-col items-center text-center gap-3
         sm:flex-row sm:text-left sm:items-center sm:gap-6
         text-gray-900
       "
